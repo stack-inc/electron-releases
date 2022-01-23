@@ -81,6 +81,11 @@ class BrowserWindow : public BaseWindow,
   void SetTopBrowserView(gin::Handle<BrowserView> browser_view,
                          gin_helper::Arguments* args) override;
   void ResetBrowserViews() override;
+  void AddChildView(v8::Local<v8::Value> value) override;
+  void RemoveChildView(v8::Local<v8::Value> value) override;
+  void SetTopChildView(v8::Local<v8::Value> value,
+                       gin_helper::Arguments* args) override;
+  void ResetBaseViews() override;
   void OnWindowShow() override;
   void OnWindowHide() override;
 
