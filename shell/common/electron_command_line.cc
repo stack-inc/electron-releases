@@ -20,7 +20,11 @@ void ElectronCommandLine::Init(int argc, base::CommandLine::CharType** argv) {
   // Otherwise we'd have to convert the arguments from UTF16.
 #if !BUILDFLAG(IS_WIN)
   // Hack around with the argv pointer. Used for process.title = "blah"
+#if BUILDFLAG(IS_MAC)
   argv = uv_setup_args(argc, argv);
+#else
+  argv = node::SetupArgs(argc, argv);
+#endif
 #endif
 
   argv_.assign(argv, argv + argc);
