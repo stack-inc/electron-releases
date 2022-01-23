@@ -1,0 +1,217 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin <martin@getstack.app>
+Date: Fri, 19 Nov 2021 00:01:16 -0500
+Subject: Fixed debug configuration
+
+
+diff --git a/src/async_wrap.h b/src/async_wrap.h
+index f7ed25f9ee..fec259e82f 100644
+--- a/src/async_wrap.h
++++ b/src/async_wrap.h
+@@ -112,7 +112,7 @@ class Environment;
+ class DestroyParam;
+ class ExternalReferenceRegistry;
+ 
+-class AsyncWrap : public BaseObject {
++class NODE_EXTERN AsyncWrap : public BaseObject {
+  public:
+   enum ProviderType {
+ #define V(PROVIDER)                                                           \
+diff --git a/src/env.h b/src/env.h
+index 86f3c718ad..e9380d206e 100644
+--- a/src/env.h
++++ b/src/env.h
+@@ -673,7 +673,7 @@ extern std::shared_ptr<KVStore> system_environment;
+ 
+ struct EnvSerializeInfo;
+ 
+-class AsyncHooks : public MemoryRetainer {
++class NODE_EXTERN AsyncHooks : public MemoryRetainer {
+  public:
+   SET_MEMORY_INFO_NAME(AsyncHooks)
+   SET_SELF_SIZE(AsyncHooks)
+@@ -978,7 +978,7 @@ struct SnapshotData {
+   EnvSerializeInfo env_info;
+ };
+ 
+-class Environment : public MemoryRetainer {
++class NODE_EXTERN Environment : public MemoryRetainer {
+  public:
+   Environment(const Environment&) = delete;
+   Environment& operator=(const Environment&) = delete;
+diff --git a/src/node.cc b/src/node.cc
+index 64a910e3a2..f7600c35be 100644
+--- a/src/node.cc
++++ b/src/node.cc
+@@ -40,6 +40,7 @@
+ #include "node_revert.h"
+ #include "node_v8_platform-inl.h"
+ #include "node_version.h"
++#include "uv.h"
+ 
+ #if HAVE_OPENSSL
+ #include "allocated_buffer-inl.h"  // Inlined functions needed by node_crypto.h
+@@ -200,6 +201,10 @@ MaybeLocal<Value> ExecuteBootstrapper(Environment* env,
+   return scope.EscapeMaybe(result);
+ }
+ 
++char** SetupArgs(int argc, char** argv) {
++  return uv_setup_args(argc, argv);
++}
++
+ #if HAVE_INSPECTOR
+ int Environment::InitializeInspector(
+     std::unique_ptr<inspector::ParentInspectorHandle> parent_handle) {
+diff --git a/src/node.h b/src/node.h
+index a41b09047d..92ce426936 100644
+--- a/src/node.h
++++ b/src/node.h
+@@ -487,6 +487,8 @@ NODE_EXTERN std::unique_ptr<InspectorParentHandle> GetInspectorParentHandle(
+     ThreadId child_thread_id,
+     const char* child_url);
+ 
++NODE_EXTERN char** SetupArgs(int argc, char** argv);
++
+ struct StartExecutionCallbackInfo {
+   v8::Local<v8::Object> process_object;
+   v8::Local<v8::Function> native_require;
+diff --git a/src/node_errors.h b/src/node_errors.h
+index f540b3e2a3..83c12f46a6 100644
+--- a/src/node_errors.h
++++ b/src/node_errors.h
+@@ -20,7 +20,7 @@ void AppendExceptionLine(Environment* env,
+                          enum ErrorHandlingMode mode);
+ 
+ [[noreturn]] void FatalError(const char* location, const char* message);
+-void OnFatalError(const char* location, const char* message);
++void NODE_EXTERN OnFatalError(const char* location, const char* message);
+ 
+ // Helpers to construct errors similar to the ones provided by
+ // lib/internal/errors.js.
+@@ -255,7 +255,7 @@ class TryCatchScope : public v8::TryCatch {
+ // Trigger the global uncaught exception handler `process._fatalException`
+ // in JS land (which emits the 'uncaughtException' event). If that returns
+ // true, continue program execution, otherwise exit the process.
+-void TriggerUncaughtException(v8::Isolate* isolate,
++void NODE_EXTERN TriggerUncaughtException(v8::Isolate* isolate,
+                               const v8::TryCatch& try_catch);
+ void TriggerUncaughtException(v8::Isolate* isolate,
+                               v8::Local<v8::Value> error,
+diff --git a/src/node_internals.h b/src/node_internals.h
+index d37be23cd6..424c40b3c0 100644
+--- a/src/node_internals.h
++++ b/src/node_internals.h
+@@ -84,7 +84,7 @@ void PrintCaughtException(v8::Isolate* isolate,
+                           v8::Local<v8::Context> context,
+                           const v8::TryCatch& try_catch);
+ 
+-void ResetStdio();  // Safe to call more than once and from signal handlers.
++NODE_EXTERN void ResetStdio();  // Safe to call more than once and from signal handlers.
+ #ifdef __POSIX__
+ void SignalExit(int signal, siginfo_t* info, void* ucontext);
+ #endif
+@@ -320,8 +320,8 @@ enum InitializationSettingsFlags : uint64_t {
+ };
+ 
+ // TODO(codebytere): eventually document and expose to embedders.
+-InitializationResult InitializeOncePerProcess(int argc, char** argv);
+-InitializationResult InitializeOncePerProcess(
++InitializationResult NODE_EXTERN InitializeOncePerProcess(int argc, char** argv);
++InitializationResult NODE_EXTERN InitializeOncePerProcess(
+   int argc,
+   char** argv,
+   InitializationSettingsFlags flags,
+@@ -333,7 +333,7 @@ void SetIsolateCreateParamsForNode(v8::Isolate::CreateParams* params);
+ 
+ #if HAVE_INSPECTOR
+ namespace profiler {
+-void StartProfilers(Environment* env);
++NODE_EXTERN void StartProfilers(Environment* env);
+ }
+ #endif  // HAVE_INSPECTOR
+ 
+diff --git a/src/node_native_module_env.h b/src/node_native_module_env.h
+index 0a53771ff5..f3d7f3fa3b 100644
+--- a/src/node_native_module_env.h
++++ b/src/node_native_module_env.h
+@@ -3,6 +3,7 @@
+ 
+ #if defined(NODE_WANT_INTERNALS) && NODE_WANT_INTERNALS
+ 
++#include "node.h"
+ #include "node_native_module.h"
+ 
+ namespace node {
+@@ -13,7 +14,7 @@ namespace native_module {
+ 
+ extern const bool has_code_cache;
+ 
+-class NativeModuleEnv {
++class NODE_EXTERN NativeModuleEnv {
+  public:
+   static void RegisterExternalReferences(ExternalReferenceRegistry* registry);
+   static void Initialize(v8::Local<v8::Object> target,
+diff --git a/src/node_options.h b/src/node_options.h
+index 40d1c02605..2596f2d00e 100644
+--- a/src/node_options.h
++++ b/src/node_options.h
+@@ -59,7 +59,7 @@ struct InspectPublishUid {
+ // to keep them separate since they are a group of options applying to a very
+ // specific part of Node. It might also make more sense for them to be
+ // per-Isolate, rather than per-Environment.
+-class DebugOptions : public Options {
++class NODE_EXTERN DebugOptions : public Options {
+  public:
+   DebugOptions() = default;
+   DebugOptions(const DebugOptions&) = default;
+diff --git a/src/node_perf_common.h b/src/node_perf_common.h
+index 1fea2e4fc9..952e08c9b6 100644
+--- a/src/node_perf_common.h
++++ b/src/node_perf_common.h
+@@ -50,7 +50,7 @@ enum PerformanceEntryType {
+   NODE_PERFORMANCE_ENTRY_TYPE_INVALID
+ };
+ 
+-class PerformanceState {
++class NODE_EXTERN PerformanceState {
+  public:
+   struct SerializeInfo {
+     AliasedBufferIndex root;
+diff --git a/src/tracing/trace_event.h b/src/tracing/trace_event.h
+index be0f55a409..842bebb70c 100644
+--- a/src/tracing/trace_event.h
++++ b/src/tracing/trace_event.h
+@@ -310,7 +310,7 @@ const int kZeroNumArgs = 0;
+ const decltype(nullptr) kGlobalScope = nullptr;
+ const uint64_t kNoId = 0;
+ 
+-class TraceEventHelper {
++class NODE_EXTERN TraceEventHelper {
+  public:
+   static v8::TracingController* GetTracingController();
+   static void SetTracingController(v8::TracingController* controller);
+diff --git a/src/util.h b/src/util.h
+index 06c67d273b..ac8c4fbf42 100644
+--- a/src/util.h
++++ b/src/util.h
+@@ -47,6 +47,8 @@
+ #define MUST_USE_RESULT
+ #endif
+ 
++#include "node.h"
++
+ namespace node {
+ 
+ // Maybe remove kPathSeparator when cpp17 is ready
+@@ -108,9 +110,9 @@ struct AssertionInfo {
+   const char* message;
+   const char* function;
+ };
+-[[noreturn]] void Assert(const AssertionInfo& info);
++[[noreturn]] void NODE_EXTERN Assert(const AssertionInfo& info);
+ [[noreturn]] void Abort();
+-void DumpBacktrace(FILE* fp);
++NODE_EXTERN void DumpBacktrace(FILE* fp);
+ 
+ // Windows 8+ does not like abort() in Release mode
+ #ifdef _WIN32

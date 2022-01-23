@@ -426,6 +426,7 @@ source_set("electron_lib") {
     "//third_party/widevine/cdm:headers",
     "//third_party/zlib/google:zip",
     "//ui/base/idle",
+    "//ui/color",
     "//ui/events:dom_keycode_converter",
     "//ui/gl",
     "//ui/native_theme",
@@ -438,7 +439,9 @@ source_set("electron_lib") {
   public_deps = [
     "//base",
     "//base:i18n",
+    "//components/enterprise/common:download_item_reroute_info",
     "//content/public/app",
+    "//services/cert_verifier/public/mojom",
   ]
 
   include_dirs = [
