@@ -1,0 +1,239 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin <martin@getstack.app>
+Date: Fri, 19 Nov 2021 00:01:16 -0500
+Subject: Fixed debug configuration
+
+
+diff --git a/src/async_wrap.h b/src/async_wrap.h
+index f7ed25f9ee..fec259e82f 100644
+--- a/src/async_wrap.h
++++ b/src/async_wrap.h
+@@ -112,7 +112,7 @@ class Environment;
+ class DestroyParam;
+ class ExternalReferenceRegistry;
+ 
+-class AsyncWrap : public BaseObject {
++class NODE_EXTERN AsyncWrap : public BaseObject {
+  public:
+   enum ProviderType {
+ #define V(PROVIDER)                                                           \
+diff --git a/src/debug_utils.h b/src/debug_utils.h
+index e2e702f586..8895d596c6 100644
+--- a/src/debug_utils.h
++++ b/src/debug_utils.h
+@@ -10,6 +10,8 @@
+ #include <sstream>
+ #include <string>
+ 
++#include "node.h"
++
+ // Use FORCE_INLINE on functions that have a debug-category-enabled check first
+ // and then ideally only a single function call following it, to maintain
+ // performance for the common case (no debugging used).
+@@ -165,7 +167,7 @@ class NativeSymbolDebuggingContext {
+ // Variant of `uv_loop_close` that tries to be as helpful as possible
+ // about giving information on currently existing handles, if there are any,
+ // but still aborts the process.
+-void CheckedUvLoopClose(uv_loop_t* loop);
++NODE_EXTERN void CheckedUvLoopClose(uv_loop_t* loop);
+ void PrintLibuvHandleInformation(uv_loop_t* loop, FILE* stream);
+ 
+ namespace per_process {
+diff --git a/src/env.h b/src/env.h
+index 0cc91123f4..2b6fa96c65 100644
+--- a/src/env.h
++++ b/src/env.h
+@@ -218,7 +218,7 @@ extern std::shared_ptr<KVStore> system_environment;
+ 
+ struct EnvSerializeInfo;
+ 
+-class AsyncHooks : public MemoryRetainer {
++class NODE_EXTERN AsyncHooks : public MemoryRetainer {
+  public:
+   SET_MEMORY_INFO_NAME(AsyncHooks)
+   SET_SELF_SIZE(AsyncHooks)
+@@ -523,7 +523,7 @@ struct SnapshotData {
+  * environment. Each environment has a principal realm. An environment can
+  * create multiple subsidiary synthetic realms.
+  */
+-class Environment : public MemoryRetainer {
++class NODE_EXTERN Environment : public MemoryRetainer {
+  public:
+   Environment(const Environment&) = delete;
+   Environment& operator=(const Environment&) = delete;
+diff --git a/src/node.cc b/src/node.cc
+index 235f2eabd7..655fa7485a 100644
+--- a/src/node.cc
++++ b/src/node.cc
+@@ -42,6 +42,7 @@
+ #include "node_snapshot_builder.h"
+ #include "node_v8_platform-inl.h"
+ #include "node_version.h"
++#include "uv.h"
+ 
+ #if HAVE_OPENSSL
+ #include "node_crypto.h"
+@@ -173,6 +174,10 @@ void SignalExit(int signo, siginfo_t* info, void* ucontext) {
+ }
+ #endif  // __POSIX__
+ 
++char** SetupArgs(int argc, char** argv) {
++  return uv_setup_args(argc, argv);
++}
++
+ #if HAVE_INSPECTOR
+ int Environment::InitializeInspector(
+     std::unique_ptr<inspector::ParentInspectorHandle> parent_handle) {
+diff --git a/src/node.h b/src/node.h
+index 5a849f047f..3eae2de275 100644
+--- a/src/node.h
++++ b/src/node.h
+@@ -590,6 +590,8 @@ NODE_EXTERN std::unique_ptr<InspectorParentHandle> GetInspectorParentHandle(
+     ThreadId child_thread_id,
+     const char* child_url);
+ 
++NODE_EXTERN char** SetupArgs(int argc, char** argv);
++
+ struct StartExecutionCallbackInfo {
+   v8::Local<v8::Object> process_object;
+   v8::Local<v8::Function> native_require;
+diff --git a/src/node_context_data.h b/src/node_context_data.h
+index 4278a17f4b..8c90d45a54 100644
+--- a/src/node_context_data.h
++++ b/src/node_context_data.h
+@@ -59,7 +59,7 @@ enum ContextEmbedderIndex {
+   kContextTag = NODE_CONTEXT_TAG,
+ };
+ 
+-class ContextEmbedderTag {
++class NODE_EXTERN ContextEmbedderTag {
+  public:
+   static inline void TagNodeContext(v8::Local<v8::Context> context) {
+     // Used by ContextEmbedderTag::IsNodeContext to know that we are on a node
+diff --git a/src/node_errors.h b/src/node_errors.h
+index f926cc1c70..f7870e5f8f 100644
+--- a/src/node_errors.h
++++ b/src/node_errors.h
+@@ -20,7 +20,7 @@ void AppendExceptionLine(Environment* env,
+                          enum ErrorHandlingMode mode);
+ 
+ [[noreturn]] void FatalError(const char* location, const char* message);
+-void OnFatalError(const char* location, const char* message);
++void NODE_EXTERN OnFatalError(const char* location, const char* message);
+ void OOMErrorHandler(const char* location, const v8::OOMDetails& details);
+ 
+ // Helpers to construct errors similar to the ones provided by
+@@ -258,7 +258,7 @@ class TryCatchScope : public v8::TryCatch {
+ // Trigger the global uncaught exception handler `process._fatalException`
+ // in JS land (which emits the 'uncaughtException' event). If that returns
+ // true, continue program execution, otherwise exit the process.
+-void TriggerUncaughtException(v8::Isolate* isolate,
++void NODE_EXTERN TriggerUncaughtException(v8::Isolate* isolate,
+                               const v8::TryCatch& try_catch);
+ void TriggerUncaughtException(v8::Isolate* isolate,
+                               v8::Local<v8::Value> error,
+@@ -273,7 +273,7 @@ void DecorateErrorStack(Environment* env,
+                         const errors::TryCatchScope& try_catch);
+ }  // namespace errors
+ 
+-v8::ModifyCodeGenerationFromStringsResult ModifyCodeGenerationFromStrings(
++NODE_EXTERN v8::ModifyCodeGenerationFromStringsResult ModifyCodeGenerationFromStrings(
+     v8::Local<v8::Context> context,
+     v8::Local<v8::Value> source,
+     bool is_code_like);
+diff --git a/src/node_internals.h b/src/node_internals.h
+index 8b37639361..15a3e88fa8 100644
+--- a/src/node_internals.h
++++ b/src/node_internals.h
+@@ -84,7 +84,7 @@ void PrintCaughtException(v8::Isolate* isolate,
+                           v8::Local<v8::Context> context,
+                           const v8::TryCatch& try_catch);
+ 
+-void ResetStdio();  // Safe to call more than once and from signal handlers.
++NODE_EXTERN void ResetStdio();  // Safe to call more than once and from signal handlers.
+ #ifdef __POSIX__
+ void SignalExit(int signal, siginfo_t* info, void* ucontext);
+ #endif
+@@ -337,7 +337,7 @@ void SetIsolateCreateParamsForNode(v8::Isolate::CreateParams* params);
+ 
+ #if HAVE_INSPECTOR
+ namespace profiler {
+-void StartProfilers(Environment* env);
++NODE_EXTERN void StartProfilers(Environment* env);
+ }
+ #endif  // HAVE_INSPECTOR
+ 
+diff --git a/src/node_options.h b/src/node_options.h
+index 431536297e..cf35e0ca0b 100644
+--- a/src/node_options.h
++++ b/src/node_options.h
+@@ -64,7 +64,7 @@ struct InspectPublishUid {
+ // to keep them separate since they are a group of options applying to a very
+ // specific part of Node. It might also make more sense for them to be
+ // per-Isolate, rather than per-Environment.
+-class DebugOptions : public Options {
++class NODE_EXTERN DebugOptions : public Options {
+  public:
+   DebugOptions() = default;
+   DebugOptions(const DebugOptions&) = default;
+diff --git a/src/node_perf_common.h b/src/node_perf_common.h
+index f457d73c57..68c80abe1f 100644
+--- a/src/node_perf_common.h
++++ b/src/node_perf_common.h
+@@ -52,7 +52,7 @@ enum PerformanceEntryType {
+   NODE_PERFORMANCE_ENTRY_TYPE_INVALID
+ };
+ 
+-class PerformanceState {
++class NODE_EXTERN PerformanceState {
+  public:
+   struct SerializeInfo {
+     AliasedBufferIndex root;
+diff --git a/src/node_wasm_web_api.h b/src/node_wasm_web_api.h
+index f56b9b3d5a..6c3b6a0929 100644
+--- a/src/node_wasm_web_api.h
++++ b/src/node_wasm_web_api.h
+@@ -45,7 +45,7 @@ class WasmStreamingObject final : public BaseObject {
+ // This is a v8::WasmStreamingCallback implementation that must be passed to
+ // v8::Isolate::SetWasmStreamingCallback when setting up the isolate in order to
+ // enable the WebAssembly.(compile|instantiate)Streaming APIs.
+-void StartStreamingCompilation(const v8::FunctionCallbackInfo<v8::Value>& args);
++void NODE_EXTERN StartStreamingCompilation(const v8::FunctionCallbackInfo<v8::Value>& args);
+ 
+ }  // namespace wasm_web_api
+ }  // namespace node
+diff --git a/src/tracing/trace_event.h b/src/tracing/trace_event.h
+index be0f55a409..842bebb70c 100644
+--- a/src/tracing/trace_event.h
++++ b/src/tracing/trace_event.h
+@@ -310,7 +310,7 @@ const int kZeroNumArgs = 0;
+ const decltype(nullptr) kGlobalScope = nullptr;
+ const uint64_t kNoId = 0;
+ 
+-class TraceEventHelper {
++class NODE_EXTERN TraceEventHelper {
+  public:
+   static v8::TracingController* GetTracingController();
+   static void SetTracingController(v8::TracingController* controller);
+diff --git a/src/util.h b/src/util.h
+index 896a6df4d9..bcab2f7660 100644
+--- a/src/util.h
++++ b/src/util.h
+@@ -51,6 +51,8 @@
+ #define MUST_USE_RESULT
+ #endif
+ 
++#include "node.h"
++
+ namespace node {
+ 
+ // Maybe remove kPathSeparator when cpp17 is ready
+@@ -114,7 +116,7 @@ struct AssertionInfo {
+ };
+ [[noreturn]] void NODE_EXTERN_PRIVATE Assert(const AssertionInfo& info);
+ [[noreturn]] void NODE_EXTERN_PRIVATE Abort();
+-void DumpBacktrace(FILE* fp);
++NODE_EXTERN void DumpBacktrace(FILE* fp);
+ 
+ // Windows 8+ does not like abort() in Release mode
+ #ifdef _WIN32
