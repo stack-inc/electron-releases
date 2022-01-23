@@ -118,6 +118,16 @@ int BrowserView::NonClientHitTest(const gfx::Point& point) {
   return HTNOWHERE;
 }
 
+void BrowserView::SetOwnerView(NativeWrapperBrowserView* view) {
+  owner_view_ = view;
+
+  // Ensure WebContents and BrowserView owner windows are in sync.
+  NativeWindow* window = view ? view->GetWindow() : nullptr;
+  if (web_contents())
+    web_contents()->SetOwnerWindow(window);
+  owner_window_ = window ? window->GetWeakPtr() : nullptr;
+}
+
 BrowserView::~BrowserView() {
   if (web_contents()) {  // destroy() called without closing WebContents
     web_contents()->RemoveObserver(this);
