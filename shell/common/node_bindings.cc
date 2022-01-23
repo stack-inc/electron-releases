@@ -46,7 +46,9 @@
 #define ELECTRON_BUILTIN_MODULES(V)      \
   V(electron_browser_app)                \
   V(electron_browser_auto_updater)       \
+  V(electron_browser_base_view)          \
   V(electron_browser_browser_view)       \
+  V(electron_browser_container_view)     \
   V(electron_browser_content_tracing)    \
   V(electron_browser_crash_reporter)     \
   V(electron_browser_dialog)             \
@@ -65,6 +67,7 @@
   V(electron_browser_printing)           \
   V(electron_browser_push_notifications) \
   V(electron_browser_safe_storage)       \
+  V(electron_browser_scroll_view)        \
   V(electron_browser_session)            \
   V(electron_browser_screen)             \
   V(electron_browser_system_preferences) \
@@ -76,6 +79,7 @@
   V(electron_browser_web_frame_main)     \
   V(electron_browser_web_view_manager)   \
   V(electron_browser_window)             \
+  V(electron_browser_wrapper_browser_view)\
   V(electron_common_asar)                \
   V(electron_common_clipboard)           \
   V(electron_common_command_line)        \
