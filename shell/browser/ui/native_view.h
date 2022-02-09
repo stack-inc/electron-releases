@@ -90,6 +90,29 @@ class NativeView : public base::RefCounted<NativeView>,
 #if defined(OS_MAC)
   void SetWantsLayer(bool wants);
   bool WantsLayer() const;
+
+  struct RoundedCornersOptions {
+    float radius = 0.f;
+    bool top_left = false;
+    bool top_right = false;
+    bool bottom_left = false;
+    bool bottom_right = false;
+
+    RoundedCornersOptions();
+  };
+
+  void SetRoundedCorners(const RoundedCornersOptions& options);
+
+  struct ClippingInsetOptions {
+    int top = 0;
+    int left = 0;
+    int bottom = 0;
+    int right = 0;
+
+    ClippingInsetOptions();
+  };
+
+  void SetClippingInsets(const ClippingInsetOptions& options);
 #endif
 
   // Get parent.
@@ -109,6 +132,12 @@ class NativeView : public base::RefCounted<NativeView>,
 
   // Whether this class inherits from Container.
   virtual bool IsContainer() const;
+
+  void SetZIndex(int z_index);
+  int GetZIndex() const;
+
+  void SetClickThrough(bool click_through);
+  bool IsClickThrough() const;
 
   virtual void DetachChildView(NativeView* view);
 
@@ -162,6 +191,10 @@ class NativeView : public base::RefCounted<NativeView>,
 
   // The native implementation.
   NATIVEVIEW view_ = nullptr;
+
+  int z_index_ = 1;
+
+  bool is_click_through_ = false;
 
 #if defined(TOOLKIT_VIEWS) && !defined(OS_MAC)
   bool delete_view_ = true;

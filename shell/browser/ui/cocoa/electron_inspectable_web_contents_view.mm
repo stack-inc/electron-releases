@@ -293,6 +293,16 @@
     [self notifyDevToolsFocused];
 }
 
+- (NSView*)hitTest:(NSPoint)point {
+  bool clickThrough =
+      inspectableWebContentsView_->inspectable_web_contents()->IsClickThrough();
+  if (clickThrough) {
+    return nil;  // i.e. this layer is not selectable
+  } else {
+    return [super hitTest:point];
+  }
+}
+
 #pragma mark - NSWindowDelegate
 
 - (void)windowWillClose:(NSNotification*)notification {

@@ -180,6 +180,16 @@ v8::Local<v8::Value> BrowserView::GetWebContents(v8::Isolate* isolate) {
   return v8::Local<v8::Value>::New(isolate, web_contents_);
 }
 
+#if defined(OS_MAC)
+void BrowserView::SetClickThrough(bool clickThrough) {
+  view_->GetInspectableWebContents()->SetClickThrough(clickThrough);
+}
+
+bool BrowserView::IsClickThrough() const {
+  return view_->GetInspectableWebContents()->IsClickThrough();
+}
+#endif
+
 // static
 v8::Local<v8::ObjectTemplate> BrowserView::FillObjectTemplate(
     v8::Isolate* isolate,
@@ -190,6 +200,10 @@ v8::Local<v8::ObjectTemplate> BrowserView::FillObjectTemplate(
       .SetMethod("getBounds", &BrowserView::GetBounds)
       .SetMethod("setBackgroundColor", &BrowserView::SetBackgroundColor)
       .SetProperty("webContents", &BrowserView::GetWebContents)
+#if defined(OS_MAC)
+      .SetProperty("clickThrough", &BrowserView::IsClickThrough,
+                   &BrowserView::SetClickThrough)
+#endif
       .Build();
 }
 

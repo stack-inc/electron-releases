@@ -84,6 +84,9 @@ class InspectableWebContents
   double GetDevToolsZoomLevel() const;
   void UpdateDevToolsZoomLevel(double level);
 
+  void SetClickThrough(bool click_through);
+  bool IsClickThrough() const;
+
  private:
   // DevToolsEmbedderMessageDispacher::Delegate
   void ActivateWindow() override;
@@ -243,6 +246,8 @@ class InspectableWebContents
   // The DevTools frontend *must* call `Register` for each setting prior to
   // use, which guarantees that this set must not be persisted.
   base::flat_set<std::string> synced_setting_names_;
+
+  bool is_click_through_ = false;
 
   base::WeakPtrFactory<InspectableWebContents> weak_factory_{this};
 };

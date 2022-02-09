@@ -80,6 +80,10 @@ void ContainerView::RemoveChildView(v8::Local<v8::Value> value) {
   }
 }
 
+void ContainerView::RearrangeChildViews() {
+  container_->RearrangeChildViews();
+}
+
 std::vector<v8::Local<v8::Value>> ContainerView::GetViews() const {
   std::vector<v8::Local<v8::Value>> ret;
 
@@ -109,6 +113,7 @@ void ContainerView::BuildPrototype(v8::Isolate* isolate,
   gin_helper::ObjectTemplateBuilder(isolate, prototype->PrototypeTemplate())
       .SetMethod("addChildView", &ContainerView::AddChildView)
       .SetMethod("removeChildView", &ContainerView::RemoveChildView)
+      .SetMethod("rearrangeChildViews", &ContainerView::RearrangeChildViews)
       .SetMethod("getViews", &ContainerView::GetViews)
       .Build();
 }

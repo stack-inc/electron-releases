@@ -52,6 +52,17 @@ typedef struct CGContext* CGContextRef;
   CGContextFillRect(context, dirty.ToCGRect());
 }
 
+- (NSView*)hitTest:(NSPoint)point {
+  if (![self shell])
+    return [super hitTest:point];
+  bool clickThrough = [self shell]->IsClickThrough();
+  if (clickThrough) {
+    return nil;  // i.e. this layer is not selectable
+  } else {
+    return [super hitTest:point];
+  }
+}
+
 @end
 
 namespace electron {
