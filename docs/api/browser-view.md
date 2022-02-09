@@ -43,6 +43,11 @@ Objects created with `new BrowserView` have the following properties:
 
 A [`WebContents`](web-contents.md) object owned by this view.
 
+#### `view.clickThrough` _macOS_ _Experimental_
+
+A `Boolean` representing whether this BrowserView receives any mouse input. Any BrowserView
+with `clickThrough = true` will still display but won't receive any mouse events.
+
 ### Instance Methods
 
 Objects created with `new BrowserView` have the following instance methods:

@@ -33,6 +33,7 @@ class ContainerView : public BaseView {
 
   void AddChildView(v8::Local<v8::Value> value);
   void RemoveChildView(v8::Local<v8::Value> value);
+  void RearrangeChildViews();
   std::vector<v8::Local<v8::Value>> GetViews() const;
 
  private:
