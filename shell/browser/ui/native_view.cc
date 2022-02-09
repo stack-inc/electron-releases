@@ -43,6 +43,22 @@ bool NativeView::IsContainer() const {
   return false;
 }
 
+void NativeView::SetZIndex(int z_index) {
+  z_index_ = z_index;
+}
+
+int NativeView::GetZIndex() const {
+  return z_index_;
+}
+
+void NativeView::SetClickThrough(bool click_through) {
+  is_click_through_ = click_through;
+}
+
+bool NativeView::IsClickThrough() const {
+  return is_click_through_;
+}
+
 void NativeView::DetachChildView(NativeView* view) {}
 
 void NativeView::TriggerBeforeunloadEvents() {}
