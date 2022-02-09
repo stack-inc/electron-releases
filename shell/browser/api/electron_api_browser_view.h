@@ -84,6 +84,10 @@ friend class WrapperBrowserView;
   gfx::Rect GetBounds();
   void SetBackgroundColor(const std::string& color_name);
   v8::Local<v8::Value> GetWebContents(v8::Isolate*);
+#if BUILDFLAG(IS_MAC)
+  void SetClickThrough(bool clickThrough);
+  bool IsClickThrough() const;
+#endif
 
   v8::Global<v8::Value> web_contents_;
   class WebContents* api_web_contents_ = nullptr;

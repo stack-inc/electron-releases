@@ -8,6 +8,10 @@
 
 namespace electron {
 
+NativeView::RoundedCornersOptions::RoundedCornersOptions() = default;
+
+NativeView::ClippingInsetOptions::ClippingInsetOptions() = default;
+
 void NativeView::SetNativeView(NATIVEVIEW view) {
   view_ = view;
 
@@ -112,6 +116,53 @@ void NativeView::SetWantsLayer(bool wants) {
 
 bool NativeView::WantsLayer() const {
   return [view_ wantsLayer];
+}
+
+void NativeView::SetRoundedCorners(
+    const NativeView::RoundedCornersOptions& options) {
+  if (@available(macOS 10.13, *)) {
+    auto* view = GetNative();
+    view.wantsLayer = YES;
+    view.layer.masksToBounds = YES;
+    view.layer.cornerRadius = options.radius;
+
+    CACornerMask mask = 0;
+    if (options.top_left)
+      mask |= kCALayerMinXMaxYCorner;
+    if (options.top_right)
+      mask |= kCALayerMaxXMaxYCorner;
+    if (options.bottom_left)
+      mask |= kCALayerMinXMinYCorner;
+    if (options.bottom_right)
+      mask |= kCALayerMaxXMinYCorner;
+    view.layer.maskedCorners = mask;
+  }
+}
+
+void NativeView::SetClippingInsets(
+    const NativeView::ClippingInsetOptions& options) {
+  if (@available(macOS 10.13, *)) {
+    auto* view = GetNative();
+
+    CALayer* sublayer = [CALayer layer];
+    sublayer.backgroundColor =
+        [[NSColor blackColor] colorWithAlphaComponent:1.0].CGColor;
+
+    if (options.left == 0 && options.right == 0 && options.bottom == 0 &&
+        options.top == 0) {
+      view.layer.mask = nil;
+      return;
+    }
+
+    int newFrameX = view.frame.origin.x + options.left;
+    int newFrameY = view.frame.origin.y + options.bottom;
+    int newFrameWidth = view.frame.size.width - options.left - options.right;
+    int newFrameHeight = view.frame.size.height - options.bottom - options.top;
+    sublayer.frame =
+        NSMakeRect(newFrameX, newFrameY, newFrameWidth, newFrameHeight);
+
+    view.layer.mask = sublayer;
+  }
 }
 
 void NativeView::UpdateDraggableRegions() {}
