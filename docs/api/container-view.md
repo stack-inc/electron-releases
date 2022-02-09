@@ -40,6 +40,10 @@ Objects created with `new ContainerView` have the following instance methods:
 
 * `view` [BaseView](base-view.md)
 
+#### `view.rearrangeChildViews()`
+
+Rearranges child views according to their z-indexes.
+
 #### `view.getViews()` _Experimental_
 
 Returns `BaseView[]` - an array of all BaseViews that have been attached
