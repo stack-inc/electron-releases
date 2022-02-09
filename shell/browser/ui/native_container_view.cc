@@ -41,6 +41,8 @@ void NativeContainerView::AddChildView(scoped_refptr<NativeView> view) {
 
   AddChildViewImpl(view.get());
   children_.insert(children_.begin() + ChildCount(), std::move(view));
+
+  RearrangeChildViews();
 }
 
 bool NativeContainerView::RemoveChildView(NativeView* view) {
@@ -54,6 +56,9 @@ bool NativeContainerView::RemoveChildView(NativeView* view) {
 
   RemoveChildViewImpl(view);
   children_.erase(i);
+
+  RearrangeChildViews();
+
   return true;
 }
 

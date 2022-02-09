@@ -55,6 +55,15 @@ A `Integer` property representing the unique ID of the view. Each ID is unique a
 
 A `boolean` property that determines whether this view is (or inherits from) [`ContainerView`](container-view.md).
 
+#### `view.zIndex` _Experimental_
+
+A `Integer` representing z-index to set. Has no effect until parent's `view.rearrangeChildViews()` is called.
+
+#### `view.clickThrough` _macOS_ _Experimental_
+
+A `Boolean` representing whether this BaseView receives any mouse input. Any BaseView
+with `clickThrough = true` will still display but won't receive any mouse events.
+
 ### Instance Methods
 
 Objects created with `new BaseView` have the following instance methods:
@@ -120,6 +129,23 @@ Returns `boolean` - Returns `true` if this view is focusable, enabled and drawn.
   optional.
 
 Change the background color of the view.
+
+#### `view.setRoundedCorners(options)` _macOS_ _Experimental_
+
+* `options` Object
+  * `radius` Number - Radius of each corner that is rounded.
+  * `topLeft` Boolean (optional) - If `true`, top left corner will be rounded with `radius` value. `false` by default.
+  * `topRight` Boolean (optional) - If `true`, top right corner will be rounded with `radius` value. `false` by default.
+  * `bottomLeft` Boolean (optional) - If `true`, bottom left corner will be rounded with `radius` value. `false` by default.
+  * `bottomRight` Boolean (optional) - If `true`, bottom right corner will be rounded with `radius` value. `false` by default.
+
++#### `view.setClippingInsets(options)` _macOS_ _Experimental_
+
+- `options` Object
+  - `left` Number (optional) - How many pixels to clip from the left side of the browser view.
+  - `top` Number (optional) - How many pixels to clip from the top of the browser view.
+  - `right` Number (optional) - How many pixels to clip from the right side of the browser view.
+  - `bottom` Number (optional) - How many pixels to clip from the bottom side of the browser view.
 
 #### `view.getParentView()` _Experimental_
 
