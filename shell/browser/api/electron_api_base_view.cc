@@ -5,12 +5,80 @@
 #include "shell/browser/native_window.h"
 #include "shell/common/color_util.h"
 #include "shell/common/gin_converters/gfx_converter.h"
+#include "shell/common/gin_converters/value_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
 #include "ui/views/view.h"
+#endif
+
+#if BUILDFLAG(IS_MAC)
+namespace gin {
+
+template <>
+struct Converter<electron::NativeView::RoundedCornersOptions> {
+  static bool FromV8(
+      v8::Isolate* isolate,
+      v8::Local<v8::Value> val,
+      electron::NativeView::RoundedCornersOptions* options) {
+    gin_helper::Dictionary params;
+    if (!ConvertFromV8(isolate, val, &params))
+      return false;
+
+    *options = electron::NativeView::RoundedCornersOptions();
+
+    float radius;
+    if (params.Get("radius", &radius))
+      options->radius = radius;
+    bool top_left = false;
+    if (params.Get("topLeft", &top_left) && top_left)
+      options->top_left = top_left;
+    bool top_right = false;
+    if (params.Get("topRight", &top_right) && top_right)
+      options->top_right = top_right;
+    bool bottom_left = false;
+    if (params.Get("bottomLeft", &bottom_left) && bottom_left)
+      options->bottom_left = bottom_left;
+    bool bottom_right = false;
+    if (params.Get("bottomRight", &bottom_right) && bottom_right)
+      options->bottom_right = bottom_right;
+
+    return true;
+  }
+};
+
+template <>
+struct Converter<electron::NativeView::ClippingInsetOptions> {
+  static bool FromV8(
+      v8::Isolate* isolate,
+      v8::Local<v8::Value> val,
+      electron::NativeView::ClippingInsetOptions* options) {
+    gin_helper::Dictionary params;
+    if (!ConvertFromV8(isolate, val, &params))
+      return false;
+
+    *options = electron::NativeView::ClippingInsetOptions();
+
+    int top = 0;
+    if (params.Get("top", &top) && top)
+      options->top = top;
+    int left = 0;
+    if (params.Get("left", &left) && left)
+      options->left = left;
+    int bottom = 0;
+    if (params.Get("bottom", &bottom) && bottom)
+      options->bottom = bottom;
+    int right = 0;
+    if (params.Get("right", &right) && right)
+      options->right = right;
+
+    return true;
+  }
+};
+
+}  // namespace gin
 #endif
 
 namespace electron {
@@ -72,6 +140,24 @@ bool BaseView::IsContainer() const {
   return view_->IsContainer();
 }
 
+void BaseView::SetZIndex(int z_index) {
+  view_->SetZIndex(z_index);
+}
+
+int BaseView::GetZIndex() const {
+  return view_->GetZIndex();
+}
+
+#if BUILDFLAG(IS_MAC)
+void BaseView::SetClickThrough(bool clickThrough) {
+  view_->SetClickThrough(clickThrough);
+}
+
+bool BaseView::IsClickThrough() const {
+  return view_->IsClickThrough();
+}
+#endif
+
 void BaseView::SetBounds(const gfx::Rect& bounds) {
   view_->SetBounds(bounds);
 }
@@ -119,6 +205,18 @@ bool BaseView::IsFocusable() const {
 void BaseView::SetBackgroundColor(const std::string& color_name) {
   view_->SetBackgroundColor(ParseCSSColor(color_name));
 }
+
+#if BUILDFLAG(IS_MAC)
+void BaseView::SetRoundedCorners(
+    const NativeView::RoundedCornersOptions& options) {
+  return view_->SetRoundedCorners(options);
+}
+
+void BaseView::SetClippingInsets(
+    const NativeView::ClippingInsetOptions& options) {
+  return view_->SetClippingInsets(options);
+}
+#endif
 
 int32_t BaseView::GetID() const {
   return weak_map_id();
@@ -181,6 +279,11 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
   gin_helper::ObjectTemplateBuilder(isolate, prototype->PrototypeTemplate())
       .SetProperty("id", &BaseView::GetID)
       .SetProperty("isContainer", &BaseView::IsContainer)
+      .SetProperty("zIndex", &BaseView::GetZIndex, &BaseView::SetZIndex)
+#if BUILDFLAG(IS_MAC)
+      .SetProperty("clickThrough", &BaseView::IsClickThrough,
+                   &BaseView::SetClickThrough)
+#endif
       .SetMethod("setBounds", &BaseView::SetBounds)
       .SetMethod("getBounds", &BaseView::GetBounds)
       .SetMethod("offsetFromView", &BaseView::OffsetFromView)
@@ -193,6 +296,10 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setFocusable", &BaseView::SetFocusable)
       .SetMethod("isFocusable", &BaseView::IsFocusable)
       .SetMethod("setBackgroundColor", &BaseView::SetBackgroundColor)
+#if BUILDFLAG(IS_MAC)
+      .SetMethod("setRoundedCorners", &BaseView::SetRoundedCorners)
+      .SetMethod("setClippingInsets", &BaseView::SetClippingInsets)
+#endif
       .SetMethod("getParentView", &BaseView::GetParentView)
       .SetMethod("getParentWindow", &BaseView::GetParentWindow)
       .Build();

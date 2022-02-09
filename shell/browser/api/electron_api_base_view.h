@@ -58,6 +58,12 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   void OnViewIsDeleting(NativeView* observed_view) override;
 
   bool IsContainer() const;
+  void SetZIndex(int z_index);
+  int GetZIndex() const;
+#if BUILDFLAG(IS_MAC)
+  void SetClickThrough(bool clickThrough);
+  bool IsClickThrough() const;
+#endif
   void SetBounds(const gfx::Rect& bounds);
   gfx::Rect GetBounds() const;
   gfx::Point OffsetFromView(gin::Handle<BaseView> from) const;
@@ -70,6 +76,12 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   void SetFocusable(bool focusable);
   bool IsFocusable() const;
   void SetBackgroundColor(const std::string& color_name);
+#if BUILDFLAG(IS_MAC)
+  void SetRoundedCorners(
+      const NativeView::RoundedCornersOptions& options);
+  void SetClippingInsets(
+      const NativeView::ClippingInsetOptions& options);
+#endif
   v8::Local<v8::Value> GetParentView() const;
   v8::Local<v8::Value> GetParentWindow() const;
 

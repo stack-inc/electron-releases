@@ -25,4 +25,6 @@ void NativeContainerView::RemoveChildViewImpl(NativeView* view) {
   GetNative()->RemoveChildView(view->GetNative());
 }
 
+void NativeContainerView::RearrangeChildViews() {}
+
 }  // namespace electron

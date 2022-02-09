@@ -23,6 +23,8 @@ class NativeContainerView : public NativeView {
   void AddChildView(scoped_refptr<NativeView> view);
   bool RemoveChildView(NativeView* view);
 
+  void RearrangeChildViews();
+
   // Get children.
   int ChildCount() const { return static_cast<int>(children_.size()); }
 
