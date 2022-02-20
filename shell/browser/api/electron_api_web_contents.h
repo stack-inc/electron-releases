@@ -266,6 +266,10 @@ class WebContents : public ExclusiveAccessContext,
   // Dragging native items.
   void StartDrag(const gin_helper::Dictionary& item, gin::Arguments* args);
 
+  void OnScreenshotTaken(gin_helper::Promise<gfx::Image> promise,
+                         const gfx::Image& image);
+  v8::Local<v8::Promise> CaptureScreenshot(gin::Arguments* args);
+
   // Captures the page with |rect|, |callback| would be called when capturing is
   // done.
   v8::Local<v8::Promise> CapturePage(gin::Arguments* args);
