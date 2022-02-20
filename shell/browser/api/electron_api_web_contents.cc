@@ -26,6 +26,8 @@
 #include "base/values.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/ui/exclusive_access/exclusive_access_manager.h"
+#include "chrome/browser/ui/thumbnails/thumbnail_image.h"
+#include "chrome/browser/ui/thumbnails/thumbnail_tab_helper.h"
 #include "chrome/browser/ui/views/eye_dropper/eye_dropper.h"
 #include "chrome/common/pref_names.h"
 #include "components/embedder_support/user_agent_utils.h"
@@ -379,6 +381,15 @@ namespace {
 base::IDMap<WebContents*>& GetAllWebContents() {
   static base::NoDestructor<base::IDMap<WebContents*>> s_all_web_contents;
   return *s_all_web_contents;
+}
+
+void OnThumbnailReady(
+    std::unique_ptr<ThumbnailImage::Subscription> subscription,
+    base::OnceCallback<void(const gfx::Image&)> callback,
+    gfx::ImageSkia image) {
+  std::move(callback).Run(gfx::Image(image));
+  base::ThreadTaskRunnerHandle::Get()->DeleteSoon(FROM_HERE,
+                                                  subscription.release());
 }
 
 // Called when CapturePage is done.
@@ -883,6 +894,8 @@ void WebContents::InitWithSessionAndOptions(
 #endif
 
   AutofillDriverFactory::CreateForWebContents(web_contents());
+
+  ThumbnailTabHelper::CreateForWebContents(web_contents());
 
   absl::optional<std::string> user_agent_override =
       GetBrowserContext()->GetUserAgentOverride();
@@ -3058,6 +3071,79 @@ void WebContents::StartDrag(const gin_helper::Dictionary& item,
   }
 }
 
+void WebContents::OnScreenshotTaken(
+    gin_helper::Promise<gfx::Image> promise,
+    const gfx::Image& image) {
+  promise.Resolve(image);
+}
+
+v8::Local<v8::Promise> WebContents::CaptureScreenshot(gin::Arguments* args) {
+  gfx::Rect rect;
+  gin_helper::Promise<gfx::Image> promise(args->isolate());
+  v8::Local<v8::Promise> handle = promise.GetHandle();
+
+  // get rect arguments if they exist
+  args->GetNext(&rect);
+
+  //if (web_contents()->GetVisibility() != content::Visibility::VISIBLE) {
+    ThumbnailTabHelper* thumbnail_helper =
+        ThumbnailTabHelper::FromWebContents(web_contents());
+    DCHECK(thumbnail_helper);
+    if (thumbnail_helper->thumbnail()) {
+      auto subscription = thumbnail_helper->thumbnail()->Subscribe();
+      subscription->SetUncompressedImageCallback(base::BindRepeating(
+          &OnThumbnailReady, base::Passed(std::move(subscription)),
+          base::Passed(base::BindOnce(&WebContents::OnScreenshotTaken,
+                                      GetWeakPtr(),
+                                      std::move(promise)))));
+      thumbnail_helper->thumbnail()->RequestThumbnailImage();
+      return handle;
+    }
+  //}
+
+#if 0
+  auto* const view = web_contents()->GetRenderWidgetHostView();
+  if (!view) {
+    promise.Resolve(gfx::Image());
+    return handle;
+  }
+
+#if !BUILDFLAG(IS_MAC)
+  // If the view's renderer is suspended this may fail on Windows/Linux -
+  // bail if so. See CopyFromSurface in
+  // content/public/browser/render_widget_host_view.h.
+  auto* rfh = web_contents()->GetMainFrame();
+  if (rfh &&
+      rfh->GetVisibilityState() == blink::mojom::PageVisibilityState::kHidden) {
+    promise.Resolve(gfx::Image());
+    return handle;
+  }
+#endif  // BUILDFLAG(IS_MAC)
+
+  // Capture full page if user doesn't specify a |rect|.
+  const gfx::Size view_size =
+      rect.IsEmpty() ? view->GetViewBounds().size() : rect.size();
+
+  // By default, the requested bitmap size is the view size in screen
+  // coordinates.  However, if there's more pixel detail available on the
+  // current system, increase the requested bitmap size to capture it all.
+  gfx::Size bitmap_size = view_size;
+  const gfx::NativeView native_view = view->GetNativeView();
+  const float scale = display::Screen::GetScreen()
+                          ->GetDisplayNearestView(native_view)
+                          .device_scale_factor();
+  if (scale > 1.0f)
+    bitmap_size = gfx::ScaleToCeiledSize(view_size, scale);
+
+  view->CopyFromSurface(gfx::Rect(rect.origin(), view_size), bitmap_size,
+                        base::BindOnce(&OnCapturePageDone, std::move(promise)));
+  return handle;
+#else
+  promise.Resolve(gfx::Image());
+  return handle;
+#endif
+}
+
 v8::Local<v8::Promise> WebContents::CapturePage(gin::Arguments* args) {
   gfx::Rect rect;
   gin_helper::Promise<gfx::Image> promise(args->isolate());
@@ -3959,6 +4045,7 @@ v8::Local<v8::ObjectTemplate> WebContents::FillObjectTemplate(
       .SetMethod("showDefinitionForSelection",
                  &WebContents::ShowDefinitionForSelection)
       .SetMethod("copyImageAt", &WebContents::CopyImageAt)
+      .SetMethod("captureScreenshot", &WebContents::CaptureScreenshot)
       .SetMethod("capturePage", &WebContents::CapturePage)
       .SetMethod("setEmbedder", &WebContents::SetEmbedder)
       .SetMethod("setDevToolsWebContents", &WebContents::SetDevToolsWebContents)
