@@ -147,12 +147,24 @@ bool ScopedDisableResize::disable_resize_ = false;
   return base::SysUTF8ToNSString(shell_->GetTitle());
 }
 
+- (BOOL)isFloatingPanel {
+  if (shell_->panel_mode())
+    return YES;
+  return [super isFloatingPanel];
+}
+
 - (BOOL)canBecomeMainWindow {
   return !self.disableKeyOrMainWindow;
 }
 
 - (BOOL)canBecomeKeyWindow {
   return !self.disableKeyOrMainWindow;
+}
+
+- (BOOL)acceptsFirstResponder {
+  if (shell_->panel_mode())
+    return YES;
+  return [super acceptsFirstResponder];
 }
 
 - (NSView*)frameView {

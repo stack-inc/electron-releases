@@ -281,6 +281,7 @@ NativeWindowMac::NativeWindowMac(const gin_helper::Dictionary& options,
 
   std::string windowType;
   options.Get(options::kType, &windowType);
+  panel_mode_ = (windowType == "panel");
 
   bool useStandardWindow = true;
   // eventually deprecate separate "standardWindow" option in favor of
@@ -302,6 +303,12 @@ NativeWindowMac::NativeWindowMac(const gin_helper::Dictionary& options,
   options.Get(options::kRoundedCorners, &rounded_corner);
   if (!rounded_corner && !has_frame())
     styleMask = 0;
+
+  if (panel_mode_)
+    styleMask |= NSWindowStyleMaskTexturedBackground |
+                 NSWindowStyleMaskResizable |
+                 NSWindowStyleMaskFullSizeContentView;
+                 //NSWindowStyleMaskNonactivatingPanel;
 
   if (minimizable)
     styleMask |= NSMiniaturizableWindowMask;
@@ -352,6 +359,10 @@ NativeWindowMac::NativeWindowMac(const gin_helper::Dictionary& options,
     [window_ setDisableKeyOrMainWindow:YES];
     [window_ setCollectionBehavior:(NSWindowCollectionBehaviorCanJoinAllSpaces |
                                     NSWindowCollectionBehaviorStationary |
+                                    NSWindowCollectionBehaviorIgnoresCycle)];
+  } else if (panel_mode_) {
+    [window_ setLevel:NSFloatingWindowLevel];
+    [window_ setCollectionBehavior:(NSWindowCollectionBehaviorCanJoinAllSpaces |
                                     NSWindowCollectionBehaviorIgnoresCycle)];
   }
 
@@ -1611,6 +1622,11 @@ void NativeWindowMac::UpdateFrame() {
   NSWindow* window = GetNativeWindow().GetNativeNSWindow();
   NSRect fullscreenFrame = [window.screen frame];
   [window setFrame:fullscreenFrame display:YES animate:YES];
+}
+
+void NativeWindowMac::MakeKeyWindow() {
+  [window_ makeKeyWindow];
+  [window_ makeMainWindow];
 }
 
 void NativeWindowMac::SetTouchBar(

@@ -224,6 +224,7 @@ class NativeWindow : public base::SupportsUserData,
   virtual absl::optional<gfx::Point> GetTrafficLightPosition() const = 0;
   virtual void RedrawTrafficLights() = 0;
   virtual void UpdateFrame() = 0;
+  virtual void MakeKeyWindow() = 0;
 #endif
 
   // Touchbar API

@@ -208,6 +208,7 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
   bool GetWindowButtonVisibility() const;
   void SetTrafficLightPosition(const gfx::Point& position);
   gfx::Point GetTrafficLightPosition() const;
+  void MakeKeyWindow();
 #endif
 
   void SetTouchBar(std::vector<gin_helper::PersistentDictionary> items);

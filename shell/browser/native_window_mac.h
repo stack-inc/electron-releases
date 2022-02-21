@@ -134,6 +134,7 @@ class NativeWindowMac : public NativeWindow,
   absl::optional<gfx::Point> GetTrafficLightPosition() const override;
   void RedrawTrafficLights() override;
   void UpdateFrame() override;
+  void MakeKeyWindow() override;
   void SetTouchBar(
       std::vector<gin_helper::PersistentDictionary> items) override;
   void RefreshTouchBarItem(const std::string& item_id) override;
@@ -190,6 +191,7 @@ class NativeWindowMac : public NativeWindow,
   ElectronPreviewItem* preview_item() const { return preview_item_.get(); }
   ElectronTouchBar* touch_bar() const { return touch_bar_.get(); }
   bool zoom_to_page_width() const { return zoom_to_page_width_; }
+  bool panel_mode() const { return panel_mode_; }
   bool always_simple_fullscreen() const { return always_simple_fullscreen_; }
 
   // We need to save the result of windowWillUseStandardFrame:defaultFrame
@@ -270,6 +272,8 @@ class NativeWindowMac : public NativeWindow,
 
   // Maximizable window state; necessary for persistence through redraws.
   bool maximizable_ = true;
+
+  bool panel_mode_ = false;
 
   // Simple (pre-Lion) Fullscreen Settings
   bool always_simple_fullscreen_ = false;

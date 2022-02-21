@@ -968,6 +968,10 @@ gfx::Point BaseWindow::GetTrafficLightPosition() const {
   // For backward compatibility we treat default value as (0, 0).
   return window_->GetTrafficLightPosition().value_or(gfx::Point());
 }
+
+void BaseWindow::MakeKeyWindow() {
+  window_->MakeKeyWindow();
+}
 #endif
 
 void BaseWindow::SetTouchBar(
@@ -1382,6 +1386,7 @@ void BaseWindow::BuildPrototype(v8::Isolate* isolate,
                  &BaseWindow::SetTrafficLightPosition)
       .SetMethod("getTrafficLightPosition",
                  &BaseWindow::GetTrafficLightPosition)
+      .SetMethod("makeKeyWindow", &BaseWindow::MakeKeyWindow)
 #endif
       .SetMethod("_setTouchBarItems", &BaseWindow::SetTouchBar)
       .SetMethod("_refreshTouchBarItem", &BaseWindow::RefreshTouchBarItem)
