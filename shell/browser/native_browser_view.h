@@ -15,6 +15,10 @@ namespace gfx {
 class Rect;
 }
 
+namespace gin_helper {
+class Dictionary;
+}
+
 namespace electron {
 
 enum AutoResizeFlags {
@@ -46,8 +50,19 @@ class NativeBrowserView : public content::WebContentsObserver {
 
   virtual void SetAutoResizeFlags(uint8_t flags) = 0;
   virtual void SetBounds(const gfx::Rect& bounds) = 0;
+  virtual void SetBounds(const gfx::Rect& bounds,
+                         const gin_helper::Dictionary& options) = 0;
   virtual gfx::Rect GetBounds() = 0;
   virtual void SetBackgroundColor(SkColor color) = 0;
+  virtual void SetViewBounds(const gfx::Rect& bounds) = 0;
+  virtual gfx::Rect GetViewBounds() = 0;
+  virtual void ResetScaling() = 0;
+  virtual void SetScale(const gin_helper::Dictionary& options) = 0;
+  virtual float GetScaleX() = 0;
+  virtual float GetScaleY() = 0;
+  virtual void SetOpacity(const double opacity,
+                          const gin_helper::Dictionary& options) = 0;
+  virtual double GetOpacity() = 0;
 
  protected:
   explicit NativeBrowserView(InspectableWebContents* inspectable_web_contents);

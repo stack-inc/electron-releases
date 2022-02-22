@@ -21,8 +21,20 @@ class NativeBrowserViewMac : public NativeBrowserView {
 
   void SetAutoResizeFlags(uint8_t flags) override;
   void SetBounds(const gfx::Rect& bounds) override;
+  void SetBounds(const gfx::Rect& bounds,
+                 const gin_helper::Dictionary& options) override;
   gfx::Rect GetBounds() override;
   void SetBackgroundColor(SkColor color) override;
+  void SetViewBounds(const gfx::Rect& bounds) override;
+  gfx::Rect GetViewBounds() override;
+  void ResetScaling() override;
+  void SetScale(const gin_helper::Dictionary& options) override;
+  float GetScaleX() override;
+  float GetScaleY() override;
+  void SetOpacity(const double opacity,
+                  const gin_helper::Dictionary& options) override;
+  double GetOpacity() override;
+
 };
 
 }  // namespace electron

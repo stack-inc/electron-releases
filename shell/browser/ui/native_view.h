@@ -14,6 +14,10 @@
 #include "ui/views/view_observer.h"
 #endif
 
+namespace gin_helper {
+class Dictionary;
+}
+
 #if BUILDFLAG(IS_MAC)
 #ifdef __OBJC__
 @class NSView;
@@ -60,7 +64,8 @@ class NativeView : public base::RefCounted<NativeView>,
   NativeView();
 
   // Change position and size.
-  virtual void SetBounds(const gfx::Rect& bounds);
+  virtual void SetBounds(const gfx::Rect& bounds,
+                         const gin_helper::Dictionary& options);
 
   // Get position and size.
   gfx::Rect GetBounds() const;
@@ -114,6 +119,13 @@ class NativeView : public base::RefCounted<NativeView>,
 
   void SetClippingInsets(const ClippingInsetOptions& options);
 #endif
+
+  void ResetScaling();
+  void SetScale(const gin_helper::Dictionary& options);
+  float GetScaleX();
+  float GetScaleY();
+  void SetOpacity(const double opacity, const gin_helper::Dictionary& options);
+  double GetOpacity();
 
   // Get parent.
   NativeView* GetParent() const { return parent_; }
