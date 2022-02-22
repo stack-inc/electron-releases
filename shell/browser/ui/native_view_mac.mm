@@ -3,6 +3,7 @@
 #include "base/mac/foundation_util.h"
 #include "base/mac/scoped_cftyperef.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
+#include "shell/browser/ui/view_utils.h"
 #include "ui/gfx/geometry/rect_conversions.h"
 #include "ui/gfx/geometry/rect_f.h"
 
@@ -44,21 +45,23 @@ void NativeView::DestroyView() {
   [view_ release];
 }
 
-void NativeView::SetBounds(const gfx::Rect& bounds) {
+void NativeView::SetBounds(const gfx::Rect& bounds,
+                           const gin_helper::Dictionary& options) {
+  SetBoundsForView(view_, bounds, options);
   NSRect frame = bounds.ToCGRect();
-  auto* superview = [view_ superview];
-  if (superview && ![superview isFlipped]) {
-    const auto superview_height = superview.frame.size.height;
-    frame =
-        NSMakeRect(bounds.x(), superview_height - bounds.y() - bounds.height(),
-                   bounds.width(), bounds.height());
-  }
-  [view_ setFrame:frame];
   [view_ resizeSubviewsWithOldSize:frame.size];
 }
 
 gfx::Rect NativeView::GetBounds() const {
-  return ToNearestRect(gfx::RectF([view_ frame]));
+  auto* superview = view_.superview;
+  if (superview && ![superview isFlipped]) {
+    const int superview_height = superview.frame.size.height;
+    return gfx::Rect(
+        view_.frame.origin.x,
+        superview_height - view_.frame.origin.y - view_.frame.size.height,
+        view_.frame.size.width, view_.frame.size.height);
+  }
+  return ToNearestRect(gfx::RectF(view_.frame));
 }
 
 gfx::Point NativeView::OffsetFromView(const NativeView* from) const {
@@ -163,6 +166,31 @@ void NativeView::SetClippingInsets(
 
     view.layer.mask = sublayer;
   }
+}
+
+void NativeView::ResetScaling() {
+  ResetScalingForView(view_);
+}
+
+void NativeView::SetScale(const gin_helper::Dictionary& options) {
+  SetScaleForView(view_, options);
+}
+
+float NativeView::GetScaleX() {
+  return GetScaleXForView(view_);
+}
+
+float NativeView::GetScaleY() {
+  return GetScaleYForView(view_);
+}
+
+void NativeView::SetOpacity(const double opacity,
+                            const gin_helper::Dictionary& options) {
+  SetOpacityForView(view_, opacity, options);
+}
+
+double NativeView::GetOpacity() {
+  return GetOpacityForView(view_);
 }
 
 void NativeView::UpdateDraggableRegions() {}

@@ -80,9 +80,17 @@ friend class WrapperBrowserView;
 
  private:
   void SetAutoResize(AutoResizeFlags flags);
-  void SetBounds(const gfx::Rect& bounds);
+  void SetBounds(const gfx::Rect& bounds, gin::Arguments* args);
   gfx::Rect GetBounds();
   void SetBackgroundColor(const std::string& color_name);
+  void SetViewBounds(const gfx::Rect& bounds);
+  gfx::Rect GetViewBounds();
+  void ResetScaling();
+  void SetScale(const gin_helper::Dictionary& options);
+  float GetScaleX();
+  float GetScaleY();
+  void SetOpacity(const double opacity, gin::Arguments* args);
+  double GetOpacity();
   v8::Local<v8::Value> GetWebContents(v8::Isolate*);
 #if BUILDFLAG(IS_MAC)
   void SetClickThrough(bool clickThrough);

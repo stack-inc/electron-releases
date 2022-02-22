@@ -3,6 +3,7 @@
 #include "content/public/browser/web_contents.h"
 #include "shell/browser/api/electron_api_browser_view.h"
 #include "shell/browser/api/electron_api_web_contents.h"
+#include "shell/common/gin_helper/dictionary.h"
 
 namespace electron {
 
@@ -18,8 +19,10 @@ void NativeWrapperBrowserView::SetBrowserView(api::BrowserView* browser_view) {
     SetBrowserViewImpl();
 }
 
-void NativeWrapperBrowserView::SetBounds(const gfx::Rect& bounds) {
-  NativeView::SetBounds(bounds);
+void NativeWrapperBrowserView::SetBounds(
+    const gfx::Rect& bounds,
+    const gin_helper::Dictionary& options) {
+  NativeView::SetBounds(bounds, options);
   if (api_browser_view_)
     api_browser_view_->view()->SetBounds(
         gfx::Rect(0, 0, bounds.width(), bounds.height()));
