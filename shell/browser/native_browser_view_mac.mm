@@ -6,6 +6,8 @@
 
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
+#include "shell/browser/ui/view_utils.h"
+#include "shell/common/gin_helper/dictionary.h"
 #include "skia/ext/skia_utils_mac.h"
 #include "ui/gfx/geometry/rect.h"
 
@@ -75,6 +77,18 @@ void NativeBrowserViewMac::SetBounds(const gfx::Rect& bounds) {
       NSMakeRect(bounds.x(), new_height, bounds.width(), bounds.height());
 }
 
+void NativeBrowserViewMac::SetBounds(const gfx::Rect& bounds,
+                                     const gin_helper::Dictionary& options) {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  SetBoundsForView(view, bounds, options);
+
+  // Ensure draggable regions are properly updated to reflect new bounds.
+  UpdateDraggableRegions(draggable_regions_);
+}
+
 gfx::Rect NativeBrowserViewMac::GetBounds() {
   auto* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
@@ -106,6 +120,74 @@ void NativeBrowserViewMac::SetBackgroundColor(SkColor color) {
   auto* view = iwc_view->GetNativeView().GetNativeNSView();
   view.wantsLayer = YES;
   view.layer.backgroundColor = skia::CGColorCreateFromSkColor(color);
+}
+
+void NativeBrowserViewMac::SetViewBounds(const gfx::Rect& bounds) {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  view.bounds =
+      NSMakeRect(bounds.x(), bounds.y(), bounds.width(), bounds.height());
+  [view setNeedsDisplay:YES];
+}
+
+gfx::Rect NativeBrowserViewMac::GetViewBounds() {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return gfx::Rect();
+  NSView* view = iwc_view->GetNativeView().GetNativeNSView();
+  return gfx::Rect(view.bounds.origin.x, view.bounds.origin.y,
+                   view.bounds.size.width, view.bounds.size.height);
+}
+
+void NativeBrowserViewMac::ResetScaling() {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  ResetScalingForView(view);
+}
+
+void NativeBrowserViewMac::SetScale(const gin_helper::Dictionary& options) {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  SetScaleForView(view, options);
+}
+
+float NativeBrowserViewMac::GetScaleX() {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return 1.0;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  return GetScaleXForView(view);
+}
+
+float NativeBrowserViewMac::GetScaleY() {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return 1.0;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  return GetScaleYForView(view);
+}
+
+void NativeBrowserViewMac::SetOpacity(const double opacity,
+                                      const gin_helper::Dictionary& options) {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  SetOpacityForView(view, opacity, options);
+}
+
+double NativeBrowserViewMac::GetOpacity() {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return 1.0;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  return GetOpacityForView(view);
 }
 
 // static
