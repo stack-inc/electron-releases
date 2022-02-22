@@ -155,8 +155,10 @@ void BrowserView::SetAutoResize(AutoResizeFlags flags) {
   view_->SetAutoResizeFlags(flags);
 }
 
-void BrowserView::SetBounds(const gfx::Rect& bounds) {
-  view_->SetBounds(bounds);
+void BrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
+  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  args->GetNext(&options);
+  view_->SetBounds(bounds, options);
 }
 
 gfx::Rect BrowserView::GetBounds() {
@@ -170,6 +172,40 @@ void BrowserView::SetBackgroundColor(const std::string& color_name) {
     auto* wc = web_contents()->web_contents();
     wc->SetPageBaseBackgroundColor(ParseHexColor(color_name));
   }
+}
+
+void BrowserView::SetViewBounds(const gfx::Rect& bounds) {
+  view_->SetViewBounds(bounds);
+}
+
+gfx::Rect BrowserView::GetViewBounds() {
+  return view_->GetViewBounds();
+}
+
+void BrowserView::ResetScaling() {
+  view_->ResetScaling();
+}
+
+void BrowserView::SetScale(const gin_helper::Dictionary& options) {
+  view_->SetScale(options);
+}
+
+float BrowserView::GetScaleX() {
+  return view_->GetScaleX();
+}
+
+float BrowserView::GetScaleY() {
+  return view_->GetScaleY();
+}
+
+void BrowserView::SetOpacity(const double opacity, gin::Arguments* args) {
+  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  args->GetNext(&options);
+  view_->SetOpacity(opacity, options);
+}
+
+double BrowserView::GetOpacity() {
+  return view_->GetOpacity();
 }
 
 v8::Local<v8::Value> BrowserView::GetWebContents(v8::Isolate* isolate) {
@@ -199,6 +235,14 @@ v8::Local<v8::ObjectTemplate> BrowserView::FillObjectTemplate(
       .SetMethod("setBounds", &BrowserView::SetBounds)
       .SetMethod("getBounds", &BrowserView::GetBounds)
       .SetMethod("setBackgroundColor", &BrowserView::SetBackgroundColor)
+      .SetMethod("setViewBounds", &BrowserView::SetViewBounds)
+      .SetMethod("getViewBounds", &BrowserView::GetViewBounds)
+      .SetMethod("resetScaling", &BrowserView::ResetScaling)
+      .SetMethod("setScale", &BrowserView::SetScale)
+      .SetMethod("getScaleX", &BrowserView::GetScaleX)
+      .SetMethod("getScaleY", &BrowserView::GetScaleY)
+      .SetMethod("setOpacity", &BrowserView::SetOpacity)
+      .SetMethod("getOpacity", &BrowserView::GetOpacity)
       .SetProperty("webContents", &BrowserView::GetWebContents)
 #if defined(OS_MAC)
       .SetProperty("clickThrough", &BrowserView::IsClickThrough,

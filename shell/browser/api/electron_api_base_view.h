@@ -64,7 +64,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   void SetClickThrough(bool clickThrough);
   bool IsClickThrough() const;
 #endif
-  void SetBounds(const gfx::Rect& bounds);
+  void SetBounds(const gfx::Rect& bounds, gin::Arguments* args);
   gfx::Rect GetBounds() const;
   gfx::Point OffsetFromView(gin::Handle<BaseView> from) const;
   gfx::Point OffsetFromWindow() const;
@@ -82,6 +82,12 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   void SetClippingInsets(
       const NativeView::ClippingInsetOptions& options);
 #endif
+  void ResetScaling();
+  void SetScale(const gin_helper::Dictionary& options);
+  float GetScaleX();
+  float GetScaleY();
+  void SetOpacity(const double opacity, gin::Arguments* args);
+  double GetOpacity();
   v8::Local<v8::Value> GetParentView() const;
   v8::Local<v8::Value> GetParentWindow() const;
 
