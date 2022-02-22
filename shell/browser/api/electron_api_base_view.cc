@@ -158,8 +158,10 @@ bool BaseView::IsClickThrough() const {
 }
 #endif
 
-void BaseView::SetBounds(const gfx::Rect& bounds) {
-  view_->SetBounds(bounds);
+void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
+  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  args->GetNext(&options);
+  view_->SetBounds(bounds, options);
 }
 
 gfx::Rect BaseView::GetBounds() const {
@@ -217,6 +219,32 @@ void BaseView::SetClippingInsets(
   return view_->SetClippingInsets(options);
 }
 #endif
+
+void BaseView::ResetScaling() {
+  view_->ResetScaling();
+}
+
+void BaseView::SetScale(const gin_helper::Dictionary& options) {
+  view_->SetScale(options);
+}
+
+float BaseView::GetScaleX() {
+  return view_->GetScaleX();
+}
+
+float BaseView::GetScaleY() {
+  return view_->GetScaleY();
+}
+
+void BaseView::SetOpacity(const double opacity, gin::Arguments* args) {
+  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  args->GetNext(&options);
+  view_->SetOpacity(opacity, options);
+}
+
+double BaseView::GetOpacity() {
+  return view_->GetOpacity();
+}
 
 int32_t BaseView::GetID() const {
   return weak_map_id();
@@ -300,6 +328,12 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setRoundedCorners", &BaseView::SetRoundedCorners)
       .SetMethod("setClippingInsets", &BaseView::SetClippingInsets)
 #endif
+      .SetMethod("resetScaling", &BaseView::ResetScaling)
+      .SetMethod("setScale", &BaseView::SetScale)
+      .SetMethod("getScaleX", &BaseView::GetScaleX)
+      .SetMethod("getScaleY", &BaseView::GetScaleY)
+      .SetMethod("setOpacity", &BaseView::SetOpacity)
+      .SetMethod("getOpacity", &BaseView::GetOpacity)
       .SetMethod("getParentView", &BaseView::GetParentView)
       .SetMethod("getParentWindow", &BaseView::GetParentWindow)
       .Build();
