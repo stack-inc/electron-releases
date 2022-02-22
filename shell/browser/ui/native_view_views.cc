@@ -44,7 +44,8 @@ void NativeView::OnViewIsDeleting(views::View* observed_view) {
   NotifyViewIsDeleting();
 }
 
-void NativeView::SetBounds(const gfx::Rect& bounds) {
+void NativeView::SetBounds(const gfx::Rect& bounds,
+                           const gin_helper::Dictionary& options) {
   if (view_)
     view_->SetBoundsRect(bounds);
 }
@@ -110,6 +111,25 @@ void NativeView::SetBackgroundColor(SkColor color) {
     return;
   view_->SetBackground(views::CreateSolidBackground(color));
   view_->SchedulePaint();
+}
+
+void NativeView::ResetScaling() {}
+
+void NativeView::SetScale(const gin_helper::Dictionary& options) {}
+
+float NativeView::GetScaleX() {
+  return 1.0;
+}
+
+float NativeView::GetScaleY() {
+  return 1.0;
+}
+
+void NativeView::SetOpacity(const double opacity,
+                            const gin_helper::Dictionary& options) {}
+
+double NativeView::GetOpacity() {
+  return 1.0;
 }
 
 }  // namespace electron

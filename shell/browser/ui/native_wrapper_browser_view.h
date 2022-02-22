@@ -19,7 +19,8 @@ class NativeWrapperBrowserView : public NativeView {
   void DetachBrowserView(NativeBrowserView* view);
 
   // NativeView:
-  void SetBounds(const gfx::Rect& bounds) override;
+  void SetBounds(const gfx::Rect& bounds,
+                 const gin_helper::Dictionary& options) override;
   void TriggerBeforeunloadEvents() override;
 #if BUILDFLAG(IS_MAC)
   void UpdateDraggableRegions() override;

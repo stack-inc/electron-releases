@@ -8,6 +8,7 @@
 
 #include "shell/browser/ui/drag_util.h"
 #include "shell/browser/ui/views/inspectable_web_contents_view_views.h"
+#include "shell/common/gin_helper/dictionary.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/views/background.h"
 #include "ui/views/view.h"
@@ -137,6 +138,16 @@ void NativeBrowserViewViews::SetBounds(const gfx::Rect& bounds) {
   UpdateDraggableRegions(draggable_regions_);
 }
 
+void NativeBrowserViewViews::SetBounds(const gfx::Rect& bounds,
+                                       const gin_helper::Dictionary& options) {
+  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetView();
+  view->SetBoundsRect(bounds);
+  ResetAutoResizeProportions();
+}
+
 gfx::Rect NativeBrowserViewViews::GetBounds() {
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
@@ -157,6 +168,34 @@ void NativeBrowserViewViews::SetBackgroundColor(SkColor color) {
   auto* view = iwc_view->GetView();
   view->SetBackground(views::CreateSolidBackground(color));
   view->SchedulePaint();
+}
+
+void NativeBrowserViewViews::SetViewBounds(const gfx::Rect& bounds) {
+  SetBounds(bounds);
+}
+
+gfx::Rect NativeBrowserViewViews::GetViewBounds() {
+  return GetBounds();
+}
+
+void NativeBrowserViewViews::ResetScaling() {}
+
+void NativeBrowserViewViews::SetScale(const gin_helper::Dictionary& options) {}
+
+float NativeBrowserViewViews::GetScaleX() {
+  return 1.0;
+}
+
+float NativeBrowserViewViews::GetScaleY() {
+  return 1.0;
+}
+
+void NativeBrowserViewViews::SetOpacity(const double opacity,
+                                        const gin_helper::Dictionary& options) {
+}
+
+double NativeBrowserViewViews::GetOpacity() {
+  return 1.0;
 }
 
 // static
