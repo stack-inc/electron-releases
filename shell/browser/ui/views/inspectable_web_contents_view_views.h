@@ -10,6 +10,7 @@
 #include "base/compiler_specific.h"
 #include "chrome/browser/devtools/devtools_contents_resizing_strategy.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
+#include "ui/views/controls/image_view.h"
 #include "ui/views/view.h"
 
 namespace views {
@@ -40,6 +41,8 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
   void SetContentsResizingStrategy(
       const DevToolsContentsResizingStrategy& strategy) override;
   void SetTitle(const std::u16string& title) override;
+  void ShowThumbnail(gfx::Image thumbnail) override;
+  void HideThumbnail() override;
 
   // views::View:
   void Layout() override;
@@ -58,6 +61,7 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
   views::WebView* devtools_window_web_view_ = nullptr;
   views::View* contents_web_view_ = nullptr;
   views::WebView* devtools_web_view_ = nullptr;
+  views::ImageView* thumbnail_view_ = nullptr;
 
   DevToolsContentsResizingStrategy strategy_;
   bool devtools_visible_ = false;

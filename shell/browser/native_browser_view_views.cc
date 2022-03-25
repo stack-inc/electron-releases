@@ -198,6 +198,22 @@ double NativeBrowserViewViews::GetOpacity() {
   return 1.0;
 }
 
+void NativeBrowserViewViews::SetVisible(bool visible) {
+  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetView();
+  view->SetVisible(visible);
+}
+
+bool NativeBrowserViewViews::IsVisible() {
+  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return false;
+  auto* view = iwc_view->GetView();
+  return view->GetVisible();
+}
+
 // static
 NativeBrowserView* NativeBrowserView::Create(
     InspectableWebContents* inspectable_web_contents) {
