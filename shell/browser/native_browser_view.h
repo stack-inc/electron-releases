@@ -12,8 +12,9 @@
 #include "third_party/skia/include/core/SkColor.h"
 
 namespace gfx {
+class Image;
 class Rect;
-}
+}  // namespace gfx
 
 namespace gin_helper {
 class Dictionary;
@@ -63,6 +64,10 @@ class NativeBrowserView : public content::WebContentsObserver {
   virtual void SetOpacity(const double opacity,
                           const gin_helper::Dictionary& options) = 0;
   virtual double GetOpacity() = 0;
+  virtual void SetVisible(bool visible) = 0;
+  virtual bool IsVisible() = 0;
+  void ShowThumbnail(gfx::Image thumbnail);
+  void HideThumbnail();
 
  protected:
   explicit NativeBrowserView(InspectableWebContents* inspectable_web_contents);

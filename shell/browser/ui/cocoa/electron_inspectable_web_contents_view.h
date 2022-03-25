@@ -31,6 +31,8 @@ using electron::InspectableWebContentsViewMac;
   BOOL devtools_docked_;
   BOOL devtools_is_first_responder_;
   BOOL attached_to_window_;
+  base::scoped_nsobject<NSImageView> thumbnail_;
+  BOOL thumbnail_visible_;
 
   DevToolsContentsResizingStrategy strategy_;
 }
@@ -45,6 +47,8 @@ using electron::InspectableWebContentsViewMac;
 - (void)setContentsResizingStrategy:
     (const DevToolsContentsResizingStrategy&)strategy;
 - (void)setTitle:(NSString*)title;
+- (void)showThumbnail:(NSImage*)thumbnail;
+- (void)hideThumbnail;
 
 @end
 
