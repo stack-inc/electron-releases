@@ -13,6 +13,7 @@
 #include "shell/browser/ui/inspectable_web_contents_delegate.h"
 #include "shell/browser/ui/inspectable_web_contents_view_delegate.h"
 #include "ui/base/models/image_model.h"
+#include "ui/gfx/image/image.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/webview/webview.h"
 #include "ui/views/widget/widget.h"
@@ -212,9 +213,29 @@ void InspectableWebContentsViewViews::SetTitle(const std::u16string& title) {
   }
 }
 
+void InspectableWebContentsViewViews::ShowThumbnail(gfx::Image thumbnail) {
+  if (!thumbnail_view_) {
+    thumbnail_view_ = new views::ImageView();
+    AddChildView(thumbnail_view_);
+    Layout();
+  }
+  thumbnail_view_->SetImage(thumbnail.AsImageSkia());
+}
+
+void InspectableWebContentsViewViews::HideThumbnail() {
+  if (thumbnail_view_) {
+    RemoveChildView(thumbnail_view_);
+    delete thumbnail_view_;
+    thumbnail_view_ = nullptr;
+    Layout();
+  }
+}
+
 void InspectableWebContentsViewViews::Layout() {
   if (!devtools_web_view_->GetVisible()) {
     contents_web_view_->SetBoundsRect(GetVisibleBounds());
+    if (thumbnail_view_)
+      thumbnail_view_->SetBoundsRect(GetVisibleBounds());
     return;
   }
 
@@ -231,6 +252,8 @@ void InspectableWebContentsViewViews::Layout() {
 
   devtools_web_view_->SetBoundsRect(new_devtools_bounds);
   contents_web_view_->SetBoundsRect(new_contents_bounds);
+  if (thumbnail_view_)
+    thumbnail_view_->SetBoundsRect(new_contents_bounds);
 
   if (GetDelegate())
     GetDelegate()->DevToolsResized();

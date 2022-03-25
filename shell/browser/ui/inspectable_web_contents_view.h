@@ -12,6 +12,10 @@
 
 class DevToolsContentsResizingStrategy;
 
+namespace gfx {
+class Image;
+}
+
 #if defined(TOOLKIT_VIEWS)
 namespace views {
 class View;
@@ -53,6 +57,8 @@ class InspectableWebContentsView {
   virtual void SetContentsResizingStrategy(
       const DevToolsContentsResizingStrategy& strategy) = 0;
   virtual void SetTitle(const std::u16string& title) = 0;
+  virtual void ShowThumbnail(gfx::Image thumbnail) = 0;
+  virtual void HideThumbnail() = 0;
 
  private:
   InspectableWebContentsViewDelegate* delegate_ = nullptr;  // weak references.
