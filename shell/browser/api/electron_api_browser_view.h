@@ -20,6 +20,7 @@
 #include "shell/common/gin_helper/constructible.h"
 #include "shell/common/gin_helper/error_thrower.h"
 #include "shell/common/gin_helper/pinnable.h"
+#include "ui/gfx/image/image.h"
 
 namespace gfx {
 class Rect;
@@ -59,7 +60,7 @@ class BrowserView : public gin::Wrappable<BrowserView>,
   NativeWrapperBrowserView* owner_view() const { return owner_view_.get(); }
 
   void SetOwnerWindow(NativeWindow* window);
-void SetOwnerView(NativeWrapperBrowserView* view);
+  void SetOwnerView(NativeWrapperBrowserView* view);
 
   int32_t ID() const { return id_; }
 
@@ -68,7 +69,7 @@ void SetOwnerView(NativeWrapperBrowserView* view);
   BrowserView& operator=(const BrowserView&) = delete;
 
  protected:
-friend class WrapperBrowserView;
+  friend class WrapperBrowserView;
 
   BrowserView(gin::Arguments* args, const gin_helper::Dictionary& options);
   ~BrowserView() override;
@@ -93,6 +94,10 @@ friend class WrapperBrowserView;
   float GetScaleY();
   void SetOpacity(const double opacity, gin::Arguments* args);
   double GetOpacity();
+  void SetVisible(bool visible);
+  bool IsVisible();
+  void Hide(bool freeze, gfx::Image thumbnail);
+  void Show();
   v8::Local<v8::Value> GetWebContents(v8::Isolate*);
 #if BUILDFLAG(IS_MAC)
   void SetClickThrough(bool clickThrough);
@@ -105,6 +110,8 @@ friend class WrapperBrowserView;
   std::unique_ptr<NativeBrowserView> view_;
   base::WeakPtr<NativeWindow> owner_window_;
   scoped_refptr<NativeWrapperBrowserView> owner_view_;
+
+  bool page_frozen_ = false;
 
   int32_t id_;
 };
