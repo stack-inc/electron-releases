@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "content/browser/renderer_host/render_widget_host_view_base.h"  // nogncheck
+#include "content/browser/web_contents/web_contents_impl.h"  // nogncheck
 #include "content/public/browser/render_widget_host_view.h"
 #include "shell/browser/api/electron_api_web_contents.h"
 #include "shell/browser/browser.h"
@@ -15,6 +16,7 @@
 #include "shell/browser/web_contents_preferences.h"
 #include "shell/common/color_util.h"
 #include "shell/common/gin_converters/gfx_converter.h"
+#include "shell/common/gin_converters/image_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
@@ -225,6 +227,36 @@ double BrowserView::GetOpacity() {
   return view_->GetOpacity();
 }
 
+void BrowserView::SetVisible(bool visible) {
+  view_->SetVisible(visible);
+}
+
+bool BrowserView::IsVisible() {
+  return view_->IsVisible();
+}
+
+void BrowserView::Hide(bool freeze, gfx::Image thumbnail) {
+  if (freeze && !page_frozen_) {
+    auto* wc =
+        static_cast<content::WebContentsImpl*>(web_contents()->web_contents());
+    wc->WasHidden();
+    wc->SetPageFrozen(true);
+    page_frozen_ = true;
+  }
+  view_->ShowThumbnail(thumbnail);
+}
+
+void BrowserView::Show() {
+  if (page_frozen_) {
+    auto* wc =
+        static_cast<content::WebContentsImpl*>(web_contents()->web_contents());
+    wc->SetPageFrozen(false);
+    wc->WasShown();
+    page_frozen_ = false;
+  }
+  view_->HideThumbnail();
+}
+
 v8::Local<v8::Value> BrowserView::GetWebContents(v8::Isolate* isolate) {
   if (web_contents_.IsEmpty()) {
     return v8::Null(isolate);
@@ -260,6 +292,10 @@ v8::Local<v8::ObjectTemplate> BrowserView::FillObjectTemplate(
       .SetMethod("getScaleY", &BrowserView::GetScaleY)
       .SetMethod("setOpacity", &BrowserView::SetOpacity)
       .SetMethod("getOpacity", &BrowserView::GetOpacity)
+      .SetMethod("setVisible", &BrowserView::SetVisible)
+      .SetMethod("isVisible", &BrowserView::IsVisible)
+      .SetMethod("hide", &BrowserView::Hide)
+      .SetMethod("show", &BrowserView::Show)
       .SetProperty("webContents", &BrowserView::GetWebContents)
 #if BUILDFLAG(IS_MAC)
       .SetProperty("clickThrough", &BrowserView::IsClickThrough,
