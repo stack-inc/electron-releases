@@ -11,6 +11,7 @@
 #import "shell/browser/ui/cocoa/electron_inspectable_web_contents_view.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_view_delegate.h"
+#include "ui/gfx/image/image.h"
 
 namespace electron {
 
@@ -60,6 +61,14 @@ void InspectableWebContentsViewMac::SetContentsResizingStrategy(
 
 void InspectableWebContentsViewMac::SetTitle(const std::u16string& title) {
   [view_ setTitle:base::SysUTF16ToNSString(title)];
+}
+
+void InspectableWebContentsViewMac::ShowThumbnail(gfx::Image thumbnail) {
+  [view_ showThumbnail:thumbnail.AsNSImage()];
+}
+
+void InspectableWebContentsViewMac::HideThumbnail() {
+  [view_ hideThumbnail];
 }
 
 }  // namespace electron
