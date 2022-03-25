@@ -106,3 +106,20 @@ Examples of valid `color` values:
     * e.g. `blueviolet` or `red`
 
 **Note:** Hex format with alpha takes `AARRGGBB` or `ARGB`, _not_ `RRGGBBA` or `RGA`.
+
+#### `view.setVisible(visible)` _Experimental_
+
+* `visible` boolean - Sets whether this view is visible.
+
+#### `view.isVisible()` _Experimental_
+
+Returns `boolean` - Whether the view is visible.
+
+#### `view.hide(freeze, thumbnail)` _Experimental_
+
+* `freeze` boolean - Hides and freezes the page. A frozen page runs as few tasks as possible.
+* `thumbnail` [NativeImage](native-image.md) - The thumbnail to show on top of the page.
+
+#### `view.show()` _Experimental_
+
+Hides the thumbnail. If the page is hidden and frozen, then it shows the page which is automatically unfrozen.
