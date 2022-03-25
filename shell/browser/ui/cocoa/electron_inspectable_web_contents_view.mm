@@ -36,6 +36,7 @@
   devtools_docked_ = NO;
   devtools_is_first_responder_ = NO;
   attached_to_window_ = NO;
+  thumbnail_visible_ = NO;
 
   if (inspectableWebContentsView_->inspectable_web_contents()->IsGuest()) {
     fake_view_.reset([[NSView alloc] init]);
@@ -216,16 +217,24 @@
     return;
 
   if (![self isDevToolsVisible] || devtools_window_) {
-    DCHECK_EQ(1u, [[self subviews] count]);
+    if (thumbnail_visible_)
+      DCHECK_EQ(2u, [[self subviews] count]);
+    else
+      DCHECK_EQ(1u, [[self subviews] count]);
     NSView* contents = [[self subviews] objectAtIndex:0];
     [contents setFrame:[self bounds]];
+    if (thumbnail_visible_)
+      [thumbnail_ setFrame:[self bounds]];
     return;
   }
 
   NSView* devToolsView = [[self subviews] objectAtIndex:0];
   NSView* contentsView = [[self subviews] objectAtIndex:1];
 
-  DCHECK_EQ(3u, [[self subviews] count]);
+  if (thumbnail_visible_)
+    DCHECK_EQ(4u, [[self subviews] count]);
+  else
+    DCHECK_EQ(3u, [[self subviews] count]);
 
   gfx::Rect new_devtools_bounds;
   gfx::Rect new_contents_bounds;
@@ -234,6 +243,8 @@
       &new_devtools_bounds, &new_contents_bounds);
   [devToolsView setFrame:[self flipRectToNSRect:new_devtools_bounds]];
   [contentsView setFrame:[self flipRectToNSRect:new_contents_bounds]];
+  if (thumbnail_visible_)
+    [thumbnail_ setFrame:[self flipRectToNSRect:new_contents_bounds]];
 
   // Move mask to the devtools area to exclude it from dragging.
   NSRect cf = contentsView.frame;
@@ -260,6 +271,25 @@
 
 - (void)setTitle:(NSString*)title {
   [devtools_window_ setTitle:title];
+}
+
+- (void)showThumbnail:(NSImage*)thumbnail {
+  if (!thumbnail_visible_) {
+    thumbnail_visible_ = YES;
+    thumbnail_.reset([[[NSImageView alloc] init] autorelease]);
+    [self addSubview:thumbnail_.get() positioned:NSWindowAbove relativeTo:nil];
+    [self adjustSubviews];
+  }
+  [thumbnail_ setImage:thumbnail];
+}
+
+- (void)hideThumbnail {
+  if (thumbnail_visible_) {
+    thumbnail_visible_ = NO;
+    [thumbnail_ removeFromSuperview];
+    // thumbnail_.reset();
+    [self adjustSubviews];
+  }
 }
 
 - (void)viewDidBecomeFirstResponder:(NSNotification*)notification {

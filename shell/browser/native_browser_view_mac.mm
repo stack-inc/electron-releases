@@ -374,6 +374,22 @@ double NativeBrowserViewMac::GetOpacity() {
   return GetOpacityForView(view);
 }
 
+void NativeBrowserViewMac::SetVisible(bool visible) {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  view.hidden = !visible;
+}
+
+bool NativeBrowserViewMac::IsVisible() {
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return false;
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  return !view.hidden;
+}
+
 void NativeBrowserViewMac::UpdateDraggableRegions(
     const std::vector<gfx::Rect>& drag_exclude_rects) {
   if (!inspectable_web_contents_)
