@@ -432,6 +432,7 @@ class WebContents : public ExclusiveAccessContext,
           callback);
 
   void SetImageAnimationPolicy(const std::string& new_policy);
+  gfx::Size GetPreferredSize();
 
   // disable copy
   WebContents(const WebContents&) = delete;
