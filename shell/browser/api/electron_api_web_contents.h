@@ -434,6 +434,7 @@ class WebContents : public ExclusiveAccessContext,
   void DoGetZoomLevel(
       electron::mojom::ElectronBrowser::DoGetZoomLevelCallback callback);
   void SetImageAnimationPolicy(const std::string& new_policy);
+  gfx::Size GetPreferredSize();
 
   // Grants |origin| access to |device|.
   // To be used in place of ObjectPermissionContextBase::GrantObjectPermission.
