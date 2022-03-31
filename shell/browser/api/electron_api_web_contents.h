@@ -440,6 +440,7 @@ class WebContents : public ExclusiveAccessContext,
           callback);
 
   void SetImageAnimationPolicy(const std::string& new_policy);
+  gfx::Size GetPreferredSize();
 
   // content::RenderWidgetHost::InputEventObserver:
   void OnInputEvent(const blink::WebInputEvent& event) override;

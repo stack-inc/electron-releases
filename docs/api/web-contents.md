@@ -1992,6 +1992,10 @@ This corresponds to the [animationPolicy][] accessibility feature in Chromium.
 
 [animationPolicy]: https://developer.chrome.com/docs/extensions/reference/accessibilityFeatures/#property-animationPolicy
 
+#### `contents.getPreferredSize()`
+
+Returns [`Size`](structures/size.md) - The preferred size of the contents.
+
 ### Instance Properties
 
 #### `contents.ipc` _Readonly_
