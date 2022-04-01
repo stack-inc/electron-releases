@@ -233,9 +233,9 @@ void InspectableWebContentsViewViews::HideThumbnail() {
 
 void InspectableWebContentsViewViews::Layout() {
   if (!devtools_web_view_->GetVisible()) {
-    contents_web_view_->SetBoundsRect(GetVisibleBounds());
+    contents_web_view_->SetBoundsRect(GetContentsBounds());
     if (thumbnail_view_)
-      thumbnail_view_->SetBoundsRect(GetVisibleBounds());
+      thumbnail_view_->SetBoundsRect(GetContentsBounds());
     return;
   }
 
