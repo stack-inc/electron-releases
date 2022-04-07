@@ -144,6 +144,16 @@ gfx::Point ScrollView::GetMaximumScrollPosition() const {
   return scroll_->GetMaximumScrollPosition();
 }
 
+void ScrollView::ScrollToPoint(gfx::Point point,
+                               const gin_helper::Dictionary& options) {
+  scroll_->ScrollToPoint(point, options);
+}
+
+void ScrollView::ScrollPointToCenter(gfx::Point point,
+                                     const gin_helper::Dictionary& options) {
+  scroll_->ScrollPointToCenter(point, options);
+}
+
 void ScrollView::SetOverlayScrollbar(bool overlay) {
   scroll_->SetOverlayScrollbar(overlay);
 }
@@ -228,6 +238,8 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("getScrollPosition", &ScrollView::GetScrollPosition)
       .SetMethod("getMaximumScrollPosition",
                  &ScrollView::GetMaximumScrollPosition)
+      .SetMethod("scrollToPoint", &ScrollView::ScrollToPoint)
+      .SetMethod("scrollPointToCenter", &ScrollView::ScrollPointToCenter)
       .SetMethod("setOverlayScrollbar", &ScrollView::SetOverlayScrollbar)
       .SetMethod("isOverlayScrollbar", &ScrollView::IsOverlayScrollbar)
 #endif
