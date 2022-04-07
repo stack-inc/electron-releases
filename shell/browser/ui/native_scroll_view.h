@@ -37,6 +37,10 @@ class NativeScrollView : public NativeView {
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
 
+  void ScrollToPoint(gfx::Point point, const gin_helper::Dictionary& options);
+  void ScrollPointToCenter(gfx::Point point,
+                           const gin_helper::Dictionary& options);
+
   void SetOverlayScrollbar(bool overlay);
   bool IsOverlayScrollbar() const;
 #endif

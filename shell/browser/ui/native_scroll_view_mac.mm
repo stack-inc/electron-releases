@@ -1,6 +1,8 @@
 #include "shell/browser/ui/native_scroll_view.h"
 
+#include "base/strings/string_util.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
+#include "shell/common/gin_helper/dictionary.h"
 
 @interface ElectronNativeScrollView
     : NSScrollView <ElectronNativeViewProtocol> {
@@ -48,6 +50,81 @@
     content_size.height = parent_size.height;
   [self.documentView setFrameSize:content_size];
   [super resizeSubviewsWithOldSize:oldBoundsSize];
+}
+
+@end
+
+@interface ScrollViewAnimation : NSAnimation
+@property(nonatomic, strong) NSScrollView* scrollView;
+@property(nonatomic) NSPoint originPoint;
+@property(nonatomic) NSPoint targetPoint;
+
++ (void)animatedScrollPointToCenter:(NSPoint)targetPoint
+                       inScrollView:(NSScrollView*)scrollView
+                        forDuration:(float)duration
+                 withAnimationCurve:(NSAnimationCurve)animationCurve;
++ (void)animatedScrollToPoint:(NSPoint)targetPoint
+                 inScrollView:(NSScrollView*)scrollView
+                  forDuration:(float)duration
+           withAnimationCurve:(NSAnimationCurve)animationCurve;
+@end
+
+@implementation ScrollViewAnimation
+
+@synthesize scrollView;
+@synthesize originPoint;
+@synthesize targetPoint;
+
++ (void)animatedScrollPointToCenter:(NSPoint)targetPoint
+                       inScrollView:(NSScrollView*)scrollView
+                        forDuration:(float)duration
+                 withAnimationCurve:(NSAnimationCurve)animationCurve {
+  NSRect visibleRect = [scrollView documentVisibleRect];
+  targetPoint = NSMakePoint(targetPoint.x - (NSWidth(visibleRect) / 2),
+                            targetPoint.y - (NSHeight(visibleRect) / 2));
+  [self animatedScrollToPoint:targetPoint
+                 inScrollView:scrollView
+                  forDuration:duration
+           withAnimationCurve:animationCurve];
+}
+
++ (void)animatedScrollToPoint:(NSPoint)targetPoint
+                 inScrollView:(NSScrollView*)scrollView
+                  forDuration:(float)duration
+           withAnimationCurve:(NSAnimationCurve)animationCurve {
+  ScrollViewAnimation* animation =
+      [[ScrollViewAnimation alloc] initWithDuration:duration
+                                     animationCurve:animationCurve];
+  animation.scrollView = scrollView;
+  animation.originPoint = [scrollView documentVisibleRect].origin;
+  animation.targetPoint = targetPoint;
+
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+    [animation startAnimation];
+  });
+}
+
+- (void)setCurrentProgress:(NSAnimationProgress)progress {
+  typedef float (^MyAnimationCurveBlock)(float, float, float);
+  MyAnimationCurveBlock cubicEaseInOut =
+      ^float(float t, float start, float end) {
+        t *= 2.;
+        if (t < 1.)
+          return end / 2 * t * t * t + start - 1.f;
+        t -= 2;
+        return end / 2 * (t * t * t + 2) + start - 1.f;
+      };
+
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    NSPoint progressPoint = self.originPoint;
+    progressPoint.x +=
+        cubicEaseInOut(progress, 0, self.targetPoint.x - self.originPoint.x);
+    progressPoint.y +=
+        cubicEaseInOut(progress, 0, self.targetPoint.y - self.originPoint.y);
+
+    [[self.scrollView documentView] scrollPoint:progressPoint];
+    [self.scrollView displayIfNeeded];
+  });
 }
 
 @end
@@ -106,6 +183,64 @@ gfx::Point NativeScrollView::GetMaximumScrollPosition() const {
   NSRect clipBounds = scroll.contentView.bounds;
   return gfx::Point(NSMaxX(docBounds) - NSWidth(clipBounds),
                     NSMaxY(docBounds) - NSHeight(clipBounds));
+}
+
+void NativeScrollView::ScrollToPoint(gfx::Point point,
+                                     const gin_helper::Dictionary& options) {
+  auto* scroll = static_cast<ElectronNativeScrollView*>(GetNative());
+  float duration = 0.4;
+  options.Get("duration", &duration);
+  std::string tfunction_name;
+  if (options.Get("timingFunction", &tfunction_name)) {
+    tfunction_name = base::ToLowerASCII(tfunction_name);
+    base::TrimWhitespaceASCII(tfunction_name, base::TRIM_ALL, &tfunction_name);
+  }
+
+  NSAnimationCurve animation_curve = NSAnimationEaseInOut;
+  if (tfunction_name == "linear") {
+    animation_curve = NSAnimationLinear;
+  } else if (tfunction_name == "easein") {
+    animation_curve = NSAnimationEaseIn;
+  } else if (tfunction_name == "easeout") {
+    animation_curve = NSAnimationEaseOut;
+  } else if (tfunction_name == "easeineaseout") {
+    animation_curve = NSAnimationEaseInOut;
+  }
+
+  [ScrollViewAnimation animatedScrollToPoint:NSMakePoint(point.x(), point.y())
+                                inScrollView:scroll
+                                 forDuration:duration
+                          withAnimationCurve:animation_curve];
+}
+
+void NativeScrollView::ScrollPointToCenter(
+    gfx::Point point,
+    const gin_helper::Dictionary& options) {
+  auto* scroll = static_cast<ElectronNativeScrollView*>(GetNative());
+  float duration = 0.4;
+  options.Get("duration", &duration);
+  std::string tfunction_name;
+  if (options.Get("timingFunction", &tfunction_name)) {
+    tfunction_name = base::ToLowerASCII(tfunction_name);
+    base::TrimWhitespaceASCII(tfunction_name, base::TRIM_ALL, &tfunction_name);
+  }
+
+  NSAnimationCurve animation_curve = NSAnimationEaseInOut;
+  if (tfunction_name == "linear") {
+    animation_curve = NSAnimationLinear;
+  } else if (tfunction_name == "easein") {
+    animation_curve = NSAnimationEaseIn;
+  } else if (tfunction_name == "easeout") {
+    animation_curve = NSAnimationEaseOut;
+  } else if (tfunction_name == "easeineaseout") {
+    animation_curve = NSAnimationEaseInOut;
+  }
+
+  [ScrollViewAnimation
+      animatedScrollPointToCenter:NSMakePoint(point.x(), point.y())
+                     inScrollView:scroll
+                      forDuration:duration
+               withAnimationCurve:animation_curve];
 }
 
 void NativeScrollView::SetOverlayScrollbar(bool overlay) {
