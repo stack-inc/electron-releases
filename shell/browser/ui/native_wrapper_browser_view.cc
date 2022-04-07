@@ -25,7 +25,7 @@ void NativeWrapperBrowserView::SetBounds(
   NativeView::SetBounds(bounds, options);
   if (api_browser_view_)
     api_browser_view_->view()->SetBounds(
-        gfx::Rect(0, 0, bounds.width(), bounds.height()));
+        gfx::Rect(0, 0, bounds.width(), bounds.height()), options);
 }
 
 void NativeWrapperBrowserView::DetachBrowserView(NativeBrowserView* view) {
