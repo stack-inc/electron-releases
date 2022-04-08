@@ -19,8 +19,14 @@ ScrollBarMode GetScrollBarMode(views::ScrollView::ScrollBarMode mode) {
 
 }  // namespace
 
-void NativeScrollView::InitScrollView() {
+void NativeScrollView::InitScrollView(
+    absl::optional<ScrollBarMode> horizontal_mode,
+    absl::optional<ScrollBarMode> vertical_mode) {
   SetNativeView(new views::ScrollView());
+  if (horizontal_mode)
+    SetHorizontalScrollBarMode(horizontal_mode.value());
+  if (vertical_mode)
+    SetVerticalScrollBarMode(vertical_mode.value());
 }
 
 void NativeScrollView::SetContentViewImpl(NativeView* view) {
