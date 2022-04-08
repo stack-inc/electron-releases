@@ -18,7 +18,7 @@ namespace {
 ScrollBarMode ConvertToScrollBarMode(std::string mode) {
   if (mode == "disabled")
     return ScrollBarMode::kDisabled;
-  else if (mode == "hidden-but-enabled")
+  else if (mode == "enabled-but-hidden")
     return ScrollBarMode::kHiddenButEnabled;
   return ScrollBarMode::kEnabled;
 }
@@ -27,7 +27,7 @@ std::string ConvertFromScrollBarMode(ScrollBarMode mode) {
   if (mode == ScrollBarMode::kDisabled)
     return "disabled";
   else if (mode == ScrollBarMode::kHiddenButEnabled)
-    return "hidden-but-enabled";
+    return "enabled-but-hidden";
   return "enabled";
 }
 
@@ -69,6 +69,24 @@ void ScrollView::ResetChildViews() {
   content_view_id_ = 0;
   content_view_.Reset();
 }
+
+#if BUILDFLAG(IS_MAC)
+void ScrollView::OnDidScroll(NativeView* observed_view) {
+  Emit("did-scroll");
+}
+
+void ScrollView::OnWillStartLiveScroll(NativeView* observed_view) {
+  Emit("will-start-live-scroll");
+}
+
+void ScrollView::OnDidLiveScroll(NativeView* observed_view) {
+  Emit("did-live-scroll");
+}
+
+void ScrollView::OnDidEndLiveScroll(NativeView* observed_view) {
+  Emit("did-end-live-scroll");
+}
+#endif  // BUILDFLAG(IS_MAC)
 
 void ScrollView::SetContentView(v8::Local<v8::Value> value) {
   gin::Handle<BaseView> content_view;
@@ -161,6 +179,30 @@ void ScrollView::SetOverlayScrollbar(bool overlay) {
 bool ScrollView::IsOverlayScrollbar() const {
   return scroll_->IsOverlayScrollbar();
 }
+
+void ScrollView::SetScrollEventsEnabled(bool enable) {
+  scroll_->SetScrollEventsEnabled(enable);
+}
+
+bool ScrollView::IsScrollEventsEnabled() {
+  return scroll_->IsScrollEventsEnabled();
+}
+
+void ScrollView::SetScrollWheelSwapped(bool swap) {
+  scroll_->SetScrollWheelSwapped(swap);
+}
+
+bool ScrollView::IsScrollWheelSwapped() {
+  return scroll_->IsScrollWheelSwapped();
+}
+
+void ScrollView::SetScrollWheelFactor(double factor) {
+  scroll_->SetScrollWheelFactor(factor);
+}
+
+double ScrollView::GetScrollWheelFactor() {
+  return scroll_->GetScrollWheelFactor();
+}
 #endif
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
@@ -205,7 +247,18 @@ gin_helper::WrappableBase* ScrollView::New(gin_helper::ErrorThrower thrower,
     return nullptr;
   }
 
-  return new ScrollView(args, new NativeScrollView());
+  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  args->GetNext(&options);
+  absl::optional<ScrollBarMode> horizontal_mode = absl::nullopt;
+  absl::optional<ScrollBarMode> vertical_mode = absl::nullopt;
+  std::string mode;
+  if (options.Get("horizontalScrollBarMode", &mode))
+    horizontal_mode = absl::make_optional(ConvertToScrollBarMode(mode));
+  if (options.Get("verticalScrollBarMode", &mode))
+    vertical_mode = absl::make_optional(ConvertToScrollBarMode(mode));
+
+  return new ScrollView(args,
+                        new NativeScrollView(horizontal_mode, vertical_mode));
 }
 
 // static
@@ -242,6 +295,12 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("scrollPointToCenter", &ScrollView::ScrollPointToCenter)
       .SetMethod("setOverlayScrollbar", &ScrollView::SetOverlayScrollbar)
       .SetMethod("isOverlayScrollbar", &ScrollView::IsOverlayScrollbar)
+      .SetMethod("setScrollEventsEnabled", &ScrollView::SetScrollEventsEnabled)
+      .SetMethod("isScrollEventsEnabled", &ScrollView::IsScrollEventsEnabled)
+      .SetMethod("setScrollWheelSwapped", &ScrollView::SetScrollWheelSwapped)
+      .SetMethod("isScrollWheelSwapped", &ScrollView::IsScrollWheelSwapped)
+      .SetMethod("setScrollWheelFactor", &ScrollView::SetScrollWheelFactor)
+      .SetMethod("getScrollWheelFactor", &ScrollView::GetScrollWheelFactor)
 #endif
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
       .SetMethod("clipHeightTo", &ScrollView::ClipHeightTo)

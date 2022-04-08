@@ -7,8 +7,10 @@
 
 namespace electron {
 
-NativeScrollView::NativeScrollView() {
-  InitScrollView();
+NativeScrollView::NativeScrollView(
+    absl::optional<ScrollBarMode> horizontal_mode,
+    absl::optional<ScrollBarMode> vertical_mode) {
+  InitScrollView(horizontal_mode, vertical_mode);
   SetContentView(new NativeContainerView);
 }
 
