@@ -2,6 +2,7 @@
 #define SHELL_BROWSER_UI_NATIVE_SCROLL_VIEW_H_
 
 #include "shell/browser/ui/native_view.h"
+#include "third_party/abseil-cpp/absl/types/optional.h"
 
 namespace electron {
 
@@ -17,7 +18,8 @@ enum class ScrollElasticity {
 
 class NativeScrollView : public NativeView {
  public:
-  NativeScrollView();
+  NativeScrollView(absl::optional<ScrollBarMode> horizontal_mode,
+                   absl::optional<ScrollBarMode> vertical_mode);
 
   // NativeView:
   void DetachChildView(NativeView* view) override;
@@ -55,6 +57,13 @@ class NativeScrollView : public NativeView {
   ScrollElasticity GetHorizontalScrollElasticity() const;
   void SetVerticalScrollElasticity(ScrollElasticity elasticity);
   ScrollElasticity GetVerticalScrollElasticity() const;
+
+  void SetScrollEventsEnabled(bool enable);
+  bool IsScrollEventsEnabled();
+  void SetScrollWheelSwapped(bool swap);
+  bool IsScrollWheelSwapped();
+  void SetScrollWheelFactor(double factor);
+  double GetScrollWheelFactor();
 #endif
 
 #if defined(TOOLKIT_VIEWS) && !defined(OS_MAC)
@@ -74,7 +83,8 @@ class NativeScrollView : public NativeView {
   // NativeView:
   void SetWindowForChildren(NativeWindow* window) override;
 
-  void InitScrollView();
+  void InitScrollView(absl::optional<ScrollBarMode> horizontal_mode,
+                      absl::optional<ScrollBarMode> vertical_mode);
   void SetContentViewImpl(NativeView* container);
   void DetachChildViewImpl();
 

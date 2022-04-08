@@ -28,6 +28,14 @@ class ScrollView : public BaseView {
   void ResetChildView(BaseView* view) override;
   void ResetChildViews() override;
 
+  // NativeView::Observer:
+#if defined(OS_MAC)
+  void OnDidScroll(NativeView* observed_view) override;
+  void OnWillStartLiveScroll(NativeView* observed_view) override;
+  void OnDidLiveScroll(NativeView* observed_view) override;
+  void OnDidEndLiveScroll(NativeView* observed_view) override;
+#endif  // defined(OS_MAC)
+
   void SetContentView(v8::Local<v8::Value> value);
   v8::Local<v8::Value> GetContentView() const;
   void SetContentSize(gfx::Size size);
@@ -49,6 +57,12 @@ class ScrollView : public BaseView {
                            const gin_helper::Dictionary& options);
   void SetOverlayScrollbar(bool overlay);
   bool IsOverlayScrollbar() const;
+  void SetScrollEventsEnabled(bool enable);
+  bool IsScrollEventsEnabled();
+  void SetScrollWheelSwapped(bool swap);
+  bool IsScrollWheelSwapped();
+  void SetScrollWheelFactor(double factor);
+  double GetScrollWheelFactor();
 #endif
 #if defined(TOOLKIT_VIEWS) && !defined(OS_MAC)
   void ClipHeightTo(int min_height, int max_height);

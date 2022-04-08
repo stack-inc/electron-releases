@@ -4,6 +4,18 @@
 
 namespace electron {
 
+#if defined(OS_MAC)
+bool NativeView::Observer::OnMouseDown(NativeView* observed_view,
+                                       const NativeMouseEvent& event) {
+  return false;
+}
+
+bool NativeView::Observer::OnMouseUp(NativeView* observed_view,
+                                     const NativeMouseEvent& event) {
+  return false;
+}
+#endif  // defined(OS_MAC)
+
 NativeView::NativeView() : view_(nullptr) {
   InitView();
 }
@@ -76,6 +88,64 @@ void NativeView::NotifyChildViewDetached(NativeView* view) {
   for (Observer& observer : observers_)
     observer.OnChildViewDetached(this, view);
 }
+
+#if defined(OS_MAC)
+bool NativeView::NotifyMouseDown(const NativeMouseEvent& event) {
+  bool prevent_default = false;
+  for (Observer& observer : observers_)
+    if (observer.OnMouseDown(this, event))
+      prevent_default = true;
+  return prevent_default;
+}
+
+bool NativeView::NotifyMouseUp(const NativeMouseEvent& event) {
+  bool prevent_default = false;
+  for (Observer& observer : observers_)
+    if (observer.OnMouseUp(this, event))
+      prevent_default = true;
+  return prevent_default;
+}
+
+void NativeView::NotifyMouseMove(const NativeMouseEvent& event) {
+  for (Observer& observer : observers_)
+    observer.OnMouseMove(this, event);
+}
+
+void NativeView::NotifyMouseEnter(const NativeMouseEvent& event) {
+  for (Observer& observer : observers_)
+    observer.OnMouseEnter(this, event);
+}
+
+void NativeView::NotifyMouseLeave(const NativeMouseEvent& event) {
+  for (Observer& observer : observers_)
+    observer.OnMouseLeave(this, event);
+}
+
+void NativeView::NotifyCaptureLost() {
+  for (Observer& observer : observers_)
+    observer.OnCaptureLost(this);
+}
+
+void NativeView::NotifyDidScroll(NativeView* view) {
+  for (Observer& observer : observers_)
+    observer.OnDidScroll(view);
+}
+
+void NativeView::NotifyWillStartLiveScroll(NativeView* view) {
+  for (Observer& observer : observers_)
+    observer.OnWillStartLiveScroll(view);
+}
+
+void NativeView::NotifyDidLiveScroll(NativeView* view) {
+  for (Observer& observer : observers_)
+    observer.OnDidLiveScroll(view);
+}
+
+void NativeView::NotifyDidEndLiveScroll(NativeView* view) {
+  for (Observer& observer : observers_)
+    observer.OnDidEndLiveScroll(view);
+}
+#endif  // defined(OS_MAC)
 
 void NativeView::NotifySizeChanged(gfx::Size old_size, gfx::Size new_size) {
   for (Observer& observer : observers_)

@@ -20,8 +20,10 @@ class Dictionary;
 
 #if defined(OS_MAC)
 #ifdef __OBJC__
+@class NSEvent;
 @class NSView;
 #else
+class NSEvent;
 struct NSView;
 #endif
 #elif defined(TOOLKIT_VIEWS)
@@ -33,12 +35,52 @@ class View;
 namespace electron {
 
 #if defined(OS_MAC)
+using NATIVEEVENT = NSEvent*;
 using NATIVEVIEW = NSView*;
 #elif defined(TOOLKIT_VIEWS)
 using NATIVEVIEW = views::View*;
 #endif
 
 class NativeWindow;
+
+#if defined(OS_MAC)
+// Supported event types.
+enum class EventType {
+  kUnknown,
+  kLeftMouseDown,
+  kRightMouseDown,
+  kOtherMouseDown,
+  kLeftMouseUp,
+  kRightMouseUp,
+  kOtherMouseUp,
+  kMouseMove,
+  kMouseEnter,
+  kMouseLeave,
+};
+
+// Base event type.
+struct NativeEvent {
+  EventType type;
+
+  // Time when event was created, starts from when machine was booted.
+  uint32_t timestamp;
+
+  // The underlying native event.
+  NATIVEEVENT native_event;
+
+ protected:
+  NativeEvent(NATIVEEVENT event, NATIVEVIEW view);
+};
+
+struct NativeMouseEvent : public NativeEvent {
+  // Create from the native event.
+  NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view);
+
+  int button;
+  gfx::Point position_in_view;
+  gfx::Point position_in_window;
+};
+#endif  // defined(OS_MAC)
 
 // The base class for all kinds of views.
 class NativeView : public base::RefCounted<NativeView>,
@@ -55,9 +97,27 @@ class NativeView : public base::RefCounted<NativeView>,
 
     virtual void OnChildViewDetached(NativeView* observed_view,
                                      NativeView* view) {}
+#if defined(OS_MAC)
+    virtual bool OnMouseDown(NativeView* observed_view,
+                             const NativeMouseEvent& event);
+    virtual bool OnMouseUp(NativeView* observed_view,
+                           const NativeMouseEvent& event);
+    virtual void OnMouseMove(NativeView* observed_view,
+                             const NativeMouseEvent& event) {}
+    virtual void OnMouseEnter(NativeView* observed_view,
+                              const NativeMouseEvent& event) {}
+    virtual void OnMouseLeave(NativeView* observed_view,
+                              const NativeMouseEvent& event) {}
+    virtual void OnCaptureLost(NativeView* observed_view) {}
+    virtual void OnDidScroll(NativeView* observed_view) {}
+    virtual void OnWillStartLiveScroll(NativeView* observed_view) {}
+    virtual void OnDidLiveScroll(NativeView* observed_view) {}
+    virtual void OnDidEndLiveScroll(NativeView* observed_view) {}
+#endif  // defined(OS_MAC)
     virtual void OnSizeChanged(NativeView* observed_view,
                                gfx::Size old_size,
                                gfx::Size new_size) {}
+
     virtual void OnViewIsDeleting(NativeView* observed_view) {}
   };
 
@@ -93,6 +153,15 @@ class NativeView : public base::RefCounted<NativeView>,
   void SetBackgroundColor(SkColor color);
 
 #if defined(OS_MAC)
+  // Capture mouse.
+  void SetCapture();
+  void ReleaseCapture();
+  bool HasCapture() const;
+
+  void EnableMouseEvents();
+  void SetMouseTrackingEnabled(bool enable);
+  bool IsMouseTrackingEnabled();
+
   void SetWantsLayer(bool wants);
   bool WantsLayer() const;
 
@@ -168,6 +237,19 @@ class NativeView : public base::RefCounted<NativeView>,
 #endif
 
   void NotifyChildViewDetached(NativeView* view);
+
+#if defined(OS_MAC)
+  bool NotifyMouseDown(const NativeMouseEvent& event);
+  bool NotifyMouseUp(const NativeMouseEvent& event);
+  void NotifyMouseMove(const NativeMouseEvent& event);
+  void NotifyMouseEnter(const NativeMouseEvent& event);
+  void NotifyMouseLeave(const NativeMouseEvent& event);
+  void NotifyCaptureLost();
+  void NotifyDidScroll(NativeView* view);
+  void NotifyWillStartLiveScroll(NativeView* view);
+  void NotifyDidLiveScroll(NativeView* view);
+  void NotifyDidEndLiveScroll(NativeView* view);
+#endif  // defined(OS_MAC)
 
   // Notify that view's size has changed.
   virtual void NotifySizeChanged(gfx::Size old_size, gfx::Size new_size);
