@@ -3,8 +3,12 @@
 
 #import <Cocoa/Cocoa.h>
 
+#include "base/mac/scoped_nsobject.h"
+#include "shell/browser/ui/cocoa/mouse_capture.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/skia/include/core/SkColor.h"
+
+@class NSTrackingArea;
 
 namespace electron {
 
@@ -19,9 +23,12 @@ struct NativeViewPrivate {
 
   NativeView* shell = nullptr;
   bool focusable = true;
+  bool hovered = false;
   bool is_content_view = false;
   bool wants_layer = false;
   bool wants_layer_infected = false;
+  base::scoped_nsobject<NSTrackingArea> tracking_area;
+  std::unique_ptr<MouseCapture> mouse_capture;
 };
 
 }  // namespace electron
@@ -42,15 +49,14 @@ struct NativeViewPrivate {
 // Extended methods of ElectronNativeViewProtocol.
 @interface NSView (ElectronNativeViewMethods) <ElectronNativeViewProtocol>
 - (electron::NativeView*)shell;
+- (void)enableTracking;
+- (void)disableTracking;
 @end
 
 namespace electron {
 
 // Return whether a class is part of views system.
 bool IsNativeView(id view);
-
-// Return whether a class has been installed with custom methods.
-bool NativeViewMethodsInstalled(Class cl);
 
 // Add custom view methods to class.
 void InstallNativeViewMethods(Class cl);
