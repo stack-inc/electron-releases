@@ -52,6 +52,19 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   // NativeView::Observer:
   void OnChildViewDetached(NativeView* observed_view,
                            NativeView* view) override;
+#if BUILDFLAG(IS_MAC)
+  bool OnMouseDown(NativeView* observed_view,
+                   const NativeMouseEvent& event) override;
+  bool OnMouseUp(NativeView* observed_view,
+                 const NativeMouseEvent& event) override;
+  void OnMouseMove(NativeView* observed_view,
+                   const NativeMouseEvent& event) override;
+  void OnMouseEnter(NativeView* observed_view,
+                    const NativeMouseEvent& event) override;
+  void OnMouseLeave(NativeView* observed_view,
+                    const NativeMouseEvent& event) override;
+  void OnCaptureLost(NativeView* observed_view) override;
+#endif  // BUILDFLAG(IS_MAC)
   void OnSizeChanged(NativeView* observed_view,
                      gfx::Size old_size,
                      gfx::Size new_size) override;
@@ -77,10 +90,14 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   bool IsFocusable() const;
   void SetBackgroundColor(const std::string& color_name);
 #if BUILDFLAG(IS_MAC)
-  void SetRoundedCorners(
-      const NativeView::RoundedCornersOptions& options);
-  void SetClippingInsets(
-      const NativeView::ClippingInsetOptions& options);
+  void SetCapture();
+  void ReleaseCapture();
+  bool HasCapture() const;
+  void EnableMouseEvents();
+  void SetMouseTrackingEnabled(bool enable);
+  bool IsMouseTrackingEnabled();
+  void SetRoundedCorners(const NativeView::RoundedCornersOptions& options);
+  void SetClippingInsets(const NativeView::ClippingInsetOptions& options);
 #endif
   void ResetScaling();
   void SetScale(const gin_helper::Dictionary& options);
