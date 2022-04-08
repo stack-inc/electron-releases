@@ -3,11 +3,76 @@
 #include "base/mac/foundation_util.h"
 #include "base/mac/scoped_cftyperef.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
+#include "shell/browser/ui/cocoa/events_handler.h"
 #include "shell/browser/ui/view_utils.h"
 #include "ui/gfx/geometry/rect_conversions.h"
 #include "ui/gfx/geometry/rect_f.h"
 
 namespace electron {
+
+namespace {
+
+// There is no way to know when another application has installed an event
+// monitor, we have to assume only current app can capture view.
+NativeView* g_captured_view = nullptr;
+
+EventType EventTypeFromNS(NSEvent* event) {
+  switch ([event type]) {
+    case NSLeftMouseDown:
+      return EventType::kLeftMouseDown;
+    case NSRightMouseDown:
+      return EventType::kRightMouseDown;
+    case NSOtherMouseDown:
+      return EventType::kOtherMouseDown;
+    case NSLeftMouseUp:
+      return EventType::kLeftMouseUp;
+    case NSRightMouseUp:
+      return EventType::kRightMouseUp;
+    case NSOtherMouseUp:
+      return EventType::kOtherMouseUp;
+    case NSLeftMouseDragged:
+    case NSRightMouseDragged:
+    case NSOtherMouseDragged:
+    case NSMouseMoved:
+      return EventType::kMouseMove;
+    case NSMouseEntered:
+      return EventType::kMouseEnter;
+    case NSMouseExited:
+      return EventType::kMouseLeave;
+    default:
+      return EventType::kUnknown;
+  }
+}
+
+gfx::Point GetPosInView(NSEvent* event, NSView* view) {
+  NSPoint point = [view convertPoint:[event locationInWindow] fromView:nil];
+  if ([view isFlipped])
+    return gfx::Point(point.x, point.y);
+  NSRect frame = [view frame];
+  return gfx::Point(point.x, NSHeight(frame) - point.y);
+}
+
+gfx::Point GetPosInWindow(NSEvent* event, NSView* view) {
+  NSPoint point = [event locationInWindow];
+  if ([view isFlipped])
+    return gfx::Point(point.x, point.y);
+  NSWindow* window = [event window];
+  NSRect frame = [window contentRectForFrameRect:[window frame]];
+  return gfx::Point(point.x, NSHeight(frame) - point.y);
+}
+
+}  // namespace
+
+NativeEvent::NativeEvent(NATIVEEVENT event, NATIVEVIEW view)
+    : type(EventTypeFromNS(event)),
+      timestamp([event timestamp] * 1000),
+      native_event(event) {}
+
+NativeMouseEvent::NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view)
+    : NativeEvent(event, view),
+      button([event buttonNumber] + 1),
+      position_in_view(GetPosInView(event, view)),
+      position_in_window(GetPosInWindow(event, view)) {}
 
 NativeView::RoundedCornersOptions::RoundedCornersOptions() = default;
 
@@ -19,14 +84,14 @@ void NativeView::SetNativeView(NATIVEVIEW view) {
   if (!IsNativeView(view))
     return;
 
-  Class cl = [view class];
-  if (!NativeViewMethodsInstalled(cl)) {
-    InstallNativeViewMethods(cl);
-  }
+  // Install events handle for the view's class.
+  InstallNativeViewMethods([view class]);
 
+  // Initialize private bits of the view.
   NativeViewPrivate* priv = [view nativeViewPrivate];
   priv->shell = this;
 
+  // Set the |focusable| property to the parent class's default one.
   SEL cmd = @selector(acceptsFirstResponder);
   auto super_impl = reinterpret_cast<BOOL (*)(NSView*, SEL)>(
       [[view superclass] instanceMethodForSelector:cmd]);
@@ -39,6 +104,10 @@ void NativeView::InitView() {
 
 void NativeView::DestroyView() {
   if (IsNativeView(view_)) {
+    // Release all hooks before destroying the view.
+    [view_ disableTracking];
+    ReleaseCapture();
+    // The view may be referenced after this class gets destroyed.
     NativeViewPrivate* priv = [view_ nativeViewPrivate];
     priv->shell = nullptr;
   }
@@ -49,6 +118,7 @@ void NativeView::SetBounds(const gfx::Rect& bounds,
                            const gin_helper::Dictionary& options) {
   SetBoundsForView(view_, bounds, options);
   NSRect frame = bounds.ToCGRect();
+  // Calling setFrame manually does not trigger resizeSubviewsWithOldSize.
   [view_ resizeSubviewsWithOldSize:frame.size];
 }
 
@@ -110,6 +180,48 @@ bool NativeView::IsFocusable() const {
 void NativeView::SetBackgroundColor(SkColor color) {
   if (IsNativeView(view_))
     [view_ setNativeBackgroundColor:color];
+}
+
+void NativeView::SetCapture() {
+  if (g_captured_view)
+    g_captured_view->ReleaseCapture();
+
+  NativeViewPrivate* priv = [view_ nativeViewPrivate];
+  priv->mouse_capture.reset(new MouseCapture(this));
+  g_captured_view = this;
+}
+
+void NativeView::ReleaseCapture() {
+  if (g_captured_view != this)
+    return;
+
+  NativeViewPrivate* priv = [view_ nativeViewPrivate];
+  priv->mouse_capture.reset();
+  g_captured_view = nullptr;
+  NotifyCaptureLost();
+}
+
+bool NativeView::HasCapture() const {
+  return g_captured_view == this;
+}
+
+void NativeView::EnableMouseEvents() {
+  AddMouseEventHandlerToClass([view_ class]);
+}
+
+void NativeView::SetMouseTrackingEnabled(bool enable) {
+  if (enable) {
+    // Install event tracking area.
+    [view_ enableTracking];
+    EnableMouseEvents();
+  } else {
+    [view_ disableTracking];
+  }
+}
+
+bool NativeView::IsMouseTrackingEnabled() {
+  NativeViewPrivate* priv = [view_ nativeViewPrivate];
+  return !!(priv->tracking_area);
 }
 
 void NativeView::SetWantsLayer(bool wants) {
