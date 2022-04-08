@@ -9,7 +9,7 @@ then the `ScrollView`, the content view will be resized to the size of the
 The scrollview supports keyboard UI and mousewheel.
 It extends [`BaseView`](base-view.md).
 
-## Class: ScrollView  extends `BaseView`
+## Class: ScrollView extends `BaseView`
 
 > Create and control scroll views.
 
@@ -72,9 +72,49 @@ app.whenReady().then(() => {
 });
 ```
 
-### `new ScrollView()` _Experimental_
+### `new ScrollView([options])` _Experimental_
+
+* `options` Object (optional)
+  * `horizontalScrollBarMode` string (optional) - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
+  * `verticalScrollBarMode` string (optional) - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
 
 Creates the new scroll view.
+
+### Instance Events
+
+Objects created with `new ScrollView` emit the following events:
+
+#### Event: 'did-scroll' _macOS_ _Experimental_
+
+Returns:
+
+* `event` Event
+
+Emitted when the content view is being scrolled.
+
+#### Event: 'will-start-live-scroll' _macOS_ _Experimental_
+
+Returns:
+
+* `event` Event
+
+Emitted at the beginning of user-initiated live scroll tracking (gesture scroll or scroller tracking, for example, thumb dragging).
+
+#### Event: 'did-live-scroll' _macOS_ _Experimental_
+
+Returns:
+
+* `event` Event
+
+Emitted after changing the clipview bounds origin due to a user-initiated event.
+
+#### Event: 'did-end-live-scroll' _macOS_ _Experimental_
+
+Returns:
+
+* `event` Event
+
+Emitted at the end of live scroll tracking.
 
 ### Static Methods
 
@@ -116,11 +156,11 @@ Returns [`Size`](structures/size.md) - The `size` of the contents.
 
 #### `view.setHorizontalScrollBarMode(mode)` _Experimental_
 
-* `mode` string - Can be one of the following values: `disabled`, `hidden-but-enabled`, `enabled`. Default is `enabled`.
+* `mode` string - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
 
 Controls how the horizontal scroll bar appears and functions.
-* `disable` - The scrollbar is hidden, and the pane will not respond to e.g. mousewheel events even if the contents are larger than the viewport.
-* `hidden-but-enabled` - The scrollbar is hidden whether or not the contents are larger than the viewport, but the pane will respond to scroll events.
+* `disabled` - The scrollbar is hidden, and the pane will not respond to e.g. mousewheel events even if the contents are larger than the viewport.
+* `enabled-but-hidden` - The scrollbar is hidden whether or not the contents are larger than the viewport, but the pane will respond to scroll events.
 *`enabled` - The scrollbar will be visible if the contents are larger than the viewport and the pane will respond to scroll events.
 
 #### `view.getHorizontalScrollBarMode()` _Experimental_
@@ -129,11 +169,11 @@ Returns `string` - horizontal scrollbar mode.
 
 #### `view.setVerticalScrollBarMode(mode)` _Experimental_
 
-* `mode` string - Can be one of the following values: `disabled`, `hidden-but-enabled`, `enabled`. Default is `enabled`.
+* `mode` string - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
 
 Controls how the vertical scroll bar appears and functions.
-* `disable` - The scrollbar is hidden, and the pane will not respond to e.g. mousewheel events even if the contents are larger than the viewport.
-* `hidden-but-enabled` - The scrollbar is hidden whether or not the contents are larger than the viewport, but the pane will respond to scroll events.
+* `disabled` - The scrollbar is hidden, and the pane will not respond to e.g. mousewheel events even if the contents are larger than the viewport.
+* `enabled-but-hidden` - The scrollbar is hidden whether or not the contents are larger than the viewport, but the pane will respond to scroll events.
 *`enabled` - The scrollbar will be visible if the contents are larger than the viewport and the pane will respond to scroll events.
 
 #### `view.getVerticalScrollBarMode()` _Experimental_
@@ -142,7 +182,7 @@ Returns `string` - vertical scrollbar mode.
 
 #### `view.setHorizontalScrollElasticity(elasticity)` _macOS_ _Experimental_
 
-* `elasticity` string - Can be one of the following values: `automatic`, `none`, `allowed`. Default is `automatic`.
+* `elasticity` string - Can be `automatic`, `none`, `allowed`. Default is `automatic`.
 
 The scroll view’s horizontal scrolling elasticity mode.
 A scroll view can scroll its contents past its bounds to achieve an elastic effect. 
@@ -151,7 +191,7 @@ bounds only occurs if the document width is greater than the view width,
 or the vertical scroller is hidden and the horizontal scroller is visible.
 * `automatic` - Automatically determine whether to allow elasticity on this axis.
 * `none` - Disallow scrolling beyond document bounds on this axis.
-*`allowed` - Allow content to be scrolled past its bounds on this axis in an elastic fashion.
+* `allowed` - Allow content to be scrolled past its bounds on this axis in an elastic fashion.
 
 #### `view.getHorizontalScrollElasticity()` _macOS_ _Experimental_
 
@@ -159,7 +199,7 @@ Returns `string` - The scroll view’s horizontal scrolling elasticity mode.
 
 #### `view.setVerticalScrollElasticity(elasticity)` _macOS_ _Experimental_
 
-* `elasticity` string - Can be one of the following values: `automatic`, `none`, `allowed`. Default is `automatic`.
+* `elasticity` string - Can be `automatic`, `none`, `allowed`. Default is `automatic`.
 
 The scroll view’s vertical scrolling elasticity mode.
 
@@ -190,6 +230,32 @@ Returns [`Point`](structures/point.md)
 
 Returns boolean - The scroller style used by the scroll view.
 
+#### `view.setScrollEventsEnabled(enable)` _macOS_ _Experimental_
+
+* `enable` boolean - Whether the scroll events are enabled. Default is `false`.
+
+#### `view.isScrollEventsEnabled()` _macOS_ _Experimental_
+
+Returns `boolean` - Whether the scroll events are enabled.
+
+#### `view.setScrollWheelSwapped(swap)` _macOS_ _Experimental_
+
+* `swap` boolean - Whether the mouse wheel should scroll horizontally. Default is `false`.
+
+Swaps the behaviour of mouse wheel.
+
+#### `view.isScrollWheelSwapped()` _macOS_ _Experimental_
+
+Returns `boolean` - Whether the mouse wheel scrolls horizontally.
+
+#### `view.setScrollWheelFactor(factor)` _macOS_ _Experimental_
+
+* `factor` Double - Scrolling factor used for mouse wheel. Default is 1.0.
+
+#### `view.getScrollWheelFactor()` _macOS_ _Experimental_
+
+Returns `Double` - Scrolling factor used for mouse wheel.
+
 #### `view.clipHeightTo(minHeight, maxHeight)` _Windows_ _Experimental_
 
 * `minHeight` Integer - The min height for the bounded scroll view.
@@ -216,7 +282,7 @@ Returns [`Rectangle`](structures/rectangle.md) - The visible region of the conte
 
 #### `view.setAllowKeyboardScrolling(allow)` _Windows_ _Experimental_
 
-* `allow` boolean - Sets whether the left/right/up/down arrow keys attempt to scroll the view.
+* `allow` boolean - Whether the left/right/up/down arrow keys attempt to scroll the view.
 
 #### `view.getAllowKeyboardScrolling()` _Windows_ _Experimental_
 
@@ -224,7 +290,7 @@ Returns `boolean` - Gets whether the keyboard arrow keys attempt to scroll the v
 
 #### `view.SetDrawOverflowIndicator(indicator)` _Windows_ _Experimental_
 
-* `indicator` boolean - Sets whether to draw a white separator on the four sides of the scroll view when it overflows.
+* `indicator` boolean - Whether to draw a white separator on the four sides of the scroll view when it overflows.
 
 #### `view.GetDrawOverflowIndicator()` _Windows_ _Experimental_
 
