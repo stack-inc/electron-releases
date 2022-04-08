@@ -14,7 +14,7 @@ Process: [Main](../glossary.md#main-process)
 * `options` Object (optional)
   * `browserView` [BrowserView](browser-view.md) (optional)
 
-If `browserView` is not set then new `BrowserView` is created.
+If `browserView` is not set then a new `BrowserView` is created.
 
 ### Instance Properties
 

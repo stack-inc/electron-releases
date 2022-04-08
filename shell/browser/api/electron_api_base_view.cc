@@ -19,10 +19,9 @@ namespace gin {
 
 template <>
 struct Converter<electron::NativeView::RoundedCornersOptions> {
-  static bool FromV8(
-      v8::Isolate* isolate,
-      v8::Local<v8::Value> val,
-      electron::NativeView::RoundedCornersOptions* options) {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     electron::NativeView::RoundedCornersOptions* options) {
     gin_helper::Dictionary params;
     if (!ConvertFromV8(isolate, val, &params))
       return false;
@@ -51,10 +50,9 @@ struct Converter<electron::NativeView::RoundedCornersOptions> {
 
 template <>
 struct Converter<electron::NativeView::ClippingInsetOptions> {
-  static bool FromV8(
-      v8::Isolate* isolate,
-      v8::Local<v8::Value> val,
-      electron::NativeView::ClippingInsetOptions* options) {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     electron::NativeView::ClippingInsetOptions* options) {
     gin_helper::Dictionary params;
     if (!ConvertFromV8(isolate, val, &params))
       return false;
@@ -85,6 +83,34 @@ namespace electron {
 
 namespace api {
 
+namespace {
+
+#if BUILDFLAG(IS_MAC)
+std::string ConvertFromEventType(EventType type) {
+  if (type == EventType::kLeftMouseDown)
+    return "left-mouse-down";
+  else if (type == EventType::kRightMouseDown)
+    return "right-mouse-down";
+  else if (type == EventType::kOtherMouseDown)
+    return "other-mouse-down";
+  else if (type == EventType::kLeftMouseUp)
+    return "left-mouse-up";
+  else if (type == EventType::kRightMouseUp)
+    return "right-mouse-up";
+  else if (type == EventType::kOtherMouseUp)
+    return "other-mouse-up";
+  else if (type == EventType::kMouseMove)
+    return "mouse-move";
+  else if (type == EventType::kMouseEnter)
+    return "mouse-enter";
+  else if (type == EventType::kMouseLeave)
+    return "mouse-leave";
+  return "unknown";
+}
+#endif  // BUILDFLAG(IS_MAC)
+
+}  // namespace
+
 BaseView::BaseView(v8::Isolate* isolate, NativeView* native_view)
     : view_(native_view) {
   view_->AddObserver(this);
@@ -114,6 +140,42 @@ void BaseView::OnChildViewDetached(NativeView* observed_view,
   if (api_view)
     ResetChildView(api_view);
 }
+
+#if BUILDFLAG(IS_MAC)
+bool BaseView::OnMouseDown(NativeView* observed_view,
+                           const NativeMouseEvent& event) {
+  return Emit("mouse-down", ConvertFromEventType(event.type), event.timestamp,
+              event.button, event.position_in_view, event.position_in_window);
+}
+
+bool BaseView::OnMouseUp(NativeView* observed_view,
+                         const NativeMouseEvent& event) {
+  return Emit("mouse-up", ConvertFromEventType(event.type), event.timestamp,
+              event.button, event.position_in_view, event.position_in_window);
+}
+
+void BaseView::OnMouseMove(NativeView* observed_view,
+                           const NativeMouseEvent& event) {
+  Emit("mouse-move", ConvertFromEventType(event.type), event.timestamp,
+       event.button, event.position_in_view, event.position_in_window);
+}
+
+void BaseView::OnMouseEnter(NativeView* observed_view,
+                            const NativeMouseEvent& event) {
+  Emit("mouse-enter", ConvertFromEventType(event.type), event.timestamp,
+       event.button, event.position_in_view, event.position_in_window);
+}
+
+void BaseView::OnMouseLeave(NativeView* observed_view,
+                            const NativeMouseEvent& event) {
+  Emit("mouse-leave", ConvertFromEventType(event.type), event.timestamp,
+       event.button, event.position_in_view, event.position_in_window);
+}
+
+void BaseView::OnCaptureLost(NativeView* observed_view) {
+  Emit("capture-lost");
+}
+#endif  // BUILDFLAG(IS_MAC)
 
 void BaseView::OnSizeChanged(NativeView* observed_view,
                              gfx::Size old_size,
@@ -209,6 +271,30 @@ void BaseView::SetBackgroundColor(const std::string& color_name) {
 }
 
 #if BUILDFLAG(IS_MAC)
+void BaseView::SetCapture() {
+  view_->SetCapture();
+}
+
+void BaseView::ReleaseCapture() {
+  view_->ReleaseCapture();
+}
+
+bool BaseView::HasCapture() const {
+  return view_->HasCapture();
+}
+
+void BaseView::EnableMouseEvents() {
+  view_->EnableMouseEvents();
+}
+
+void BaseView::SetMouseTrackingEnabled(bool enable) {
+  view_->SetMouseTrackingEnabled(enable);
+}
+
+bool BaseView::IsMouseTrackingEnabled() {
+  return view_->IsMouseTrackingEnabled();
+}
+
 void BaseView::SetRoundedCorners(
     const NativeView::RoundedCornersOptions& options) {
   return view_->SetRoundedCorners(options);
@@ -325,6 +411,12 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("isFocusable", &BaseView::IsFocusable)
       .SetMethod("setBackgroundColor", &BaseView::SetBackgroundColor)
 #if BUILDFLAG(IS_MAC)
+      .SetMethod("setCapture", &BaseView::SetCapture)
+      .SetMethod("releaseCapture", &BaseView::ReleaseCapture)
+      .SetMethod("hasCapture", &BaseView::HasCapture)
+      .SetMethod("enableMouseEvents", &BaseView::EnableMouseEvents)
+      .SetMethod("setMouseTrackingEnabled", &BaseView::SetMouseTrackingEnabled)
+      .SetMethod("isMouseTrackingEnabled", &BaseView::IsMouseTrackingEnabled)
       .SetMethod("setRoundedCorners", &BaseView::SetRoundedCorners)
       .SetMethod("setClippingInsets", &BaseView::SetClippingInsets)
 #endif
