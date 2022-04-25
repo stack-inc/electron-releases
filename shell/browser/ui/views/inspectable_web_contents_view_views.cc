@@ -20,6 +20,13 @@
 #include "ui/views/widget/widget_delegate.h"
 #include "ui/views/window/client_view.h"
 
+/***** stack *****/
+#include "ui/base/ui_base_features.h"
+
+#include "electron/shell/browser/web_contents_preferences.h"
+#include "electron/shell/browser/ui/views/native_view_host_scroll_with_layers.h"
+/*****************/
+
 namespace electron {
 
 namespace {
@@ -81,11 +88,39 @@ InspectableWebContentsView* CreateInspectableContentsView(
 InspectableWebContentsViewViews::InspectableWebContentsViewViews(
     InspectableWebContents* inspectable_web_contents)
     : inspectable_web_contents_(inspectable_web_contents),
-      devtools_web_view_(new views::WebView(nullptr)),
+      //! devtools_web_view_(new views::WebView(nullptr)),
       title_(u"Developer Tools") {
+
+  /***** stack *****/
+  WebContentsPreferences* web_contents_preferences =
+      WebContentsPreferences::From(
+          inspectable_web_contents_->GetWebContents());
+  const bool scroll_with_layers_enabled = base::FeatureList::IsEnabled(
+      ::features::kUiCompositorScrollWithLayers);
+
+  if (scroll_with_layers_enabled && web_contents_preferences &&
+      web_contents_preferences->OptimizeForScroll()) {
+    devtools_web_view_ = new views::WebView(
+        std::make_unique<NativeViewHostScrollWithLayers>(), nullptr);
+  } else {
+    devtools_web_view_ = new views::WebView(nullptr);
+  }
+  /*****************/
+
   if (!inspectable_web_contents_->IsGuest() &&
       inspectable_web_contents_->GetWebContents()->GetNativeView()) {
-    auto* contents_web_view = new views::WebView(nullptr);
+    //! auto* contents_web_view = new views::WebView(nullptr);
+    /***** stack *****/
+    views::WebView* contents_web_view = nullptr;
+    if (scroll_with_layers_enabled && web_contents_preferences &&
+        web_contents_preferences->OptimizeForScroll()) {
+      contents_web_view = new views::WebView(
+          std::make_unique<NativeViewHostScrollWithLayers>(), nullptr);
+    } else {
+      contents_web_view = new views::WebView(nullptr);
+    }
+    /*****************/
+
     contents_web_view->SetWebContents(
         inspectable_web_contents_->GetWebContents());
     contents_web_view_ = contents_web_view;

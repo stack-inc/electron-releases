@@ -248,8 +248,12 @@ filenames = {
     "shell/browser/ui/views/menu_model_adapter.h",
     "shell/browser/ui/views/native_frame_view.cc",
     "shell/browser/ui/views/native_frame_view.h",
+    "shell/browser/ui/views/native_view_host_scroll_with_layers.cc",
+    "shell/browser/ui/views/native_view_host_scroll_with_layers.h",
     "shell/browser/ui/views/root_view.cc",
     "shell/browser/ui/views/root_view.h",
+    "shell/browser/ui/views/scroll_view_scroll_with_layers.cc",
+    "shell/browser/ui/views/scroll_view_scroll_with_layers.h",
     "shell/browser/ui/views/submenu_button.cc",
     "shell/browser/ui/views/submenu_button.h",
   ]
