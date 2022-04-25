@@ -58,6 +58,9 @@ extern const char kVisualEffectState[];
 extern const char kTrafficLightPosition[];
 extern const char kRoundedCorners[];
 extern const char ktitleBarOverlay[];
+/***** stack *****/
+extern const char kOptimizeForScroll[];
+/*****************/
 extern const char kOverlayButtonColor[];
 extern const char kOverlaySymbolColor[];
 extern const char kOverlayHeight[];
