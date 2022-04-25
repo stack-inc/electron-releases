@@ -71,7 +71,11 @@ function createWindow () {
       //marginRight: GAP,
     //});
     //webContentView.addChildView(chrome);
-    const browserView = new BrowserView();
+    const browserView = new BrowserView({
+      webPreferences: {
+        optimizeForScroll : true,
+      }
+    });
     browserView.webContents.loadURL(url);
     browserView.setBackgroundColor("#ffffff");
     const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView });
