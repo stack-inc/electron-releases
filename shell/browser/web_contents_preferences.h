@@ -81,6 +81,9 @@ class WebContentsPreferences
   bool IsWebSecurityEnabled() const { return web_security_; }
   bool GetPreloadPath(base::FilePath* path) const;
   bool IsSandboxed() const;
+  /***** stack *****/
+  bool OptimizeForScroll() const { return optimize_for_scroll_; }
+  /*****************/
 
  private:
   friend class content::WebContentsUserData<WebContentsPreferences>;
@@ -142,6 +145,10 @@ class WebContentsPreferences
 #if BUILDFLAG(ENABLE_BUILTIN_SPELLCHECKER)
   bool spellcheck_;
 #endif
+
+  /***** stack *****/
+  bool optimize_for_scroll_;
+  /*****************/
 
   // This is a snapshot of some relevant preferences at the time the renderer
   // was launched.

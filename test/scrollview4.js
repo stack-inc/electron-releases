@@ -28,7 +28,7 @@ global.win = null;
 function createWindow () {
   // Create window.
   win = new BrowserWindow({ autoHideMenuBar: true, width: 1400, height: 1000 });
-win.loadURL("https://wp.pl");
+  win.loadURL("https://wp.pl");
 
   // The content view.
   const contentView = new ContainerView();
@@ -72,7 +72,11 @@ win.loadURL("https://wp.pl");
       //marginRight: GAP,
     //});
     //webContentView.addChildView(chrome);
-    const browserView = new BrowserView();
+    const browserView = new BrowserView({
+      webPreferences: {
+        optimizeForScroll : true,
+      }
+    });
     browserView.webContents.loadURL(url);
     browserView.setBackgroundColor("#ffffff");
     const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView });

@@ -1,0 +1,132 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: olek.white.green@gmail.com
+Date: Fri, 22 Apr 2022 00:01:16 -0500
+Subject: Enable UiCompositorScrollWithLayers feature and optimization.
+
+
+diff --git a/ui/base/ui_base_features.cc b/ui/base/ui_base_features.cc
+index 7ffd42fbffa36..c2ccf460fb5b6 100644
+--- a/ui/base/ui_base_features.cc
++++ b/ui/base/ui_base_features.cc
+@@ -149,7 +149,7 @@ bool IsUiGpuRasterizationEnabled() {
+ const base::Feature kUiCompositorScrollWithLayers = {
+     "UiCompositorScrollWithLayers",
+ // TODO(https://crbug.com/615948): Use composited scrolling on all platforms.
+-#if BUILDFLAG(IS_APPLE)
++#if BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_WIN)
+     base::FEATURE_ENABLED_BY_DEFAULT
+ #else
+     base::FEATURE_DISABLED_BY_DEFAULT
+diff --git a/ui/views/controls/native/native_view_host.h b/ui/views/controls/native/native_view_host.h
+index 0b4187b7a61cc..3e5073793723f 100644
+--- a/ui/views/controls/native/native_view_host.h
++++ b/ui/views/controls/native/native_view_host.h
+@@ -99,6 +99,12 @@ class VIEWS_EXPORT NativeViewHost : public View {
+   bool fast_resize() const { return fast_resize_; }
+ 
+   gfx::NativeView native_view() const { return native_view_; }
++  // Added for UiCompositorScrollWithLayers feature.
++  NativeViewHostWrapper* native_wrapper() const {
++    return native_wrapper_.get();
++  }
++  // Added for UiCompositorScrollWithLayers feature.
++  gfx::Size native_view_size() { return native_view_size_; }
+ 
+   void NativeViewDestroyed();
+ 
+diff --git a/ui/views/controls/scroll_view.cc b/ui/views/controls/scroll_view.cc
+index e594c891e0a56..ba3e57ee5a827 100644
+--- a/ui/views/controls/scroll_view.cc
++++ b/ui/views/controls/scroll_view.cc
+@@ -567,6 +567,12 @@ base::CallbackListSubscription ScrollView::AddContentsScrolledCallback(
+   return on_contents_scrolled_.Add(std::move(callback));
+ }
+ 
++// Added for UiCompositorScrollWithLayers feature.
++base::CallbackListSubscription ScrollView::AddContentsLayerScrolledCallback(
++    ScrollViewCallback callback) {
++  return on_contents_layer_scrolled_.Add(std::move(callback));
++}
++
+ base::CallbackListSubscription ScrollView::AddContentsScrollEndedCallback(
+     ScrollViewCallback callback) {
+   return on_contents_scroll_ended_.Add(std::move(callback));
+@@ -1181,6 +1187,9 @@ void ScrollView::EnableViewportLayer() {
+ void ScrollView::OnLayerScrolled(const gfx::PointF& current_offset,
+                                  const cc::ElementId&) {
+   OnScrolled(current_offset);
++
++  // Added for UiCompositorScrollWithLayers feature.
++  on_contents_layer_scrolled_.Notify();
+ }
+ 
+ void ScrollView::OnScrolled(const gfx::PointF& offset) {
+diff --git a/ui/views/controls/scroll_view.h b/ui/views/controls/scroll_view.h
+index 6e4fbc4f6ed8e..1b749adc8ba8e 100644
+--- a/ui/views/controls/scroll_view.h
++++ b/ui/views/controls/scroll_view.h
+@@ -204,6 +204,10 @@ class VIEWS_EXPORT ScrollView : public View, public ScrollBarController {
+   base::CallbackListSubscription AddContentsScrolledCallback(
+       ScrollViewCallback callback);
+ 
++  // Added for UiCompositorScrollWithLayers feature.
++  base::CallbackListSubscription AddContentsLayerScrolledCallback(
++      ScrollViewCallback callback);
++
+   // Called at the end of a sequence of events that are generated to scroll
+   // the contents. The gesture scroll sequence {ui::ET_GESTURE_SCROLL_BEGIN,
+   // ui::ET_GESTURE_SCROLL_UPDATE, ..., ui::ET_GESTURE_SCROLL_UPDATE,
+@@ -390,6 +394,8 @@ class VIEWS_EXPORT ScrollView : public View, public ScrollBarController {
+ 
+   // Scrolling callbacks.
+   ScrollViewCallbackList on_contents_scrolled_;
++  // Added for UiCompositorScrollWithLayers feature.
++  ScrollViewCallbackList on_contents_layer_scrolled_;
+   ScrollViewCallbackList on_contents_scroll_ended_;
+ };
+ 
+diff --git a/ui/views/controls/webview/webview.cc b/ui/views/controls/webview/webview.cc
+index a87b20d3282a8..11ec1bac331e9 100644
+--- a/ui/views/controls/webview/webview.cc
++++ b/ui/views/controls/webview/webview.cc
+@@ -63,7 +63,15 @@ WebView::ScopedWebContentsCreatorForTesting::
+ ////////////////////////////////////////////////////////////////////////////////
+ // WebView, public:
+ 
+-WebView::WebView(content::BrowserContext* browser_context) {
++// Added for UiCompositorScrollWithLayers feature.
++WebView::WebView(content::BrowserContext* browser_context)
++    : WebView(std::make_unique<NativeViewHost>(), browser_context) {
++}
++
++// Added for UiCompositorScrollWithLayers feature.
++WebView::WebView(std::unique_ptr<NativeViewHost> holder,
++    content::BrowserContext* browser_context)
++        : holder_(AddChildView(std::move(holder))) {
+   set_suppress_default_focus_handling();
+   ui::AXPlatformNode::AddAXModeObserver(this);
+   SetBrowserContext(browser_context);
+diff --git a/ui/views/controls/webview/webview.h b/ui/views/controls/webview/webview.h
+index 041bcb7c9f4ae..084205590047d 100644
+--- a/ui/views/controls/webview/webview.h
++++ b/ui/views/controls/webview/webview.h
+@@ -45,6 +45,9 @@ class WEBVIEW_EXPORT WebView : public View,
+   METADATA_HEADER(WebView);
+ 
+   explicit WebView(content::BrowserContext* browser_context = nullptr);
++  // Added for UiCompositorScrollWithLayers feature.
++  WebView(std::unique_ptr<NativeViewHost> holder,
++      content::BrowserContext* browser_context = nullptr);
+ 
+   WebView(const WebView&) = delete;
+   WebView& operator=(const WebView&) = delete;
+@@ -187,8 +190,7 @@ class WEBVIEW_EXPORT WebView : public View,
+       content::BrowserContext* browser_context,
+       base::Location creator_location = base::Location::Current());
+ 
+-  const raw_ptr<NativeViewHost> holder_ =
+-      AddChildView(std::make_unique<NativeViewHost>());
++  const raw_ptr<NativeViewHost> holder_;
+   // Non-NULL if |web_contents()| was created and is owned by this WebView.
+   std::unique_ptr<content::WebContents> wc_owner_;
+   // Set to true when |holder_| is letterboxed (scaled to be smaller than this
