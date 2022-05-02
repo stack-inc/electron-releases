@@ -2,7 +2,7 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#include "electron/shell/browser/ui/views/native_view_host_scroll_with_layers.h"
+#include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
 
 #include "ui/views/controls/native/native_view_host_wrapper.h"
 

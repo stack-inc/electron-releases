@@ -2,13 +2,13 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#include "electron/shell/browser/ui/views/scroll_view_scroll_with_layers.h"
+#include "electron/shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h"
 
 #include "ui/aura/window.h"
 #include "ui/compositor/layer.h"
 #include "ui/gfx/native_widget_types.h"
 
-#include "electron/shell/browser/ui/views/native_view_host_scroll_with_layers.h"
+#include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
 
 namespace electron {
 
@@ -63,7 +63,7 @@ void ScrollViewScrollWithLayers::ContentsScrollEndedImpl(views::View* view) {
   if (view->GetProperty(kNativeViewHostScrollWithLayer)) {
     NativeViewHostScrollWithLayers* native_view_host =
         static_cast<NativeViewHostScrollWithLayers*>(view);
-    native_view_host->SetForceVisibleLayout(false);
+    // native_view_host->SetForceVisibleLayout(false);
     native_view_host->Layout();
 
     if (is_scrolling) {
