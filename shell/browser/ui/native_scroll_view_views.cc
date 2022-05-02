@@ -4,7 +4,7 @@
 #include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/scroll_view.h"
 
-#include "electron/shell/browser/ui/views/scroll_view_scroll_with_layers.h"
+#include "electron/shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h"
 
 namespace electron {
 

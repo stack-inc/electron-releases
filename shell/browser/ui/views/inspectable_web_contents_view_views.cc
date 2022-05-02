@@ -24,7 +24,8 @@
 #include "ui/base/ui_base_features.h"
 
 #include "electron/shell/browser/web_contents_preferences.h"
-#include "electron/shell/browser/ui/views/native_view_host_scroll_with_layers.h"
+#include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
+#include "electron/shell/browser/ui/views/scroll_with_layers/web_view_scroll_with_layers.h"
 /*****************/
 
 namespace electron {
@@ -114,7 +115,7 @@ InspectableWebContentsViewViews::InspectableWebContentsViewViews(
     views::WebView* contents_web_view = nullptr;
     if (scroll_with_layers_enabled && web_contents_preferences &&
         web_contents_preferences->OptimizeForScroll()) {
-      contents_web_view = new views::WebView(
+      contents_web_view = new WebViewScrollWithLayers(this,
           std::make_unique<NativeViewHostScrollWithLayers>(), nullptr);
     } else {
       contents_web_view = new views::WebView(nullptr);
@@ -293,5 +294,22 @@ void InspectableWebContentsViewViews::Layout() {
   if (GetDelegate())
     GetDelegate()->DevToolsResized();
 }
+
+/***** stack *****/
+void InspectableWebContentsViewViews::OnPaintBackground(gfx::Canvas* canvas) {
+  if (stop_paint_background_)
+    return;
+
+  views::View::OnPaintBackground(canvas);
+}
+
+void InspectableWebContentsViewViews::SetStopPaintBackground(
+    bool stop_paint_background) {
+  if (stop_paint_background_ != stop_paint_background)
+    SchedulePaint();
+
+  stop_paint_background_ = stop_paint_background;
+}
+/*****************/
 
 }  // namespace electron
