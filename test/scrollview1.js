@@ -56,9 +56,9 @@ function createWindow () {
     //padding: 30,
     //flexShrink: 0,
   //});
-  scrollContent.setBackgroundColor("#FF0000");
   scrollContent.setBounds({x: 0, y: 0, width: APPS.length * (APP_WIDTH + GAP), height: 600});
   scroll.setContentView(scrollContent);
+  scrollContent.setBackgroundColor("#FF0000");
 
   // Webview
   const addWebview = function (scrollContent, url, i) {
