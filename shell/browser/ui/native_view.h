@@ -113,6 +113,12 @@ class NativeView : public base::RefCounted<NativeView>,
     virtual void OnWillStartLiveScroll(NativeView* observed_view) {}
     virtual void OnDidLiveScroll(NativeView* observed_view) {}
     virtual void OnDidEndLiveScroll(NativeView* observed_view) {}
+    virtual void OnScrollWheel(NativeView* observed_view,
+                               bool mouse_event,
+                               float scrolling_delta_x,
+                               float scrolling_delta_y,
+                               std::string phase,
+                               std::string momentum_phase) {}
 #endif  // defined(OS_MAC)
     virtual void OnSizeChanged(NativeView* observed_view,
                                gfx::Size old_size,
@@ -249,6 +255,12 @@ class NativeView : public base::RefCounted<NativeView>,
   void NotifyWillStartLiveScroll(NativeView* view);
   void NotifyDidLiveScroll(NativeView* view);
   void NotifyDidEndLiveScroll(NativeView* view);
+  void NotifyScrollWheel(NativeView* observed_view,
+                         bool mouse_event,
+                         float scrolling_delta_x,
+                         float scrolling_delta_y,
+                         std::string phase,
+                         std::string momentum_phase);
 #endif  // defined(OS_MAC)
 
   // Notify that view's size has changed.

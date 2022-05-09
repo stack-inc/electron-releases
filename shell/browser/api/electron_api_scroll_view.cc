@@ -86,6 +86,16 @@ void ScrollView::OnDidLiveScroll(NativeView* observed_view) {
 void ScrollView::OnDidEndLiveScroll(NativeView* observed_view) {
   Emit("did-end-live-scroll");
 }
+
+void ScrollView::OnScrollWheel(NativeView* observed_view,
+                               bool mouse_event,
+                               float scrolling_delta_x,
+                               float scrolling_delta_y,
+                               std::string phase,
+                               std::string momentum_phase) {
+  Emit("scroll-wheel", mouse_event, scrolling_delta_x, scrolling_delta_y, phase,
+       momentum_phase);
+}
 #endif  // defined(OS_MAC)
 
 void ScrollView::SetContentView(v8::Local<v8::Value> value) {
