@@ -2,10 +2,34 @@
 
 #include <cmath>
 
-#include "base/logging.h"
 #include "base/strings/string_util.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
 #include "shell/common/gin_helper/dictionary.h"
+
+namespace {
+
+std::string phaseToString(NSEventPhase phase) {
+  switch (phase) {
+    case NSEventPhaseNone:
+      return "none";
+    case NSEventPhaseBegan:
+      return "began";
+    case NSEventPhaseStationary:
+      return "stationary";
+    case NSEventPhaseChanged:
+      return "changed";
+    case NSEventPhaseEnded:
+      return "ended";
+    case NSEventPhaseCancelled:
+      return "cancelled";
+    case NSEventPhaseMayBegin:
+      return "mayBegin";
+    default:
+      return "unknown";
+  }
+}
+
+}  // namespace
 
 @interface ElectronNativeScrollView
     : NSScrollView <ElectronNativeViewProtocol> {
@@ -140,12 +164,6 @@
 }
 
 - (void)scrollWheel:(NSEvent*)event {
-  LOG(ERROR) << "@@scrollWheel event - scrollingDeltaX: "
-             << event.scrollingDeltaX
-             << ", scrollingDeltaY: " << event.scrollingDeltaY
-             << ", deltaX: " << event.deltaX << ", deltaY: " << event.deltaY
-             << ", type: " << static_cast<int>(event.type)
-             << ", subtype: " << static_cast<int>(event.subtype);
   if (scroll_wheel_swapped_ && event.subtype == NSEventSubtypeMouseEvent) {
     CGEventRef cgEvent = CGEventCreateCopy(event.CGEvent);
     if (cgEvent) {
@@ -177,6 +195,13 @@
     }
   } else {
     [super scrollWheel:event];
+  }
+
+  if (scroll_events_enabled_) {
+    shell_->NotifyScrollWheel(shell_, event.subtype == NSEventSubtypeMouseEvent,
+                              event.scrollingDeltaX, event.scrollingDeltaY,
+                              phaseToString(event.phase),
+                              phaseToString(event.momentumPhase));
   }
 }
 
