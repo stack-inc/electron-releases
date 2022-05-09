@@ -145,6 +145,17 @@ void NativeView::NotifyDidEndLiveScroll(NativeView* view) {
   for (Observer& observer : observers_)
     observer.OnDidEndLiveScroll(view);
 }
+
+void NativeView::NotifyScrollWheel(NativeView* view,
+                                   bool mouse_event,
+                                   float scrolling_delta_x,
+                                   float scrolling_delta_y,
+                                   std::string phase,
+                                   std::string momentum_phase) {
+  for (Observer& observer : observers_)
+    observer.OnScrollWheel(view, mouse_event, scrolling_delta_x,
+                           scrolling_delta_y, phase, momentum_phase);
+}
 #endif  // BUILDFLAG(IS_MAC)
 
 void NativeView::NotifySizeChanged(gfx::Size old_size, gfx::Size new_size) {

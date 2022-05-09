@@ -34,6 +34,12 @@ class ScrollView : public BaseView {
   void OnWillStartLiveScroll(NativeView* observed_view) override;
   void OnDidLiveScroll(NativeView* observed_view) override;
   void OnDidEndLiveScroll(NativeView* observed_view) override;
+  void OnScrollWheel(NativeView* observed_view,
+                     bool mouse_event,
+                     float scrolling_delta_x,
+                     float scrolling_delta_y,
+                     std::string phase,
+                     std::string momentum_phase) override;
 #endif  // BUILDFLAG(IS_MAC)
 
   void SetContentView(v8::Local<v8::Value> value);
