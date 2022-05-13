@@ -65,6 +65,38 @@ typedef struct CGContext* CGContextRef;
 
 @end
 
+@implementation ElectronNativeVibrantView
+
+- (void)dealloc {
+  if ([self shell])
+    [self shell]->NotifyViewIsDeleting();
+  [super dealloc];
+}
+
+- (electron::NativeViewPrivate*)nativeViewPrivate {
+  return &private_;
+}
+
+- (void)setNativeBackgroundColor:(SkColor)color {
+}
+
+- (BOOL)isFlipped {
+  return YES;
+}
+
+- (NSView*)hitTest:(NSPoint)point {
+  if (![self shell])
+    return [super hitTest:point];
+  bool clickThrough = [self shell]->IsClickThrough();
+  if (clickThrough) {
+    return nil;  // i.e. this layer is not selectable
+  } else {
+    return [super hitTest:point];
+  }
+}
+
+@end
+
 namespace electron {
 
 namespace {
