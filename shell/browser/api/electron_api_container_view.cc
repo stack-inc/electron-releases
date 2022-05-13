@@ -103,7 +103,12 @@ gin_helper::WrappableBase* ContainerView::New(gin_helper::ErrorThrower thrower,
     return nullptr;
   }
 
-  return new ContainerView(args, new NativeContainerView());
+  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  args->GetNext(&options);
+  bool vibrant = false;
+  options.Get("vibrant", &vibrant);
+
+  return new ContainerView(args, new NativeContainerView(vibrant));
 }
 
 // static

@@ -7,7 +7,10 @@
 namespace electron {
 
 void NativeContainerView::InitContainerView() {
-  SetNativeView([[ElectronNativeView alloc] init]);
+  if (!IsVibrant())
+    SetNativeView([[ElectronNativeView alloc] init]);
+  else
+    SetNativeView([[ElectronNativeVibrantView alloc] init]);
 }
 
 void NativeContainerView::AddChildViewImpl(NativeView* view) {

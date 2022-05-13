@@ -90,6 +90,10 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   bool IsFocusable() const;
   void SetBackgroundColor(const std::string& color_name);
 #if BUILDFLAG(IS_MAC)
+  void SetVisualEffectMaterial(std::string material);
+  std::string GetVisualEffectMaterial() const;
+  void SetVisualEffectBlendingMode(std::string mode);
+  std::string GetVisualEffectBlendingMode() const;
   void SetCapture();
   void ReleaseCapture();
   bool HasCapture() const;

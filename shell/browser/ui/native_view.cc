@@ -16,7 +16,7 @@ bool NativeView::Observer::OnMouseUp(NativeView* observed_view,
 }
 #endif  // BUILDFLAG(IS_MAC)
 
-NativeView::NativeView() : view_(nullptr) {
+NativeView::NativeView(bool vibrant) : view_(nullptr), vibrant_(vibrant) {
   InitView();
 }
 
