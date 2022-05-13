@@ -86,6 +86,46 @@ namespace api {
 namespace {
 
 #if BUILDFLAG(IS_MAC)
+VisualEffectMaterial ConvertToVisualEffectMaterial(std::string material) {
+  if (material == "appearanceBased")
+    return VisualEffectMaterial::kAppearanceBased;
+  else if (material == "light")
+    return VisualEffectMaterial::kLight;
+  else if (material == "dark")
+    return VisualEffectMaterial::kDark;
+  else if (material == "titlebar")
+    return VisualEffectMaterial::kTitlebar;
+  return VisualEffectMaterial::kAppearanceBased;
+}
+
+std::string ConvertFromVisualEffectMaterial(VisualEffectMaterial material) {
+  if (material == VisualEffectMaterial::kAppearanceBased)
+    return "appearanceBased";
+  else if (material == VisualEffectMaterial::kLight)
+    return "light";
+  else if (material == VisualEffectMaterial::kDark)
+    return "dark";
+  else if (material == VisualEffectMaterial::kTitlebar)
+    return "titlebar";
+  return "appearanceBased";
+}
+
+VisualEffectBlendingMode ConvertToVisualEffectBlendingMode(std::string mode) {
+  if (mode == "behindWindow")
+    return VisualEffectBlendingMode::kBehindWindow;
+  else if (mode == "withinWindow")
+    return VisualEffectBlendingMode::kWithinWindow;
+  return VisualEffectBlendingMode::kBehindWindow;
+}
+
+std::string ConvertFromVisualEffectBlendingMode(VisualEffectBlendingMode mode) {
+  if (mode == VisualEffectBlendingMode::kBehindWindow)
+    return "behindWindow";
+  else if (mode == VisualEffectBlendingMode::kWithinWindow)
+    return "withinWindow";
+  return "behindWindow";
+}
+
 std::string ConvertFromEventType(EventType type) {
   if (type == EventType::kLeftMouseDown)
     return "left-mouse-down";
@@ -271,6 +311,22 @@ void BaseView::SetBackgroundColor(const std::string& color_name) {
 }
 
 #if BUILDFLAG(IS_MAC)
+void BaseView::SetVisualEffectMaterial(std::string material) {
+  view_->SetVisualEffectMaterial(ConvertToVisualEffectMaterial(material));
+}
+
+std::string BaseView::GetVisualEffectMaterial() const {
+  return ConvertFromVisualEffectMaterial(view_->GetVisualEffectMaterial());
+}
+
+void BaseView::SetVisualEffectBlendingMode(std::string mode) {
+  view_->SetVisualEffectBlendingMode(ConvertToVisualEffectBlendingMode(mode));
+}
+
+std::string BaseView::GetVisualEffectBlendingMode() const {
+  return ConvertFromVisualEffectBlendingMode(view_->GetVisualEffectBlendingMode());
+}
+
 void BaseView::SetCapture() {
   view_->SetCapture();
 }
@@ -382,7 +438,12 @@ gin_helper::WrappableBase* BaseView::New(gin_helper::ErrorThrower thrower,
     return nullptr;
   }
 
-  return new BaseView(args, new NativeView());
+  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  args->GetNext(&options);
+  bool vibrant = false;
+  options.Get("vibrant", &vibrant);
+
+  return new BaseView(args, new NativeView(vibrant));
 }
 
 // static
@@ -411,6 +472,10 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("isFocusable", &BaseView::IsFocusable)
       .SetMethod("setBackgroundColor", &BaseView::SetBackgroundColor)
 #if BUILDFLAG(IS_MAC)
+      .SetMethod("setVisualEffectMaterial", &BaseView::SetVisualEffectMaterial)
+      .SetMethod("getVisualEffectMaterial", &BaseView::GetVisualEffectMaterial)
+      .SetMethod("setVisualEffectBlendingMode", &BaseView::SetVisualEffectBlendingMode)
+      .SetMethod("getVisualEffectBlendingMode", &BaseView::GetVisualEffectBlendingMode)
       .SetMethod("setCapture", &BaseView::SetCapture)
       .SetMethod("releaseCapture", &BaseView::ReleaseCapture)
       .SetMethod("hasCapture", &BaseView::HasCapture)

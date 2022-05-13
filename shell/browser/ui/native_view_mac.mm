@@ -99,7 +99,10 @@ void NativeView::SetNativeView(NATIVEVIEW view) {
 }
 
 void NativeView::InitView() {
-  SetNativeView([[ElectronNativeView alloc] init]);
+  if (!IsVibrant())
+    SetNativeView([[ElectronNativeView alloc] init]);
+  else
+    SetNativeView([[ElectronNativeVibrantView alloc] init]);
 }
 
 void NativeView::DestroyView() {
@@ -180,6 +183,39 @@ bool NativeView::IsFocusable() const {
 void NativeView::SetBackgroundColor(SkColor color) {
   if (IsNativeView(view_))
     [view_ setNativeBackgroundColor:color];
+}
+
+void NativeView::SetVisualEffectMaterial(VisualEffectMaterial material) {
+  if (IsNativeView(view_) && vibrant_) {
+    static_cast<ElectronNativeVibrantView*>(view_).material =
+        static_cast<NSVisualEffectMaterial>(material);
+  }
+}
+
+VisualEffectMaterial NativeView::GetVisualEffectMaterial() const {
+  if (IsNativeView(view_) && vibrant_) {
+    return static_cast<VisualEffectMaterial>(
+        static_cast<ElectronNativeVibrantView*>(view_).material);
+  } else {
+    return VisualEffectMaterial::kAppearanceBased;
+  }
+}
+
+void NativeView::SetVisualEffectBlendingMode(VisualEffectBlendingMode mode) {
+  if (IsNativeView(view_) && vibrant_) {
+    SetWantsLayer(mode == VisualEffectBlendingMode::kWithinWindow);
+    static_cast<ElectronNativeVibrantView*>(view_).blendingMode =
+        static_cast<NSVisualEffectBlendingMode>(mode);
+  }
+}
+
+VisualEffectBlendingMode NativeView::GetVisualEffectBlendingMode() const {
+  if (IsNativeView(view_) && vibrant_) {
+    return static_cast<VisualEffectBlendingMode>(
+        static_cast<ElectronNativeVibrantView*>(view_).blendingMode);
+  } else {
+    return VisualEffectBlendingMode::kBehindWindow;
+  }
 }
 
 void NativeView::SetCapture() {
