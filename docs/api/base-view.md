@@ -11,7 +11,10 @@ Process: [Main](../glossary.md#main-process)
 
 `BaseView` is an [EventEmitter][event-emitter].
 
-### `new BaseView()` _Experimental_
+### `new BaseView([options])` _Experimental_
+
+* `options` Object (optional)
+  * `vibrant` boolean (optional) - Enables the vibrant visual effect. Default is `false`.
 
 Creates the new base view.
 
@@ -225,6 +228,32 @@ Returns `boolean` - Returns `true` if this view is focusable, enabled and drawn.
   optional.
 
 Change the background color of the view.
+
+#### `view.setVisualEffectMaterial(material)` _macOS_ _Experimental_
+
+* `material` string - Can be `appearanceBased`, `light`, `dark`, `titlebar`. Default is `appearanceBased`.
+
+Sets the material shown by the vibrant view.
+* `appearanceBased` - The default material for the view’s effective appearance.
+* `light` - The material with a light effect.
+*`dark` - The material with a dark effect.
+*`titlebar` - The material for a window’s titlebar.
+
+#### `view.getVisualEffectMaterial()` _macOS_ _Experimental_
+
+Returns `string` - The material shown by the vibrant view.
+
+#### `view.setVisualEffectBlendingMode(mode)` _macOS_ _Experimental_
+
+* `mode` string - Can be `behindWindow`, `withinWindow`. Default is `behindWindow`.
+
+Sets whether the vibrant view blends with what's either behind or within the window.
+* `behindWindow` - The mode that blends and blurs the vibrant view with the contents behind the window, such as the desktop or other windows.
+* `withinWindow` - The mode that blends and blurs the vibrant view with contents behind the view in the current window only.
+
+#### `view.getVisualEffectBlendingMode()` _macOS_ _Experimental_
+
+Returns `string` - Whether the vibrant view blends with what's either behind or within the window.
 
 #### `view.setCapture()` _macOS_ _Experimental_
 
