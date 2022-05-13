@@ -9,7 +9,7 @@ namespace electron {
 
 class NativeContainerView : public NativeView {
  public:
-  NativeContainerView();
+  NativeContainerView(bool vibrant = false);
 
   // NativeView:
   bool IsContainer() const override;

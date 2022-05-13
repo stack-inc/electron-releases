@@ -44,6 +44,20 @@ using NATIVEVIEW = views::View*;
 class NativeWindow;
 
 #if defined(OS_MAC)
+  // Values here should match NSVisualEffectMaterial.
+  enum class VisualEffectMaterial {
+    kAppearanceBased,
+    kLight,
+    kDark,
+    kTitlebar,
+  };
+
+  // Values here should match NSVisualEffectBlendingMode.
+  enum class VisualEffectBlendingMode {
+    kBehindWindow,
+    kWithinWindow,
+  };
+
 // Supported event types.
 enum class EventType {
   kUnknown,
@@ -127,7 +141,7 @@ class NativeView : public base::RefCounted<NativeView>,
     virtual void OnViewIsDeleting(NativeView* observed_view) {}
   };
 
-  NativeView();
+  NativeView(bool vibrant = false);
 
   // Change position and size.
   virtual void SetBounds(const gfx::Rect& bounds,
@@ -159,6 +173,11 @@ class NativeView : public base::RefCounted<NativeView>,
   void SetBackgroundColor(SkColor color);
 
 #if defined(OS_MAC)
+  void SetVisualEffectMaterial(VisualEffectMaterial material);
+  VisualEffectMaterial GetVisualEffectMaterial() const;
+  void SetVisualEffectBlendingMode(VisualEffectBlendingMode mode);
+  VisualEffectBlendingMode GetVisualEffectBlendingMode() const;
+
   // Capture mouse.
   void SetCapture();
   void ReleaseCapture();
@@ -219,6 +238,8 @@ class NativeView : public base::RefCounted<NativeView>,
 
   // Whether this class inherits from Container.
   virtual bool IsContainer() const;
+
+  bool IsVibrant() const { return vibrant_; }
 
   void SetZIndex(int z_index);
   int GetZIndex() const;
@@ -297,6 +318,8 @@ class NativeView : public base::RefCounted<NativeView>,
 
   // The native implementation.
   NATIVEVIEW view_ = nullptr;
+
+  bool vibrant_ = false;
 
   int z_index_ = 1;
 
