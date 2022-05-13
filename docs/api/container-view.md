@@ -10,7 +10,10 @@ It extends [`BaseView`](base-view.md).
 
 Process: [Main](../glossary.md#main-process)
 
-### `new ContainerView()` _Experimental_
+### `new ContainerView([options])` _Experimental_
+
+* `options` Object (optional)
+  * `vibrant` boolean (optional) - Enables the vibrant visual effect. Default is `false`.
 
 Creates the new container view.
 
