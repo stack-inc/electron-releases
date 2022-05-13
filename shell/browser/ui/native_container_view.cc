@@ -6,7 +6,8 @@
 
 namespace electron {
 
-NativeContainerView::NativeContainerView() {
+NativeContainerView::NativeContainerView(bool vibrant)
+    : NativeView(vibrant) {
   InitContainerView();
 }
 

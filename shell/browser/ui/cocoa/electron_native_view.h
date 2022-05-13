@@ -46,6 +46,12 @@ struct NativeViewPrivate {
 }
 @end
 
+@interface ElectronNativeVibrantView : NSVisualEffectView <ElectronNativeViewProtocol> {
+ @private
+  electron::NativeViewPrivate private_;
+}
+@end
+
 // Extended methods of ElectronNativeViewProtocol.
 @interface NSView (ElectronNativeViewMethods) <ElectronNativeViewProtocol>
 - (electron::NativeView*)shell;
