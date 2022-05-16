@@ -99,10 +99,12 @@ void NativeView::SetNativeView(NATIVEVIEW view) {
 }
 
 void NativeView::InitView() {
-  if (!IsVibrant())
+  if (!IsVibrant() && !IsBlurred())
     SetNativeView([[ElectronNativeView alloc] init]);
-  else
+  else if (IsVibrant())
     SetNativeView([[ElectronNativeVibrantView alloc] init]);
+  else
+    SetNativeView([[ElectronNativeBlurredView alloc] init]);
 }
 
 void NativeView::DestroyView() {
@@ -215,6 +217,58 @@ VisualEffectBlendingMode NativeView::GetVisualEffectBlendingMode() const {
         static_cast<ElectronNativeVibrantView*>(view_).blendingMode);
   } else {
     return VisualEffectBlendingMode::kBehindWindow;
+  }
+}
+
+void NativeView::SetBlurTintColorWithSRGB(float r, float g, float b, float a) {
+  if (IsNativeView(view_) && blurred_) {
+    NSColor* color = [NSColor colorWithSRGBRed:r green:g blue:b alpha:a];
+    [static_cast<ElectronNativeBlurredView*>(view_) setTintColor:color];
+  }
+}
+
+void NativeView::SetBlurTintColorWithCalibratedWhite(float white,
+                                                     float alphaval) {
+  if (IsNativeView(view_) && blurred_) {
+    NSColor* color = [NSColor colorWithCalibratedWhite:white alpha:alphaval];
+    [static_cast<ElectronNativeBlurredView*>(view_) setTintColor:color];
+  }
+}
+
+void NativeView::SetBlurTintColorWithGenericGamma22White(float white,
+                                                         float alphaval) {
+  if (IsNativeView(view_) && blurred_) {
+    NSColor* color = [NSColor colorWithGenericGamma22White:white
+                                                     alpha:alphaval];
+    [static_cast<ElectronNativeBlurredView*>(view_) setTintColor:color];
+  }
+}
+
+void NativeView::SetBlurRadius(float radius) {
+  if (IsNativeView(view_) && blurred_) {
+    [static_cast<ElectronNativeBlurredView*>(view_) setBlurRadius:radius];
+  }
+}
+
+float NativeView::GetBlurRadius() {
+  if (IsNativeView(view_) && blurred_) {
+    return [static_cast<ElectronNativeBlurredView*>(view_) blurRadius];
+  } else {
+    return 0.0;
+  }
+}
+
+void NativeView::SetBlurSaturationFactor(float factor) {
+  if (IsNativeView(view_) && blurred_) {
+    [static_cast<ElectronNativeBlurredView*>(view_) setSaturationFactor:factor];
+  }
+}
+
+float NativeView::GetBlurSaturationFactor() {
+  if (IsNativeView(view_) && blurred_) {
+    return [static_cast<ElectronNativeBlurredView*>(view_) saturationFactor];
+  } else {
+    return 0.0;
   }
 }
 
