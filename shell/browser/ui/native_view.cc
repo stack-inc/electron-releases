@@ -16,7 +16,8 @@ bool NativeView::Observer::OnMouseUp(NativeView* observed_view,
 }
 #endif  // defined(OS_MAC)
 
-NativeView::NativeView(bool vibrant) : view_(nullptr), vibrant_(vibrant) {
+NativeView::NativeView(bool vibrant, bool blurred)
+    : view_(nullptr), vibrant_(vibrant), blurred_(blurred) {
   InitView();
 }
 

@@ -94,6 +94,13 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   std::string GetVisualEffectMaterial() const;
   void SetVisualEffectBlendingMode(std::string mode);
   std::string GetVisualEffectBlendingMode() const;
+  void SetBlurTintColorWithSRGB(float r, float g, float b, float a);
+  void SetBlurTintColorWithCalibratedWhite(float white, float alphaval);
+  void SetBlurTintColorWithGenericGamma22White(float white, float alphaval);
+  void SetBlurRadius(float radius);
+  float GetBlurRadius();
+  void SetBlurSaturationFactor(float factor);
+  float GetBlurSaturationFactor();
   void SetCapture();
   void ReleaseCapture();
   bool HasCapture() const;

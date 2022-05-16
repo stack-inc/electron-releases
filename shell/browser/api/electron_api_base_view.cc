@@ -324,7 +324,38 @@ void BaseView::SetVisualEffectBlendingMode(std::string mode) {
 }
 
 std::string BaseView::GetVisualEffectBlendingMode() const {
-  return ConvertFromVisualEffectBlendingMode(view_->GetVisualEffectBlendingMode());
+  return ConvertFromVisualEffectBlendingMode(
+      view_->GetVisualEffectBlendingMode());
+}
+
+void BaseView::SetBlurTintColorWithSRGB(float r, float g, float b, float a) {
+  view_->SetBlurTintColorWithSRGB(r, g, b, a);
+}
+
+void BaseView::SetBlurTintColorWithCalibratedWhite(float white,
+                                                   float alphaval) {
+  view_->SetBlurTintColorWithCalibratedWhite(white, alphaval);
+}
+
+void BaseView::SetBlurTintColorWithGenericGamma22White(float white,
+                                                       float alphaval) {
+  view_->SetBlurTintColorWithGenericGamma22White(white, alphaval);
+}
+
+void BaseView::SetBlurRadius(float radius) {
+  view_->SetBlurRadius(radius);
+}
+
+float BaseView::GetBlurRadius() {
+  return view_->GetBlurRadius();
+}
+
+void BaseView::SetBlurSaturationFactor(float factor) {
+  view_->SetBlurSaturationFactor(factor);
+}
+
+float BaseView::GetBlurSaturationFactor() {
+  return view_->GetBlurSaturationFactor();
 }
 
 void BaseView::SetCapture() {
@@ -442,8 +473,10 @@ gin_helper::WrappableBase* BaseView::New(gin_helper::ErrorThrower thrower,
   args->GetNext(&options);
   bool vibrant = false;
   options.Get("vibrant", &vibrant);
+  bool blurred = false;
+  options.Get("blurred", &blurred);
 
-  return new BaseView(args, new NativeView(vibrant));
+  return new BaseView(args, new NativeView(vibrant, blurred));
 }
 
 // static
@@ -474,8 +507,20 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
 #if defined(OS_MAC)
       .SetMethod("setVisualEffectMaterial", &BaseView::SetVisualEffectMaterial)
       .SetMethod("getVisualEffectMaterial", &BaseView::GetVisualEffectMaterial)
-      .SetMethod("setVisualEffectBlendingMode", &BaseView::SetVisualEffectBlendingMode)
-      .SetMethod("getVisualEffectBlendingMode", &BaseView::GetVisualEffectBlendingMode)
+      .SetMethod("setVisualEffectBlendingMode",
+                 &BaseView::SetVisualEffectBlendingMode)
+      .SetMethod("getVisualEffectBlendingMode",
+                 &BaseView::GetVisualEffectBlendingMode)
+      .SetMethod("setBlurTintColorWithSRGB",
+                 &BaseView::SetBlurTintColorWithSRGB)
+      .SetMethod("setBlurTintColorWithCalibratedWhite",
+                 &BaseView::SetBlurTintColorWithCalibratedWhite)
+      .SetMethod("setBlurTintColorWithGenericGamma22White",
+                 &BaseView::SetBlurTintColorWithGenericGamma22White)
+      .SetMethod("setBlurRadius", &BaseView::SetBlurRadius)
+      .SetMethod("getBlurRadius", &BaseView::GetBlurRadius)
+      .SetMethod("setBlurSaturationFactor", &BaseView::SetBlurSaturationFactor)
+      .SetMethod("getBlurSaturationFactor", &BaseView::GetBlurSaturationFactor)
       .SetMethod("setCapture", &BaseView::SetCapture)
       .SetMethod("releaseCapture", &BaseView::ReleaseCapture)
       .SetMethod("hasCapture", &BaseView::HasCapture)

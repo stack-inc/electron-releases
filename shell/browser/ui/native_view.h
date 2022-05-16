@@ -44,19 +44,19 @@ using NATIVEVIEW = views::View*;
 class NativeWindow;
 
 #if defined(OS_MAC)
-  // Values here should match NSVisualEffectMaterial.
-  enum class VisualEffectMaterial {
-    kAppearanceBased,
-    kLight,
-    kDark,
-    kTitlebar,
-  };
+// Values here should match NSVisualEffectMaterial.
+enum class VisualEffectMaterial {
+  kAppearanceBased,
+  kLight,
+  kDark,
+  kTitlebar,
+};
 
-  // Values here should match NSVisualEffectBlendingMode.
-  enum class VisualEffectBlendingMode {
-    kBehindWindow,
-    kWithinWindow,
-  };
+// Values here should match NSVisualEffectBlendingMode.
+enum class VisualEffectBlendingMode {
+  kBehindWindow,
+  kWithinWindow,
+};
 
 // Supported event types.
 enum class EventType {
@@ -141,7 +141,7 @@ class NativeView : public base::RefCounted<NativeView>,
     virtual void OnViewIsDeleting(NativeView* observed_view) {}
   };
 
-  NativeView(bool vibrant = false);
+  NativeView(bool vibrant = false, bool blurred = false);
 
   // Change position and size.
   virtual void SetBounds(const gfx::Rect& bounds,
@@ -177,6 +177,14 @@ class NativeView : public base::RefCounted<NativeView>,
   VisualEffectMaterial GetVisualEffectMaterial() const;
   void SetVisualEffectBlendingMode(VisualEffectBlendingMode mode);
   VisualEffectBlendingMode GetVisualEffectBlendingMode() const;
+
+  void SetBlurTintColorWithSRGB(float r, float g, float b, float a);
+  void SetBlurTintColorWithCalibratedWhite(float white, float alphaval);
+  void SetBlurTintColorWithGenericGamma22White(float white, float alphaval);
+  void SetBlurRadius(float radius);
+  float GetBlurRadius();
+  void SetBlurSaturationFactor(float factor);
+  float GetBlurSaturationFactor();
 
   // Capture mouse.
   void SetCapture();
@@ -240,6 +248,7 @@ class NativeView : public base::RefCounted<NativeView>,
   virtual bool IsContainer() const;
 
   bool IsVibrant() const { return vibrant_; }
+  bool IsBlurred() const { return blurred_; }
 
   void SetZIndex(int z_index);
   int GetZIndex() const;
@@ -320,6 +329,7 @@ class NativeView : public base::RefCounted<NativeView>,
   NATIVEVIEW view_ = nullptr;
 
   bool vibrant_ = false;
+  bool blurred_ = false;
 
   int z_index_ = 1;
 
