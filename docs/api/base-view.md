@@ -15,6 +15,7 @@ Process: [Main](../glossary.md#main-process)
 
 * `options` Object (optional)
   * `vibrant` boolean (optional) - Enables the vibrant visual effect. Default is `false`.
+  * `blurred` boolean (optional) - Enables the blurred visual effect. Default is `false`.
 
 Creates the new base view.
 
@@ -239,9 +240,13 @@ Sets the material shown by the vibrant view.
 *`dark` - The material with a dark effect.
 *`titlebar` - The material for a window’s titlebar.
 
+This function works when `view` is created with `vibrant` option.
+
 #### `view.getVisualEffectMaterial()` _macOS_ _Experimental_
 
 Returns `string` - The material shown by the vibrant view.
+
+This function works when `view` is created with `vibrant` option.
 
 #### `view.setVisualEffectBlendingMode(mode)` _macOS_ _Experimental_
 
@@ -251,9 +256,64 @@ Sets whether the vibrant view blends with what's either behind or within the win
 * `behindWindow` - The mode that blends and blurs the vibrant view with the contents behind the window, such as the desktop or other windows.
 * `withinWindow` - The mode that blends and blurs the vibrant view with contents behind the view in the current window only.
 
+This function works when `view` is created with `vibrant` option.
+
 #### `view.getVisualEffectBlendingMode()` _macOS_ _Experimental_
 
 Returns `string` - Whether the vibrant view blends with what's either behind or within the window.
+
+This function works when `view` is created with `vibrant` option.
+
+#### `view.setBlurTintColorWithSRGB(red, green, blue, alpha)` _macOS_ _Experimental_
+
+* `red` Float - The red component of the color .
+* `green` Float - The green component of the color .
+* `blue` Float - The blue component of the color .
+* `alpha` Float - The opacity value of the color .
+
+Sets a color for blurred view from the specified components in the sRGB colorspace. 
+This function works when `view` is created with `blurred` option.
+
+#### `view.setBlurTintColorWithCalibratedWhite(white, alpha)` _macOS_ _Experimental_
+
+* `white` Float - The grayscale value of the color. Default is 1.0.
+* `alpha` Float - The opacity value of the color . Default is 0.7.
+
+Sets a color for blurred view using the given opacity and grayscale values.
+The layer will be tinted using the tint color. By default it is a 70% White Color.
+This function works when `view` is created with `blurred` option.
+
+#### `view.setBlurTintColorWithGenericGamma22White(white, alpha)` _macOS_ _Experimental_
+
+* `white` Float - The grayscale value of the color. Default is 1.0.
+* `alpha` Float - The opacity value of the color . Default is 0.7.
+
+Sets a color for blurred view with the specified white and alpha values in the GenericGamma22 colorspace.
+This function works when `view` is created with `blurred` option.
+
+#### `view.setBlurRadius(radius)` _macOS_ _Experimental_
+
+* `radius` Float - The strength of the Gaussian Blur filter. Default is 20.
+
+This function works when `view` is created with `blurred` option.
+
+#### `view.getBlurRadius()` _macOS_ _Experimental_
+
+Returns `Float` - The strength of the Gaussian Blur filter.
+
+This function works when `view` is created with `blurred` option.
+
+#### `view.setBlurSaturationFactor(factor)` _macOS_ _Experimental_
+
+* `factor` Float - The saturation of the colors (To get more vibrant colors). Default is 2.0.
+
+This function works when `view` is created with `blurred` option.
+
+#### `view.getBlurSaturationFactor()` _macOS_ _Experimental_
+
+Returns `Float` - The saturation factor.
+
+This function works when `view` is created with `blurred` option.
 
 #### `view.setCapture()` _macOS_ _Experimental_
 
