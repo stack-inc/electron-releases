@@ -14,6 +14,7 @@ Process: [Main](../glossary.md#main-process)
 
 * `options` Object (optional)
   * `vibrant` boolean (optional) - Enables the vibrant visual effect. Default is `false`.
+  * `blurred` boolean (optional) - Enables the blurred visual effect. Default is `false`.
 
 Creates the new container view.
 
