@@ -107,8 +107,10 @@ gin_helper::WrappableBase* ContainerView::New(gin_helper::ErrorThrower thrower,
   args->GetNext(&options);
   bool vibrant = false;
   options.Get("vibrant", &vibrant);
+  bool blurred = false;
+  options.Get("blurred", &blurred);
 
-  return new ContainerView(args, new NativeContainerView(vibrant));
+  return new ContainerView(args, new NativeContainerView(vibrant, blurred));
 }
 
 // static
