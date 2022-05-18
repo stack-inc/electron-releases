@@ -5,6 +5,7 @@
 #include "ui/views/controls/scroll_view.h"
 
 #include "electron/shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h"
+#include "electron/shell/browser/ui/views/stack_elastic_scroll/stack_scroll_bar_views.h"
 
 namespace electron {
 
@@ -43,6 +44,8 @@ void NativeScrollView::SetContentViewImpl(NativeView* view) {
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   view->set_delete_view(false);
+  scroll->SetHorizontalScrollBar(std::make_unique<StackScrollBarViews>(true));
+  scroll->SetVerticalScrollBar(std::make_unique<StackScrollBarViews>(false));
   auto content_view = std::unique_ptr<views::View>(view->GetNative());
   scroll->SetContents(std::move(content_view));
 }
