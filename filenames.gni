@@ -250,6 +250,10 @@ filenames = {
     "shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h",
     "shell/browser/ui/views/scroll_with_layers/web_view_scroll_with_layers.cc",
     "shell/browser/ui/views/scroll_with_layers/web_view_scroll_with_layers.h",
+    "shell/browser/ui/views/stack_elastic_scroll/stack_elastic_scroll_animator.cc",
+    "shell/browser/ui/views/stack_elastic_scroll/stack_elastic_scroll_animator.h",
+    "shell/browser/ui/views/stack_elastic_scroll/stack_scroll_bar_views.cc",
+    "shell/browser/ui/views/stack_elastic_scroll/stack_scroll_bar_views.h",
     "shell/browser/ui/views/submenu_button.cc",
     "shell/browser/ui/views/submenu_button.h",
   ]
