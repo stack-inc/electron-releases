@@ -5,8 +5,10 @@
 
 #include <string>
 
+#include "base/cxx17_backports.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
+#include "shell/common/gin_converters/gfx_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
 #include "ui/gfx/geometry/rect.h"
 
@@ -42,6 +44,7 @@ void SetBoundsForView(NSView* view,
   std::string tfunction_name;
   float cx1 = 0.0, cy1 = 0.0, cx2 = 1.0, cy2 = 1.0;
   bool use_control_points = false;
+  gfx::Rect from_bounds;
   if (options.Get("duration", &duration))
     animation = true;
   if (options.Get("timingFunction", &tfunction_name)) {
@@ -63,14 +66,28 @@ void SetBoundsForView(NSView* view,
   auto* superview = view.superview;
   if (superview && ![superview isFlipped]) {
     const auto superview_height = superview.frame.size.height;
-    frame =
-        NSMakeRect(bounds.x(), superview_height - bounds.y() - bounds.height(),
-                   bounds.width(), bounds.height());
+    frame.origin.y = superview_height - bounds.y() - bounds.height();
   }
 
   if (!animation) {
-    view.frame = frame;
+    [view setFrame:frame];
+    [view setNeedsDisplay:YES];
+    // Calling setFrame manually does not trigger resizeSubviewsWithOldSize.
+    [view resizeSubviewsWithOldSize:frame.size];
     return;
+  }
+
+  NSRect fromFrame = view.frame;
+  if (options.Get("fromBounds", &from_bounds)) {
+    if (superview && ![superview isFlipped]) {
+      const auto superview_height = superview.frame.size.height;
+      fromFrame =
+          NSMakeRect(from_bounds.x(),
+                     superview_height - from_bounds.y() - from_bounds.height(),
+                     from_bounds.width(), from_bounds.height());
+    } else {
+      fromFrame = from_bounds.ToCGRect();
+    }
   }
 
   CAMediaTimingFunction* timing_function = nil;
@@ -95,15 +112,29 @@ void SetBoundsForView(NSView* view,
         [[CAMediaTimingFunction alloc] initWithControlPoints:cx1:cy1:cx2:cy2];
   }
 
-  [NSAnimationContext
-      runAnimationGroup:^(NSAnimationContext* context) {
-        context.duration = duration;
-        context.timingFunction = timing_function;
-        // Trigger the animation
-        view.animator.frame = frame;
-      }
-      completionHandler:^{
-      }];
+  CABasicAnimation* positionAnimation =
+      [CABasicAnimation animationWithKeyPath:@"position"];
+  positionAnimation.duration = duration;
+  positionAnimation.timingFunction = timing_function;
+  positionAnimation.fromValue = @(fromFrame.origin);
+  positionAnimation.toValue = @(frame.origin);
+  if (fromFrame.size.width == frame.size.width &&
+      fromFrame.size.height == frame.size.height) {
+    [view.layer addAnimation:positionAnimation forKey:@"position"];
+  } else {
+    CABasicAnimation* sizeAnimation =
+        [CABasicAnimation animationWithKeyPath:@"bounds.size"];
+    sizeAnimation.duration = duration;
+    sizeAnimation.timingFunction = timing_function;
+    sizeAnimation.fromValue = @(fromFrame.size);
+    sizeAnimation.toValue = @(frame.size);
+    CAAnimationGroup* group = [CAAnimationGroup animation];
+    group.duration = duration;
+    group.timingFunction = timing_function;
+    group.animations = @[ positionAnimation, sizeAnimation ];
+    [view.layer addAnimation:group forKey:@"allMyAnimations"];
+  }
+  [view setFrame:frame];
 }
 
 void ResetScalingForView(NSView* view) {
