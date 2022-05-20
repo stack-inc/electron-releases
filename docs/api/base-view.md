@@ -147,8 +147,9 @@ Objects created with `new BaseView` have the following instance methods:
 
 #### `view.setBounds(bounds[, options])` _Experimental_
 
-* `bounds` [Rectangle](structures/rectangle.md) - The position and size of the view, relative to its parent.
+* `bounds` [Rectangle](structures/rectangle.md) - The target position and size of the view, relative to its parent.
 * `options` Object (optional)
+  * `fromBounds` [Rectangle](structures/rectangle.md) (optional) - The initial position and size of the view, relative to its parent.
   * `duration` Float (optional) - A duration of the animation (in seconds). Default is 1.0.
   * `timingFunction` string (optional) - One of the following values: `linear`, `easeIn`, `easeOut`, `easeInEaseOut`, `default`. Default is `linear`.
   * `timingControlPoints` Object (optional)

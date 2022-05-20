@@ -68,6 +68,7 @@ Objects created with `new BrowserView` have the following instance methods:
 
 * `bounds` [Rectangle](structures/rectangle.md)
 * `options` Object (optional)
+  * `fromBounds` [Rectangle](structures/rectangle.md) (optional) - The initial position and size of the view, relative to its parent.
   * `duration` Float (optional) - A duration of the animation (in seconds). Default is 1.0.
   * `timingFunction` string (optional) - One of the following values: `linear`, `easeIn`, `easeOut`, `easeInEaseOut`, `default`. Default is `linear`.
   * `timingControlPoints` Object (optional)

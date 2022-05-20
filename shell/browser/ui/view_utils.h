@@ -1,6 +1,8 @@
 #ifndef SHELL_BROWSER_UI_VIEW_UTILS_H_
 #define SHELL_BROWSER_UI_VIEW_UTILS_H_
 
+#include "build/build_config.h"
+
 namespace gin_helper {
 class Dictionary;
 }
