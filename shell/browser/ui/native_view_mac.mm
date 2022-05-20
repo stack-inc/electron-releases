@@ -122,9 +122,6 @@ void NativeView::DestroyView() {
 void NativeView::SetBounds(const gfx::Rect& bounds,
                            const gin_helper::Dictionary& options) {
   SetBoundsForView(view_, bounds, options);
-  NSRect frame = bounds.ToCGRect();
-  // Calling setFrame manually does not trigger resizeSubviewsWithOldSize.
-  [view_ resizeSubviewsWithOldSize:frame.size];
 }
 
 gfx::Rect NativeView::GetBounds() const {

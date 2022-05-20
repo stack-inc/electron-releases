@@ -73,11 +73,11 @@ struct NativeViewPrivate {
 @property(strong, nonatomic) NSColor* _tintColor;
 
 //* To get more vibrant colors, a filter to increase the saturation of the
-//colors can be applied. The default value is 2.5.
+// colors can be applied. The default value is 2.5.
 @property(assign, nonatomic) float _saturationFactor;
 
 //* The blur radius defines the strength of the Gaussian Blur filter. The
-//default value is 20.0.
+// default value is 20.0.
 @property(assign, nonatomic) float _blurRadius;
 
 @end
