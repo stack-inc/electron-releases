@@ -5,7 +5,7 @@
 #include "ui/views/controls/scroll_view.h"
 
 #include "electron/shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h"
-#include "electron/shell/browser/ui/views/stack_elastic_scroll/stack_scroll_bar_views.h"
+#include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_scroll_bar_views.h"
 
 namespace electron {
 
