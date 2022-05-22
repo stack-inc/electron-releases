@@ -2,8 +2,8 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_STACK_ELASTIC_SCROLL_STACK_ELASTIC_SCROLL_ANIMATOR_H_
-#define ELECTRON_SHELL_BROWSER_UI_VIEWS_STACK_ELASTIC_SCROLL_STACK_ELASTIC_SCROLL_ANIMATOR_H_
+#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_STACK_SMOOTH_SCROLL_STACK_SMOOTH_SCROLL_ANIMATOR_H_
+#define ELECTRON_SHELL_BROWSER_UI_VIEWS_STACK_SMOOTH_SCROLL_STACK_SMOOTH_SCROLL_ANIMATOR_H_
 
 #include "base/memory/raw_ptr.h"
 #include "ui/gfx/animation/animation_delegate.h"
@@ -12,16 +12,16 @@
 
 namespace electron {
 
-class StackElasticScrollAnimator : public gfx::AnimationDelegate {
+class StackSmoothScrollAnimator : public gfx::AnimationDelegate {
  public:
-  StackElasticScrollAnimator(views::ScrollBar* scroll_bar);
-  ~StackElasticScrollAnimator() override;
+  StackSmoothScrollAnimator(views::ScrollBar* scroll_bar);
+  ~StackSmoothScrollAnimator() override;
 
-  StackElasticScrollAnimator(const StackElasticScrollAnimator&) = delete;
-  StackElasticScrollAnimator(StackElasticScrollAnimator&&) = delete;
-  StackElasticScrollAnimator& operator=(
-      const StackElasticScrollAnimator&) = delete;
-  StackElasticScrollAnimator& operator=(StackElasticScrollAnimator&&) = delete;
+  StackSmoothScrollAnimator(const StackSmoothScrollAnimator&) = delete;
+  StackSmoothScrollAnimator(StackSmoothScrollAnimator&&) = delete;
+  StackSmoothScrollAnimator& operator=(
+      const StackSmoothScrollAnimator&) = delete;
+  StackSmoothScrollAnimator& operator=(StackSmoothScrollAnimator&&) = delete;
 
   void Start(int offset_x, int offset_y);
   void Stop();
@@ -42,4 +42,4 @@ class StackElasticScrollAnimator : public gfx::AnimationDelegate {
 
 }  // namespace electron
 
-#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_STACK_ELASTIC_SCROLL_STACK_ELASTIC_SCROLL_ANIMATOR_H_
+#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_STACK_SMOOTH_SCROLL_STACK_SMOOTH_SCROLL_ANIMATOR_H_
