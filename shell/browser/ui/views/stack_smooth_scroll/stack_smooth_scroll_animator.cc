@@ -2,7 +2,7 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#include "electron/shell/browser/ui/views/stack_elastic_scroll/stack_elastic_scroll_animator.h"
+#include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_smooth_scroll_animator.h"
 
 #include <cmath>
 
@@ -26,7 +26,7 @@ base::TimeDelta CalculateInterval(int frame_rate) {
 
 }  // namespace
 
-class StackElasticScrollAnimator::ContinuousAnimation : public gfx::Animation {
+class StackSmoothScrollAnimator::ContinuousAnimation : public gfx::Animation {
  public:
   ContinuousAnimation(gfx::AnimationDelegate* delegate)
       : Animation(CalculateInterval(kDefaultFrameRate)) {
@@ -56,7 +56,7 @@ class StackElasticScrollAnimator::ContinuousAnimation : public gfx::Animation {
   base::TimeDelta delta_;
 };
 
-StackElasticScrollAnimator::StackElasticScrollAnimator(
+StackSmoothScrollAnimator::StackSmoothScrollAnimator(
     views::ScrollBar* scroll_bar)
         : scroll_bar_(scroll_bar),
           animation_(nullptr),
@@ -65,11 +65,11 @@ StackElasticScrollAnimator::StackElasticScrollAnimator(
           current_offset_x_(0),
           current_offset_y_(0) {
 }
-StackElasticScrollAnimator::~StackElasticScrollAnimator() {
+StackSmoothScrollAnimator::~StackSmoothScrollAnimator() {
   Stop();
 }
 
-void StackElasticScrollAnimator::Start(int offset_x, int offset_y) {
+void StackSmoothScrollAnimator::Start(int offset_x, int offset_y) {
   if (!animation_) {
     current_offset_x_ = 0;
     current_offset_y_ = 0;
@@ -83,7 +83,7 @@ void StackElasticScrollAnimator::Start(int offset_x, int offset_y) {
   dest_offset_y_ += offset_y;
 }
 
-void StackElasticScrollAnimator::Stop() {
+void StackSmoothScrollAnimator::Stop() {
   if (animation_) {
     animation_->Stop();
     delete animation_;
@@ -91,7 +91,7 @@ void StackElasticScrollAnimator::Stop() {
   }
 }
 
-void StackElasticScrollAnimator::AnimationProgressed(
+void StackSmoothScrollAnimator::AnimationProgressed(
     const gfx::Animation* animation) {
   double delta_x = dest_offset_x_ - current_offset_x_;
   double delta_y = dest_offset_y_ - current_offset_y_;
