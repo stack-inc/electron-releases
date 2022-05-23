@@ -45,6 +45,7 @@ function createWindow () {
   scroll.setBounds({x: 0, y: 0, width: 1377, height: 600});
   scroll.setHorizontalScrollBarMode("enabled");
   scroll.setVerticalScrollBarMode("disabled");
+  scroll.setScrollWheelSwapped(true);
 
   contentView.addChildView(scroll);
 
