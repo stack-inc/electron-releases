@@ -50,6 +50,8 @@ class ScrollView : public BaseView {
   std::string GetHorizontalScrollBarMode() const;
   void SetVerticalScrollBarMode(std::string mode);
   std::string GetVerticalScrollBarMode() const;
+  void SetScrollWheelSwapped(bool swap);
+  bool IsScrollWheelSwapped();
 #if BUILDFLAG(IS_MAC)
   void SetHorizontalScrollElasticity(std::string elasticity);
   std::string GetHorizontalScrollElasticity() const;
@@ -65,8 +67,6 @@ class ScrollView : public BaseView {
   bool IsOverlayScrollbar() const;
   void SetScrollEventsEnabled(bool enable);
   bool IsScrollEventsEnabled();
-  void SetScrollWheelSwapped(bool swap);
-  bool IsScrollWheelSwapped();
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor();
 #endif
