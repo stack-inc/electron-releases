@@ -116,6 +116,21 @@ ScrollBarMode NativeScrollView::GetVerticalScrollBarMode() const {
   return GetScrollBarMode(scroll->GetVerticalScrollBarMode());
 }
 
+void NativeScrollView::SetScrollWheelSwapped(bool swap) {
+  if (!GetNative())
+    return;
+  auto* scroll = static_cast<views::ScrollView*>(GetNative());
+  scroll->SetTreatAllScrollEventsAsHorizontal(swap);
+}
+
+bool NativeScrollView::IsScrollWheelSwapped() {
+  if (!GetNative())
+    return false;
+
+  auto* scroll = static_cast<views::ScrollView*>(GetNative());
+  return scroll->GetTreatAllScrollEventsAsHorizontal();
+}
+
 void NativeScrollView::ClipHeightTo(int min_height, int max_height) {
   if (!GetNative())
     return;
