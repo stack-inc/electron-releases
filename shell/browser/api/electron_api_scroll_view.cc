@@ -143,6 +143,14 @@ std::string ScrollView::GetVerticalScrollBarMode() const {
   return ConvertFromScrollBarMode(scroll_->GetVerticalScrollBarMode());
 }
 
+void ScrollView::SetScrollWheelSwapped(bool swap) {
+  scroll_->SetScrollWheelSwapped(swap);
+}
+
+bool ScrollView::IsScrollWheelSwapped() {
+  return scroll_->IsScrollWheelSwapped();
+}
+
 #if BUILDFLAG(IS_MAC)
 void ScrollView::SetHorizontalScrollElasticity(std::string elasticity) {
   scroll_->SetHorizontalScrollElasticity(ConvertToScrollElasticity(elasticity));
@@ -196,14 +204,6 @@ void ScrollView::SetScrollEventsEnabled(bool enable) {
 
 bool ScrollView::IsScrollEventsEnabled() {
   return scroll_->IsScrollEventsEnabled();
-}
-
-void ScrollView::SetScrollWheelSwapped(bool swap) {
-  scroll_->SetScrollWheelSwapped(swap);
-}
-
-bool ScrollView::IsScrollWheelSwapped() {
-  return scroll_->IsScrollWheelSwapped();
 }
 
 void ScrollView::SetScrollWheelFactor(double factor) {
@@ -288,6 +288,8 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
                  &ScrollView::SetVerticalScrollBarMode)
       .SetMethod("getVerticalScrollBarMode",
                  &ScrollView::GetVerticalScrollBarMode)
+      .SetMethod("setScrollWheelSwapped", &ScrollView::SetScrollWheelSwapped)
+      .SetMethod("isScrollWheelSwapped", &ScrollView::IsScrollWheelSwapped)
 #if BUILDFLAG(IS_MAC)
       .SetMethod("setHorizontalScrollElasticity",
                  &ScrollView::SetHorizontalScrollElasticity)
@@ -307,8 +309,6 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("isOverlayScrollbar", &ScrollView::IsOverlayScrollbar)
       .SetMethod("setScrollEventsEnabled", &ScrollView::SetScrollEventsEnabled)
       .SetMethod("isScrollEventsEnabled", &ScrollView::IsScrollEventsEnabled)
-      .SetMethod("setScrollWheelSwapped", &ScrollView::SetScrollWheelSwapped)
-      .SetMethod("isScrollWheelSwapped", &ScrollView::IsScrollWheelSwapped)
       .SetMethod("setScrollWheelFactor", &ScrollView::SetScrollWheelFactor)
       .SetMethod("getScrollWheelFactor", &ScrollView::GetScrollWheelFactor)
 #endif

@@ -18,8 +18,6 @@ ScrollViewScrollWithLayers::ScrollViewScrollWithLayers()
       this->AddContentsLayerScrolledCallback(
           base::BindRepeating(&ScrollViewScrollWithLayers::ContentsLayerScrolled,
               base::Unretained(this)));
-
-  SetTreatAllScrollEventsAsHorizontal(true);
 }
 
 ScrollViewScrollWithLayers::~ScrollViewScrollWithLayers() = default;
