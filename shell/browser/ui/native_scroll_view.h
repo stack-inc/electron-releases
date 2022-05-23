@@ -51,6 +51,8 @@ class NativeScrollView : public NativeView {
   ScrollBarMode GetHorizontalScrollBarMode() const;
   void SetVerticalScrollBarMode(ScrollBarMode mode);
   ScrollBarMode GetVerticalScrollBarMode() const;
+  void SetScrollWheelSwapped(bool swap);
+  bool IsScrollWheelSwapped();
 
 #if BUILDFLAG(IS_MAC)
   void SetHorizontalScrollElasticity(ScrollElasticity elasticity);
@@ -60,8 +62,6 @@ class NativeScrollView : public NativeView {
 
   void SetScrollEventsEnabled(bool enable);
   bool IsScrollEventsEnabled();
-  void SetScrollWheelSwapped(bool swap);
-  bool IsScrollWheelSwapped();
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor();
 #endif
