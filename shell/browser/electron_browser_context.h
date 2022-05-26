@@ -14,11 +14,12 @@
 #include "chrome/browser/predictors/preconnect_manager.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/resource_context.h"
+#include "content/public/browser/web_contents.h"
 #include "electron/buildflags/buildflags.h"
 #include "mojo/public/cpp/bindings/remote.h"
 #include "services/network/public/mojom/network_context.mojom.h"
 #include "services/network/public/mojom/url_loader_factory.mojom.h"
-#include "shell/browser/media/media_device_id_salt.h"
+#include "electron/shell/browser/media/media_device_id_salt.h"
 #include "third_party/blink/public/common/permissions/permission_utils.h"
 
 class PrefService;
@@ -52,7 +53,12 @@ class ResolveProxyHelper;
 class WebViewManager;
 class ProtocolRegistry;
 
-class ElectronBrowserContext : public content::BrowserContext {
+class ElectronBrowserContextBase : public content::BrowserContext {
+ public:
+  virtual int GetWebContentsTabId(content::WebContents* web_contents) = 0;
+};
+
+class ElectronBrowserContext : public ElectronBrowserContextBase {
  public:
   // disable copy
   ElectronBrowserContext(const ElectronBrowserContext&) = delete;
@@ -120,6 +126,8 @@ class ElectronBrowserContext : public content::BrowserContext {
   content::ClientHintsControllerDelegate* GetClientHintsControllerDelegate()
       override;
   content::StorageNotificationService* GetStorageNotificationService() override;
+
+  int GetWebContentsTabId(content::WebContents* web_contents) override;
 
   CookieChangeNotifier* cookie_change_notifier() const {
     return cookie_change_notifier_.get();
