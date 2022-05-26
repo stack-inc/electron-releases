@@ -36,6 +36,7 @@
 #include "services/network/public/cpp/features.h"
 #include "services/network/public/cpp/wrapper_shared_url_loader_factory.h"
 #include "services/network/public/mojom/network_context.mojom.h"
+#include "shell/browser/api/electron_api_web_contents.h"
 #include "shell/browser/cookie_change_notifier.h"
 #include "shell/browser/electron_browser_client.h"
 #include "shell/browser/electron_browser_main_parts.h"
@@ -391,6 +392,13 @@ ElectronBrowserContext::GetClientHintsControllerDelegate() {
 content::StorageNotificationService*
 ElectronBrowserContext::GetStorageNotificationService() {
   return nullptr;
+}
+
+int ElectronBrowserContext::GetWebContentsTabId(content::WebContents* web_contents) {
+  auto* api_contents = electron::api::WebContents::From(web_contents);
+  if (api_contents)
+    return api_contents->ID();
+  return -1;
 }
 
 ResolveProxyHelper* ElectronBrowserContext::GetResolveProxyHelper() {

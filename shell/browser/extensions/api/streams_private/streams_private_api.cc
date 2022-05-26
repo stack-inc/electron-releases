@@ -10,11 +10,12 @@
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/render_frame_host.h"
 #include "content/public/browser/web_contents.h"
+#include "electron/shell/browser/electron_browser_context.h"
 #include "extensions/browser/extension_registry.h"
 #include "extensions/browser/guest_view/mime_handler_view/mime_handler_stream_manager.h"
 #include "extensions/browser/guest_view/mime_handler_view/mime_handler_view_guest.h"
 #include "extensions/common/manifest_handlers/mime_types_handler.h"
-#include "shell/browser/api/electron_api_web_contents.h"
+// #include "shell/browser/api/electron_api_web_contents.h"
 
 namespace extensions {
 
@@ -51,9 +52,15 @@ void StreamsPrivateAPI::SendExecuteMimeTypeHandlerEvent(
       extensions::Extension::GetBaseURLFromExtensionId(extension_id).spec() +
       handler->handler_url());
   int tab_id = -1;
+#if 0
   auto* api_contents = electron::api::WebContents::From(web_contents);
   if (api_contents)
     tab_id = api_contents->ID();
+#else
+  auto* electron_browser_context =
+      static_cast<electron::ElectronBrowserContextBase*>(browser_context);
+  tab_id = electron_browser_context->GetWebContentsTabId(web_contents);
+#endif
   auto stream_container = std::make_unique<extensions::StreamContainer>(
       tab_id, embedded, handler_url, extension_id,
       std::move(transferrable_loader), original_url);
