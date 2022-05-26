@@ -18,6 +18,7 @@
 
 namespace extensions {
 
+#if 0
 void StreamsPrivateAPI::SendExecuteMimeTypeHandlerEvent(
     const std::string& extension_id,
     const std::string& stream_id,
@@ -60,5 +61,6 @@ void StreamsPrivateAPI::SendExecuteMimeTypeHandlerEvent(
   extensions::MimeHandlerStreamManager::Get(browser_context)
       ->AddStream(stream_id, std::move(stream_container), frame_tree_node_id);
 }
+#endif  // 0
 
 }  // namespace extensions
