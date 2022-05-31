@@ -99,10 +99,8 @@ class BrowserView : public gin::Wrappable<BrowserView>,
   void Hide(bool freeze, gfx::Image thumbnail);
   void Show();
   v8::Local<v8::Value> GetWebContents(v8::Isolate*);
-#if BUILDFLAG(IS_MAC)
   void SetClickThrough(bool clickThrough);
   bool IsClickThrough() const;
-#endif
 
   v8::Global<v8::Value> web_contents_;
   class WebContents* api_web_contents_ = nullptr;
