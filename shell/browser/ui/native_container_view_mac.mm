@@ -1,5 +1,7 @@
 #include "shell/browser/ui/native_container_view.h"
 
+#include <objc/objc-runtime.h>
+
 #include <list>
 
 #include "shell/browser/ui/cocoa/electron_native_view.h"
@@ -39,13 +41,17 @@ void NativeContainerView::RemoveChildViewImpl(NativeView* view) {
 }
 
 void NativeContainerView::RearrangeChildViews() {
-  //[CATransaction begin];
-  //[CATransaction setDisableActions:YES];
+  if (children_.size() == 0)
+    return;
 
-std::list<NativeView*> children = {};
+  [CATransaction begin];
+  [CATransaction setDisableActions:YES];
+
+  std::list<NativeView*> children = {};
   for (auto it = children_.begin(); it != children_.end(); it++)
     children.push_back((*it).get());
-  children.sort([](auto* a, auto* b) { return a->GetZIndex() < b->GetZIndex(); });
+  children.sort(
+      [](auto* a, auto* b) { return a->GetZIndex() < b->GetZIndex(); });
 
   auto begin = children.begin();
   auto* first = *begin;
@@ -58,13 +64,13 @@ std::list<NativeView*> children = {};
     auto* nativeSecond = second->GetNative();
 
     [GetNative() addSubview:nativeSecond
-                           positioned:NSWindowAbove
-                           relativeTo:nativeFirst];
+                 positioned:NSWindowAbove
+                 relativeTo:nativeFirst];
 
     first = second;
   }
 
-  //[CATransaction commit];
+  [CATransaction commit];
 }
 
 void NativeContainerView::UpdateDraggableRegions() {
