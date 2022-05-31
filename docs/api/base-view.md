@@ -136,7 +136,7 @@ A `boolean` property that determines whether this view is (or inherits from) [`C
 
 A `Integer` representing z-index to set. Has no effect until parent's `view.rearrangeChildViews()` is called.
 
-#### `view.clickThrough` _macOS_ _Experimental_
+#### `view.clickThrough` _Experimental_
 
 A `Boolean` representing whether this BaseView receives any mouse input. Any BaseView
 with `clickThrough = true` will still display but won't receive any mouse events.
@@ -340,7 +340,7 @@ Enable mouse events.
 
 Returns `boolean` - Whether the mouse tracking is enabled.
 
-#### `view.setRoundedCorners(options)` _macOS_ _Experimental_
+#### `view.setRoundedCorners(options)` _Experimental_
 
 * `options` Object
   * `radius` Number - Radius of each corner that is rounded.
@@ -349,7 +349,7 @@ Returns `boolean` - Whether the mouse tracking is enabled.
   * `bottomLeft` Boolean (optional) - If `true`, bottom left corner will be rounded with `radius` value. `false` by default.
   * `bottomRight` Boolean (optional) - If `true`, bottom right corner will be rounded with `radius` value. `false` by default.
 
-#### `view.setClippingInsets(options)` _macOS_ _Experimental_
+#### `view.setClippingInsets(options)` _Experimental_
 
 * `options` Object
   * `left` Number (optional) - How many pixels to clip from the left side of the browser view.

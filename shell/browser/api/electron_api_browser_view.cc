@@ -263,7 +263,6 @@ v8::Local<v8::Value> BrowserView::GetWebContents(v8::Isolate* isolate) {
   return v8::Local<v8::Value>::New(isolate, web_contents_);
 }
 
-#if BUILDFLAG(IS_MAC)
 void BrowserView::SetClickThrough(bool clickThrough) {
   view_->GetInspectableWebContents()->SetClickThrough(clickThrough);
 }
@@ -271,7 +270,6 @@ void BrowserView::SetClickThrough(bool clickThrough) {
 bool BrowserView::IsClickThrough() const {
   return view_->GetInspectableWebContents()->IsClickThrough();
 }
-#endif
 
 // static
 v8::Local<v8::ObjectTemplate> BrowserView::FillObjectTemplate(
@@ -295,10 +293,8 @@ v8::Local<v8::ObjectTemplate> BrowserView::FillObjectTemplate(
       .SetMethod("hide", &BrowserView::Hide)
       .SetMethod("show", &BrowserView::Show)
       .SetProperty("webContents", &BrowserView::GetWebContents)
-#if BUILDFLAG(IS_MAC)
       .SetProperty("clickThrough", &BrowserView::IsClickThrough,
                    &BrowserView::SetClickThrough)
-#endif
       .Build();
 }
 
