@@ -25,6 +25,30 @@ void NativeContainerView::RemoveChildViewImpl(NativeView* view) {
   GetNative()->RemoveChildView(view->GetNative());
 }
 
-void NativeContainerView::RearrangeChildViews() {}
+void NativeContainerView::RearrangeChildViews() {
+  if (children_.size() == 0)
+    return;
+
+  std::list<NativeView*> children = {};
+  for (auto it = children_.begin(); it != children_.end(); it++)
+    children.push_back((*it).get());
+  children.sort(
+      [](auto* a, auto* b) { return a->GetZIndex() < b->GetZIndex(); });
+
+  auto begin = children.begin();
+  auto* first = *begin;
+  begin++;
+
+  for (auto it = begin; it != children.end(); it++) {
+    auto* second = *it;
+
+    int index_of_first = GetNative()->GetIndexOf(first->GetNative());
+    int index_of_second = GetNative()->GetIndexOf(second->GetNative());
+    if (index_of_second != index_of_first + 1)
+      GetNative()->ReorderChildView(second->GetNative(), index_of_first + 1);
+
+    first = second;
+  }
+}
 
 }  // namespace electron

@@ -1,6 +1,8 @@
 #include "shell/browser/ui/native_view.h"
 
+#include "ui/compositor/layer.h"
 #include "ui/gfx/geometry/rect_conversions.h"
+#include "ui/gfx/geometry/rounded_corners_f.h"
 #include "ui/views/background.h"
 #include "ui/views/view.h"
 
@@ -111,6 +113,34 @@ void NativeView::SetBackgroundColor(SkColor color) {
     return;
   view_->SetBackground(views::CreateSolidBackground(color));
   view_->SchedulePaint();
+}
+
+void NativeView::SetRoundedCorners(
+    const NativeView::RoundedCornersOptions& options) {
+  auto* view = GetNative();
+  view->SetPaintToLayer();
+  view->layer()->SetFillsBoundsOpaquely(false);
+
+  // Use rounded corners.
+  float radius = options.radius;
+  view->layer()->SetRoundedCornerRadius(gfx::RoundedCornersF(
+      options.top_left ? radius : 0.0f, options.top_right ? radius : 0.0f,
+      options.bottom_right ? radius : 0.0f,
+      options.bottom_left ? radius : 0.0f));
+  view->layer()->SetIsFastRoundedCorner(true);
+}
+
+void NativeView::SetClippingInsets(
+    const NativeView::ClippingInsetOptions& options) {
+  auto* view = GetNative();
+  view->SetPaintToLayer();
+  view->layer()->SetFillsBoundsOpaquely(false);
+
+  gfx::Rect clip_rect = view->GetLocalBounds();
+  gfx::Insets insets = gfx::Insets::TLBR(options.top, options.left,
+                                         options.bottom, options.right);
+  clip_rect.Inset(insets);
+  view->layer()->SetClipRect(clip_rect);
 }
 
 void NativeView::ResetScaling() {}

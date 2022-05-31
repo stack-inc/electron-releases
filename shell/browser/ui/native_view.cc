@@ -16,6 +16,10 @@ bool NativeView::Observer::OnMouseUp(NativeView* observed_view,
 }
 #endif  // BUILDFLAG(IS_MAC)
 
+NativeView::RoundedCornersOptions::RoundedCornersOptions() = default;
+
+NativeView::ClippingInsetOptions::ClippingInsetOptions() = default;
+
 NativeView::NativeView(bool vibrant, bool blurred)
     : view_(nullptr), vibrant_(vibrant), blurred_(blurred) {
   InitView();
