@@ -73,10 +73,8 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   bool IsContainer() const;
   void SetZIndex(int z_index);
   int GetZIndex() const;
-#if BUILDFLAG(IS_MAC)
   void SetClickThrough(bool clickThrough);
   bool IsClickThrough() const;
-#endif
   void SetBounds(const gfx::Rect& bounds, gin::Arguments* args);
   gfx::Rect GetBounds() const;
   gfx::Point OffsetFromView(gin::Handle<BaseView> from) const;
@@ -107,9 +105,9 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   void EnableMouseEvents();
   void SetMouseTrackingEnabled(bool enable);
   bool IsMouseTrackingEnabled();
+#endif
   void SetRoundedCorners(const NativeView::RoundedCornersOptions& options);
   void SetClippingInsets(const NativeView::ClippingInsetOptions& options);
-#endif
   void ResetScaling();
   void SetScale(const gin_helper::Dictionary& options);
   float GetScaleX();

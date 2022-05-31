@@ -74,10 +74,6 @@ NativeMouseEvent::NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view)
       position_in_view(GetPosInView(event, view)),
       position_in_window(GetPosInWindow(event, view)) {}
 
-NativeView::RoundedCornersOptions::RoundedCornersOptions() = default;
-
-NativeView::ClippingInsetOptions::ClippingInsetOptions() = default;
-
 void NativeView::SetNativeView(NATIVEVIEW view) {
   view_ = view;
 
@@ -323,8 +319,8 @@ bool NativeView::WantsLayer() const {
 void NativeView::SetRoundedCorners(
     const NativeView::RoundedCornersOptions& options) {
   if (@available(macOS 10.13, *)) {
+    SetWantsLayer(true);
     auto* view = GetNative();
-    view.wantsLayer = YES;
     view.layer.masksToBounds = YES;
     view.layer.cornerRadius = options.radius;
 
@@ -344,6 +340,7 @@ void NativeView::SetRoundedCorners(
 void NativeView::SetClippingInsets(
     const NativeView::ClippingInsetOptions& options) {
   if (@available(macOS 10.13, *)) {
+    SetWantsLayer(true);
     auto* view = GetNative();
 
     CALayer* sublayer = [CALayer layer];
