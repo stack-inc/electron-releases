@@ -141,6 +141,25 @@ class NativeView : public base::RefCounted<NativeView>,
     virtual void OnViewIsDeleting(NativeView* observed_view) {}
   };
 
+  struct RoundedCornersOptions {
+    RoundedCornersOptions();
+
+    float radius = 0.f;
+    bool top_left = false;
+    bool top_right = false;
+    bool bottom_left = false;
+    bool bottom_right = false;
+  };
+
+  struct ClippingInsetOptions {
+    ClippingInsetOptions();
+
+    int top = 0;
+    int left = 0;
+    int bottom = 0;
+    int right = 0;
+  };
+
   NativeView(bool vibrant = false, bool blurred = false);
 
   // Change position and size.
@@ -197,30 +216,11 @@ class NativeView : public base::RefCounted<NativeView>,
 
   void SetWantsLayer(bool wants);
   bool WantsLayer() const;
-
-  struct RoundedCornersOptions {
-    float radius = 0.f;
-    bool top_left = false;
-    bool top_right = false;
-    bool bottom_left = false;
-    bool bottom_right = false;
-
-    RoundedCornersOptions();
-  };
+#endif
 
   void SetRoundedCorners(const RoundedCornersOptions& options);
 
-  struct ClippingInsetOptions {
-    int top = 0;
-    int left = 0;
-    int bottom = 0;
-    int right = 0;
-
-    ClippingInsetOptions();
-  };
-
   void SetClippingInsets(const ClippingInsetOptions& options);
-#endif
 
   void ResetScaling();
   void SetScale(const gin_helper::Dictionary& options);

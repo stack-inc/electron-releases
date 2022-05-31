@@ -14,7 +14,6 @@
 #include "ui/views/view.h"
 #endif
 
-#if BUILDFLAG(IS_MAC)
 namespace gin {
 
 template <>
@@ -77,7 +76,6 @@ struct Converter<electron::NativeView::ClippingInsetOptions> {
 };
 
 }  // namespace gin
-#endif
 
 namespace electron {
 
@@ -250,7 +248,6 @@ int BaseView::GetZIndex() const {
   return view_->GetZIndex();
 }
 
-#if BUILDFLAG(IS_MAC)
 void BaseView::SetClickThrough(bool clickThrough) {
   view_->SetClickThrough(clickThrough);
 }
@@ -258,7 +255,6 @@ void BaseView::SetClickThrough(bool clickThrough) {
 bool BaseView::IsClickThrough() const {
   return view_->IsClickThrough();
 }
-#endif
 
 void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
   gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
@@ -381,6 +377,7 @@ void BaseView::SetMouseTrackingEnabled(bool enable) {
 bool BaseView::IsMouseTrackingEnabled() {
   return view_->IsMouseTrackingEnabled();
 }
+#endif
 
 void BaseView::SetRoundedCorners(
     const NativeView::RoundedCornersOptions& options) {
@@ -391,7 +388,6 @@ void BaseView::SetClippingInsets(
     const NativeView::ClippingInsetOptions& options) {
   return view_->SetClippingInsets(options);
 }
-#endif
 
 void BaseView::ResetScaling() {
   view_->ResetScaling();
@@ -488,10 +484,8 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetProperty("id", &BaseView::GetID)
       .SetProperty("isContainer", &BaseView::IsContainer)
       .SetProperty("zIndex", &BaseView::GetZIndex, &BaseView::SetZIndex)
-#if BUILDFLAG(IS_MAC)
       .SetProperty("clickThrough", &BaseView::IsClickThrough,
                    &BaseView::SetClickThrough)
-#endif
       .SetMethod("setBounds", &BaseView::SetBounds)
       .SetMethod("getBounds", &BaseView::GetBounds)
       .SetMethod("offsetFromView", &BaseView::OffsetFromView)
@@ -527,9 +521,9 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("enableMouseEvents", &BaseView::EnableMouseEvents)
       .SetMethod("setMouseTrackingEnabled", &BaseView::SetMouseTrackingEnabled)
       .SetMethod("isMouseTrackingEnabled", &BaseView::IsMouseTrackingEnabled)
+#endif
       .SetMethod("setRoundedCorners", &BaseView::SetRoundedCorners)
       .SetMethod("setClippingInsets", &BaseView::SetClippingInsets)
-#endif
       .SetMethod("resetScaling", &BaseView::ResetScaling)
       .SetMethod("setScale", &BaseView::SetScale)
       .SetMethod("getScaleX", &BaseView::GetScaleX)
