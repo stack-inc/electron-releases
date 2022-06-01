@@ -38,7 +38,7 @@ function createWindow () {
   win.setContentBaseView(contentView);
 
   // Scroll
-  const scroll = new ScrollView();
+  const scroll = new ScrollView({ smoothScroll: true });
   //scroll.setStyle({
     //flex: 1,
   //});
