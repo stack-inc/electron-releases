@@ -267,8 +267,15 @@ gin_helper::WrappableBase* ScrollView::New(gin_helper::ErrorThrower thrower,
   if (options.Get("verticalScrollBarMode", &mode))
     vertical_mode = absl::make_optional(ConvertToScrollBarMode(mode));
 
-  return new ScrollView(args,
-                        new NativeScrollView(horizontal_mode, vertical_mode));
+  auto* native_scroll = new NativeScrollView(horizontal_mode, vertical_mode);
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  bool smooth_scroll = false;
+  if (options.Get("smoothScroll", &smooth_scroll))
+    native_scroll->SetSmoothScroll(smooth_scroll);
+#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+
+  return new ScrollView(args, native_scroll);
 }
 
 // static

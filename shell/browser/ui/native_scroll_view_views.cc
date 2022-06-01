@@ -22,6 +22,23 @@ ScrollBarMode GetScrollBarMode(views::ScrollView::ScrollBarMode mode) {
   }
 }
 
+void UpdateScrollBars(views::ScrollView* scroll_view, bool is_smooth_scroll) {
+  if (!scroll_view)
+    return;
+
+  if (is_smooth_scroll) {
+    scroll_view->SetHorizontalScrollBar(
+        std::make_unique<StackScrollBarViews>(true));
+    scroll_view->SetVerticalScrollBar(
+        std::make_unique<StackScrollBarViews>(false));
+  } else {
+    scroll_view->SetHorizontalScrollBar(
+        std::make_unique<views::ScrollBarViews>(true));
+    scroll_view->SetVerticalScrollBar(
+        std::make_unique<views::ScrollBarViews>(false));
+  }
+}
+
 }  // namespace
 
 void NativeScrollView::InitScrollView(
@@ -44,8 +61,7 @@ void NativeScrollView::SetContentViewImpl(NativeView* view) {
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   view->set_delete_view(false);
-  scroll->SetHorizontalScrollBar(std::make_unique<StackScrollBarViews>(true));
-  scroll->SetVerticalScrollBar(std::make_unique<StackScrollBarViews>(false));
+  UpdateScrollBars(scroll, smooth_scroll_);
   auto content_view = std::unique_ptr<views::View>(view->GetNative());
   scroll->SetContents(std::move(content_view));
 }
@@ -185,6 +201,14 @@ bool NativeScrollView::GetDrawOverflowIndicator() const {
     return false;
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   return scroll->GetDrawOverflowIndicator();
+}
+
+void NativeScrollView::SetSmoothScroll(bool enable) {
+  if (smooth_scroll_ != enable && GetNative()) {
+    auto* scroll = static_cast<views::ScrollView*>(GetNative());
+    UpdateScrollBars(scroll, enable);
+  }
+  smooth_scroll_ = enable;
 }
 
 }  // namespace electron
