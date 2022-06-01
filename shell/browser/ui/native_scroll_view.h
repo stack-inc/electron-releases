@@ -75,6 +75,7 @@ class NativeScrollView : public NativeView {
   bool GetAllowKeyboardScrolling() const;
   void SetDrawOverflowIndicator(bool indicator);
   bool GetDrawOverflowIndicator() const;
+  void SetSmoothScroll(bool enable);
 #endif
 
  protected:
@@ -89,6 +90,10 @@ class NativeScrollView : public NativeView {
   void DetachChildViewImpl();
 
  private:
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  bool smooth_scroll_ = false;
+#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+
   scoped_refptr<NativeView> content_view_;
 };
 
