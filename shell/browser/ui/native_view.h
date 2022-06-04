@@ -123,7 +123,6 @@ class NativeView : public base::RefCounted<NativeView>,
     virtual void OnMouseLeave(NativeView* observed_view,
                               const NativeMouseEvent& event) {}
     virtual void OnCaptureLost(NativeView* observed_view) {}
-    virtual void OnDidScroll(NativeView* observed_view) {}
     virtual void OnWillStartLiveScroll(NativeView* observed_view) {}
     virtual void OnDidLiveScroll(NativeView* observed_view) {}
     virtual void OnDidEndLiveScroll(NativeView* observed_view) {}
@@ -134,6 +133,11 @@ class NativeView : public base::RefCounted<NativeView>,
                                std::string phase,
                                std::string momentum_phase) {}
 #endif  // BUILDFLAG(IS_MAC)
+
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+    virtual void OnDidScroll(NativeView* observed_view) {}
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+
     virtual void OnSizeChanged(NativeView* observed_view,
                                gfx::Size old_size,
                                gfx::Size new_size) {}
@@ -281,7 +285,6 @@ class NativeView : public base::RefCounted<NativeView>,
   void NotifyMouseEnter(const NativeMouseEvent& event);
   void NotifyMouseLeave(const NativeMouseEvent& event);
   void NotifyCaptureLost();
-  void NotifyDidScroll(NativeView* view);
   void NotifyWillStartLiveScroll(NativeView* view);
   void NotifyDidLiveScroll(NativeView* view);
   void NotifyDidEndLiveScroll(NativeView* view);
@@ -292,6 +295,10 @@ class NativeView : public base::RefCounted<NativeView>,
                          std::string phase,
                          std::string momentum_phase);
 #endif  // BUILDFLAG(IS_MAC)
+
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+void NotifyDidScroll(NativeView* view);
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
   // Notify that view's size has changed.
   virtual void NotifySizeChanged(gfx::Size old_size, gfx::Size new_size);
