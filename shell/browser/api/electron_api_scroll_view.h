@@ -30,7 +30,6 @@ class ScrollView : public BaseView {
 
   // NativeView::Observer:
 #if BUILDFLAG(IS_MAC)
-  void OnDidScroll(NativeView* observed_view) override;
   void OnWillStartLiveScroll(NativeView* observed_view) override;
   void OnDidLiveScroll(NativeView* observed_view) override;
   void OnDidEndLiveScroll(NativeView* observed_view) override;
@@ -41,6 +40,10 @@ class ScrollView : public BaseView {
                      std::string phase,
                      std::string momentum_phase) override;
 #endif  // BUILDFLAG(IS_MAC)
+
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+void OnDidScroll(NativeView* observed_view) override;
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
   void SetContentView(v8::Local<v8::Value> value);
   v8::Local<v8::Value> GetContentView() const;
