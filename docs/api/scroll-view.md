@@ -1,6 +1,6 @@
 # ScrollView
 
-Show a part of view with scrollbar. 
+Show a part of view with scrollbar.
 The `ScrollView` can show an arbitrary content view inside it. It is used to make
 any View scrollable. When the content is larger than the `ScrollView`,
 scrollbars will be optionally showed. When the content view is smaller
@@ -85,7 +85,7 @@ Creates the new scroll view.
 
 Objects created with `new ScrollView` emit the following events:
 
-#### Event: 'did-scroll' _macOS_ _Experimental_
+#### Event: 'did-scroll' _macOS_ __winOs__ _Experimental_
 
 Returns:
 
@@ -250,7 +250,7 @@ Returns `string` - vertical scrollbar mode.
 * `elasticity` string - Can be `automatic`, `none`, `allowed`. Default is `automatic`.
 
 The scroll view’s horizontal scrolling elasticity mode.
-A scroll view can scroll its contents past its bounds to achieve an elastic effect. 
+A scroll view can scroll its contents past its bounds to achieve an elastic effect.
 When set to `automatic`, scrolling the horizontal axis beyond its document
 bounds only occurs if the document width is greater than the view width,
 or the vertical scroller is hidden and the horizontal scroller is visible.
