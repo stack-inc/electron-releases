@@ -44,11 +44,17 @@ void UpdateScrollBars(views::ScrollView* scroll_view, bool is_smooth_scroll) {
 void NativeScrollView::InitScrollView(
     absl::optional<ScrollBarMode> horizontal_mode,
     absl::optional<ScrollBarMode> vertical_mode) {
+  views::ScrollView* scroll_view = nullptr;
   if (base::FeatureList::IsEnabled(::features::kUiCompositorScrollWithLayers)) {
-    SetNativeView(new ScrollViewScrollWithLayers());
+    scroll_view = new ScrollViewScrollWithLayers();
   } else {
-    SetNativeView(new views::ScrollView());
+    scroll_view = new views::ScrollView();
   }
+
+  on_contents_scrolled_subscription_ = scroll_view->AddContentsScrolledCallback(
+      base::BindRepeating(&NativeScrollView::OnDidScroll,
+          base::Unretained(this)));
+  SetNativeView(scroll_view);
 
   if (horizontal_mode)
     SetHorizontalScrollBarMode(horizontal_mode.value());
@@ -209,6 +215,10 @@ void NativeScrollView::SetSmoothScroll(bool enable) {
     UpdateScrollBars(scroll, enable);
   }
   smooth_scroll_ = enable;
+}
+
+void NativeScrollView::OnDidScroll() {
+  NotifyDidScroll(this);
 }
 
 }  // namespace electron
