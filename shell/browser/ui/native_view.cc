@@ -131,11 +131,6 @@ void NativeView::NotifyCaptureLost() {
     observer.OnCaptureLost(this);
 }
 
-void NativeView::NotifyDidScroll(NativeView* view) {
-  for (Observer& observer : observers_)
-    observer.OnDidScroll(view);
-}
-
 void NativeView::NotifyWillStartLiveScroll(NativeView* view) {
   for (Observer& observer : observers_)
     observer.OnWillStartLiveScroll(view);
@@ -162,6 +157,13 @@ void NativeView::NotifyScrollWheel(NativeView* view,
                            scrolling_delta_y, phase, momentum_phase);
 }
 #endif  // BUILDFLAG(IS_MAC)
+
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+void NativeView::NotifyDidScroll(NativeView* view) {
+  for (Observer& observer : observers_)
+    observer.OnDidScroll(view);
+}
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
 void NativeView::NotifySizeChanged(gfx::Size old_size, gfx::Size new_size) {
   for (Observer& observer : observers_)
