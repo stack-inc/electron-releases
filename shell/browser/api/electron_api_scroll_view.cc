@@ -71,10 +71,6 @@ void ScrollView::ResetChildViews() {
 }
 
 #if BUILDFLAG(IS_MAC)
-void ScrollView::OnDidScroll(NativeView* observed_view) {
-  Emit("did-scroll");
-}
-
 void ScrollView::OnWillStartLiveScroll(NativeView* observed_view) {
   Emit("will-start-live-scroll");
 }
@@ -97,6 +93,12 @@ void ScrollView::OnScrollWheel(NativeView* observed_view,
        momentum_phase);
 }
 #endif  // BUILDFLAG(IS_MAC)
+
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+void ScrollView::OnDidScroll(NativeView* observed_view) {
+  Emit("did-scroll");
+}
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
 void ScrollView::SetContentView(v8::Local<v8::Value> value) {
   gin::Handle<BaseView> content_view;

@@ -1,6 +1,13 @@
 #ifndef SHELL_BROWSER_UI_NATIVE_SCROLL_VIEW_H_
 #define SHELL_BROWSER_UI_NATIVE_SCROLL_VIEW_H_
 
+#include "build/build_config.h"
+#include "build/buildflag.h"
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#include "base/callback_list.h"
+#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+
 #include "shell/browser/ui/native_view.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 
@@ -76,6 +83,8 @@ class NativeScrollView : public NativeView {
   void SetDrawOverflowIndicator(bool indicator);
   bool GetDrawOverflowIndicator() const;
   void SetSmoothScroll(bool enable);
+
+  void OnDidScroll();
 #endif
 
  protected:
@@ -92,6 +101,7 @@ class NativeScrollView : public NativeView {
  private:
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   bool smooth_scroll_ = false;
+  base::CallbackListSubscription on_contents_scrolled_subscription_;
 #endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
 
   scoped_refptr<NativeView> content_view_;
