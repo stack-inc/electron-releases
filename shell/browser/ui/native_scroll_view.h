@@ -67,8 +67,6 @@ class NativeScrollView : public NativeView {
   void SetVerticalScrollElasticity(ScrollElasticity elasticity);
   ScrollElasticity GetVerticalScrollElasticity() const;
 
-  void SetScrollEventsEnabled(bool enable);
-  bool IsScrollEventsEnabled();
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor();
 #endif
@@ -87,6 +85,11 @@ class NativeScrollView : public NativeView {
   void OnDidScroll();
 #endif
 
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+  void SetScrollEventsEnabled(bool enable);
+  bool IsScrollEventsEnabled();
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+
  protected:
   ~NativeScrollView() override;
 
@@ -101,6 +104,7 @@ class NativeScrollView : public NativeView {
  private:
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   bool smooth_scroll_ = false;
+  bool scroll_events_ = false;
   base::CallbackListSubscription on_contents_scrolled_subscription_;
 #endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
 

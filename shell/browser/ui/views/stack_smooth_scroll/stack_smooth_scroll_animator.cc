@@ -8,8 +8,6 @@
 
 #include "ui/gfx/animation/animation.h"
 
-#include "base/logging.h"
-
 namespace electron {
 namespace {
 

@@ -200,14 +200,6 @@ bool ScrollView::IsOverlayScrollbar() const {
   return scroll_->IsOverlayScrollbar();
 }
 
-void ScrollView::SetScrollEventsEnabled(bool enable) {
-  scroll_->SetScrollEventsEnabled(enable);
-}
-
-bool ScrollView::IsScrollEventsEnabled() {
-  return scroll_->IsScrollEventsEnabled();
-}
-
 void ScrollView::SetScrollWheelFactor(double factor) {
   scroll_->SetScrollWheelFactor(factor);
 }
@@ -250,6 +242,16 @@ bool ScrollView::GetDrawOverflowIndicator() const {
   return scroll_->GetDrawOverflowIndicator();
 }
 #endif
+
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+void ScrollView::SetScrollEventsEnabled(bool enable) {
+  scroll_->SetScrollEventsEnabled(enable);
+}
+
+bool ScrollView::IsScrollEventsEnabled() {
+  return scroll_->IsScrollEventsEnabled();
+}
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
 // static
 gin_helper::WrappableBase* ScrollView::New(gin_helper::ErrorThrower thrower,
@@ -299,6 +301,8 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
                  &ScrollView::GetVerticalScrollBarMode)
       .SetMethod("setScrollWheelSwapped", &ScrollView::SetScrollWheelSwapped)
       .SetMethod("isScrollWheelSwapped", &ScrollView::IsScrollWheelSwapped)
+      .SetMethod("setScrollEventsEnabled", &ScrollView::SetScrollEventsEnabled)
+      .SetMethod("isScrollEventsEnabled", &ScrollView::IsScrollEventsEnabled)
 #if BUILDFLAG(IS_MAC)
       .SetMethod("setHorizontalScrollElasticity",
                  &ScrollView::SetHorizontalScrollElasticity)
@@ -316,8 +320,6 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("scrollPointToCenter", &ScrollView::ScrollPointToCenter)
       .SetMethod("setOverlayScrollbar", &ScrollView::SetOverlayScrollbar)
       .SetMethod("isOverlayScrollbar", &ScrollView::IsOverlayScrollbar)
-      .SetMethod("setScrollEventsEnabled", &ScrollView::SetScrollEventsEnabled)
-      .SetMethod("isScrollEventsEnabled", &ScrollView::IsScrollEventsEnabled)
       .SetMethod("setScrollWheelFactor", &ScrollView::SetScrollWheelFactor)
       .SetMethod("getScrollWheelFactor", &ScrollView::GetScrollWheelFactor)
 #endif
