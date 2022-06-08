@@ -68,8 +68,6 @@ void OnDidScroll(NativeView* observed_view) override;
                            const gin_helper::Dictionary& options);
   void SetOverlayScrollbar(bool overlay);
   bool IsOverlayScrollbar() const;
-  void SetScrollEventsEnabled(bool enable);
-  bool IsScrollEventsEnabled();
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor();
 #endif
@@ -83,6 +81,10 @@ void OnDidScroll(NativeView* observed_view) override;
   void SetDrawOverflowIndicator(bool indicator);
   bool GetDrawOverflowIndicator() const;
 #endif
+#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
+void SetScrollEventsEnabled(bool enable);
+bool IsScrollEventsEnabled();
+#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
  private:
   NativeScrollView* scroll_;
