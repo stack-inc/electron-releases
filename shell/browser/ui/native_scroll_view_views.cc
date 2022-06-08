@@ -218,7 +218,16 @@ void NativeScrollView::SetSmoothScroll(bool enable) {
 }
 
 void NativeScrollView::OnDidScroll() {
-  NotifyDidScroll(this);
+  if (IsScrollEventsEnabled())
+    NotifyDidScroll(this);
+}
+
+void NativeScrollView::SetScrollEventsEnabled(bool enable) {
+  scroll_events_ = enable;
+}
+
+bool NativeScrollView::IsScrollEventsEnabled() {
+  return scroll_events_;
 }
 
 }  // namespace electron

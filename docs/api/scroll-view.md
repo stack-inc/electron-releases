@@ -85,7 +85,7 @@ Creates the new scroll view.
 
 Objects created with `new ScrollView` emit the following events:
 
-#### Event: 'did-scroll' _macOS_ __winOs__ _Experimental_
+#### Event: 'did-scroll' _macOS_ _Windows_ _Experimental_
 
 Returns:
 
@@ -294,7 +294,7 @@ Returns [`Point`](structures/point.md) - The maximum horizontal and vertical scr
 
 Returns boolean - The scroller style used by the scroll view.
 
-#### `view.setScrollEventsEnabled(enable)` _macOS_ _Experimental_
+#### `view.setScrollEventsEnabled(enable)` _macOS_ _Windows_ _Experimental_
 
 * `enable` boolean - Whether the scroll events are enabled. Default is `false`.
 
