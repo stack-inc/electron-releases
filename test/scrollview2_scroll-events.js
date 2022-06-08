@@ -46,6 +46,7 @@ function createWindow () {
   scroll.setHorizontalScrollBarMode("enabled");
   scroll.setVerticalScrollBarMode("disabled");
   scroll.setScrollWheelSwapped(true);
+  scroll.setScrollEventsEnabled(true);
   scroll.on('did-scroll', function() {
     console.log('------ > did-scroll');
   });
