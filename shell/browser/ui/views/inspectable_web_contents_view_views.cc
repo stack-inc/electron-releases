@@ -23,9 +23,9 @@
 /***** stack *****/
 #include "ui/base/ui_base_features.h"
 
-#include "electron/shell/browser/web_contents_preferences.h"
 #include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
 #include "electron/shell/browser/ui/views/scroll_with_layers/web_view_scroll_with_layers.h"
+#include "electron/shell/browser/web_contents_preferences.h"
 /*****************/
 
 namespace electron {
@@ -91,13 +91,11 @@ InspectableWebContentsViewViews::InspectableWebContentsViewViews(
     : inspectable_web_contents_(inspectable_web_contents),
       //! devtools_web_view_(new views::WebView(nullptr)),
       title_(u"Developer Tools") {
-
   /***** stack *****/
   WebContentsPreferences* web_contents_preferences =
-      WebContentsPreferences::From(
-          inspectable_web_contents_->GetWebContents());
-  const bool scroll_with_layers_enabled = base::FeatureList::IsEnabled(
-      ::features::kUiCompositorScrollWithLayers);
+      WebContentsPreferences::From(inspectable_web_contents_->GetWebContents());
+  const bool scroll_with_layers_enabled =
+      base::FeatureList::IsEnabled(::features::kUiCompositorScrollWithLayers);
 
   if (scroll_with_layers_enabled && web_contents_preferences &&
       web_contents_preferences->OptimizeForScroll()) {
@@ -115,8 +113,8 @@ InspectableWebContentsViewViews::InspectableWebContentsViewViews(
     views::WebView* contents_web_view = nullptr;
     if (scroll_with_layers_enabled && web_contents_preferences &&
         web_contents_preferences->OptimizeForScroll()) {
-      contents_web_view = new WebViewScrollWithLayers(this,
-          std::make_unique<NativeViewHostScrollWithLayers>(), nullptr);
+      contents_web_view = new WebViewScrollWithLayers(
+          this, std::make_unique<NativeViewHostScrollWithLayers>(), nullptr);
     } else {
       contents_web_view = new views::WebView(nullptr);
     }
@@ -146,6 +144,15 @@ views::View* InspectableWebContentsViewViews::GetView() {
 
 views::View* InspectableWebContentsViewViews::GetWebView() {
   return contents_web_view_;
+}
+
+void InspectableWebContentsViewViews::SetCornerRadii(
+    const gfx::RoundedCornersF& corner_radii) {
+  if (!devtools_web_view_->GetVisible()) {
+    static_cast<views::WebView*>(contents_web_view_)
+        ->holder()
+        ->SetCornerRadii(corner_radii);
+  }
 }
 
 void InspectableWebContentsViewViews::ShowDevTools(bool activate) {
