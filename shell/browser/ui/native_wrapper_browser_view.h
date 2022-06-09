@@ -26,6 +26,10 @@ class NativeWrapperBrowserView : public NativeView {
   void UpdateDraggableRegions() override;
 #endif
 
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  void SetRoundedCorners(const RoundedCornersOptions& options) override;
+#endif
+
  protected:
   ~NativeWrapperBrowserView() override;
 
