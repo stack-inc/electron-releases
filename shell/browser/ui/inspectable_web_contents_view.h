@@ -19,6 +19,10 @@ class Image;
 }
 
 #if defined(TOOLKIT_VIEWS)
+namespace gfx {
+class RoundedCornersF;
+}
+
 namespace views {
 class View;
 }
@@ -52,6 +56,7 @@ class InspectableWebContentsView {
   // Returns the web view control, which can be used by the
   // GetInitiallyFocusedView() to set initial focus to web view.
   virtual views::View* GetWebView() = 0;
+  virtual void SetCornerRadii(const gfx::RoundedCornersF& corner_radii) = 0;
 #else
   virtual gfx::NativeView GetNativeView() const = 0;
 #endif
