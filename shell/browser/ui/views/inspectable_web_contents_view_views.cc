@@ -150,10 +150,17 @@ views::View* InspectableWebContentsViewViews::GetWebView() {
 
 void InspectableWebContentsViewViews::SetCornerRadii(
     const gfx::RoundedCornersF& corner_radii) {
-  if (!devtools_web_view_->GetVisible()) {
-    static_cast<views::WebView*>(contents_web_view_)
-        ->holder()
-        ->SetCornerRadii(corner_radii);
+  if (!contents_web_view_ || !inspectable_web_contents_ ||
+      (inspectable_web_contents_->IsGuest() ||
+          !inspectable_web_contents_->GetWebContents()->GetNativeView()))
+    return;
+
+  auto* holder = static_cast<views::WebView*>(contents_web_view_)->holder();
+  if (!holder || !holder->GetNativeViewContainer())
+    return;
+
+  if (!devtools_web_view_ || !devtools_web_view_->GetVisible()) {
+    holder->SetCornerRadii(corner_radii);
   }
 }
 
