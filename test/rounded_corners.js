@@ -8,13 +8,13 @@ app.whenReady().then(() => {
   webContentView.setBackgroundColor("#1F2937")
   webContentView.setBounds({x: 400, y: 200, width: 650, height: 650})
   win.addChildView(webContentView)
-  webContentView.setRoundedCorners({ 'radius': 40, 'topLeft': true, 'topRight': true, 'bottomLeft': true, 'bottomRight': true })
 
   const browserView = new BrowserView()
   browserView.webContents.loadURL('https://electronjs.org')
   const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView })
   wrapperBrowserView.setBounds({x: 0, y: 0, width: 600, height: 600})
   webContentView.addChildView(wrapperBrowserView)
+  wrapperBrowserView.setRoundedCorners({ 'radius': 40, 'topLeft': true, 'topRight': true, 'bottomLeft': true, 'bottomRight': true })
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
