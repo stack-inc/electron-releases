@@ -159,7 +159,7 @@ void BrowserView::SetAutoResize(AutoResizeFlags flags) {
 }
 
 void BrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
-  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  BoundsAnimationOptions options;
   args->GetNext(&options);
   view_->SetBounds(bounds, options);
 }
@@ -203,7 +203,7 @@ void BrowserView::ResetScaling() {
   view_->ResetScaling();
 }
 
-void BrowserView::SetScale(const gin_helper::Dictionary& options) {
+void BrowserView::SetScale(const ScaleAnimationOptions& options) {
   view_->SetScale(options);
 }
 
@@ -216,7 +216,7 @@ float BrowserView::GetScaleY() {
 }
 
 void BrowserView::SetOpacity(const double opacity, gin::Arguments* args) {
-  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  AnimationOptions options;
   args->GetNext(&options);
   view_->SetOpacity(opacity, options);
 }
