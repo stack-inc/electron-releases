@@ -20,7 +20,7 @@ class NativeWrapperBrowserView : public NativeView {
 
   // NativeView:
   void SetBounds(const gfx::Rect& bounds,
-                 const gin_helper::Dictionary& options) override;
+                 const BoundsAnimationOptions& options) override;
   void TriggerBeforeunloadEvents() override;
 #if BUILDFLAG(IS_MAC)
   void UpdateDraggableRegions() override;
