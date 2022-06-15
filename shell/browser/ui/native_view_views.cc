@@ -41,15 +41,22 @@ void NativeView::OnViewBoundsChanged(views::View* observed_view) {
     NotifySizeChanged(old_size, size);
 }
 
+void NativeView::OnViewRemovedFromWidget(views::View* observed_view) {
+  if (bounds_animator_.get()) {
+    bounds_animator_->Cancel();
+    bounds_animator_.reset();
+  }
+}
+
 void NativeView::OnViewIsDeleting(views::View* observed_view) {
   view_ = nullptr;
   NotifyViewIsDeleting();
 }
 
 void NativeView::SetBounds(const gfx::Rect& bounds,
-                           const gin_helper::Dictionary& options) {
+                           const BoundsAnimationOptions& options) {
   if (view_)
-    view_->SetBoundsRect(bounds);
+    SetBoundsForView(view_, bounds, options, this);
 }
 
 gfx::Rect NativeView::GetBounds() const {
@@ -143,23 +150,44 @@ void NativeView::SetClippingInsets(
   view->layer()->SetClipRect(clip_rect);
 }
 
-void NativeView::ResetScaling() {}
+void NativeView::ResetScaling() {
+  if (view_)
+    ResetScalingForView(view_);
+}
 
-void NativeView::SetScale(const gin_helper::Dictionary& options) {}
+void NativeView::SetScale(const ScaleAnimationOptions& options) {
+  if (view_)
+    SetScaleForView(view_, options);
+}
 
 float NativeView::GetScaleX() {
+  if (view_)
+    return GetScaleXForView(view_);
   return 1.0;
 }
 
 float NativeView::GetScaleY() {
+  if (view_)
+    return GetScaleYForView(view_);
   return 1.0;
 }
 
 void NativeView::SetOpacity(const double opacity,
-                            const gin_helper::Dictionary& options) {}
+                            const AnimationOptions& options) {
+  if (view_)
+    SetOpacityForView(view_, opacity, options);
+}
 
 double NativeView::GetOpacity() {
+  if (view_)
+    return GetOpacityForView(view_);
   return 1.0;
+}
+
+views::BoundsAnimator* NativeView::GetOrCreateBoundsAnimator() {
+  if (!bounds_animator_.get() && view_->parent())
+    bounds_animator_ = std::make_unique<views::BoundsAnimator>(view_->parent());
+  return bounds_animator_.get();
 }
 
 }  // namespace electron

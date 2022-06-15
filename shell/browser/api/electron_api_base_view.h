@@ -5,6 +5,7 @@
 #include <string>
 
 #include "shell/browser/ui/native_view.h"
+#include "shell/browser/ui/view_utils.h"
 #include "shell/common/gin_helper/error_thrower.h"
 #include "shell/common/gin_helper/trackable_object.h"
 
@@ -109,7 +110,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   void SetRoundedCorners(const NativeView::RoundedCornersOptions& options);
   void SetClippingInsets(const NativeView::ClippingInsetOptions& options);
   void ResetScaling();
-  void SetScale(const gin_helper::Dictionary& options);
+  void SetScale(const ScaleAnimationOptions& options);
   float GetScaleX();
   float GetScaleY();
   void SetOpacity(const double opacity, gin::Arguments* args);

@@ -11,7 +11,6 @@
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
 #include "shell/browser/ui/view_utils.h"
-#include "shell/common/gin_helper/dictionary.h"
 #include "skia/ext/skia_utils_mac.h"
 #include "ui/gfx/geometry/rect.h"
 
@@ -273,7 +272,7 @@ void NativeBrowserViewMac::SetBounds(const gfx::Rect& bounds) {
 }
 
 void NativeBrowserViewMac::SetBounds(const gfx::Rect& bounds,
-                                     const gin_helper::Dictionary& options) {
+                                     const BoundsAnimationOptions& options) {
   auto* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
     return;
@@ -333,7 +332,7 @@ void NativeBrowserViewMac::ResetScaling() {
   ResetScalingForView(view);
 }
 
-void NativeBrowserViewMac::SetScale(const gin_helper::Dictionary& options) {
+void NativeBrowserViewMac::SetScale(const ScaleAnimationOptions& options) {
   auto* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
     return;
@@ -358,7 +357,7 @@ float NativeBrowserViewMac::GetScaleY() {
 }
 
 void NativeBrowserViewMac::SetOpacity(const double opacity,
-                                      const gin_helper::Dictionary& options) {
+                                      const AnimationOptions& options) {
   auto* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
     return;

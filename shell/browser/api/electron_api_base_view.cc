@@ -257,7 +257,7 @@ bool BaseView::IsClickThrough() const {
 }
 
 void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
-  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  BoundsAnimationOptions options;
   args->GetNext(&options);
   view_->SetBounds(bounds, options);
 }
@@ -393,7 +393,7 @@ void BaseView::ResetScaling() {
   view_->ResetScaling();
 }
 
-void BaseView::SetScale(const gin_helper::Dictionary& options) {
+void BaseView::SetScale(const ScaleAnimationOptions& options) {
   view_->SetScale(options);
 }
 
@@ -406,7 +406,7 @@ float BaseView::GetScaleY() {
 }
 
 void BaseView::SetOpacity(const double opacity, gin::Arguments* args) {
-  gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
+  AnimationOptions options;
   args->GetNext(&options);
   view_->SetOpacity(opacity, options);
 }

@@ -4,7 +4,6 @@
 #include "base/mac/scoped_cftyperef.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
 #include "shell/browser/ui/cocoa/events_handler.h"
-#include "shell/browser/ui/view_utils.h"
 #include "ui/gfx/geometry/rect_conversions.h"
 #include "ui/gfx/geometry/rect_f.h"
 
@@ -116,7 +115,7 @@ void NativeView::DestroyView() {
 }
 
 void NativeView::SetBounds(const gfx::Rect& bounds,
-                           const gin_helper::Dictionary& options) {
+                           const BoundsAnimationOptions& options) {
   SetBoundsForView(view_, bounds, options);
 }
 
@@ -368,7 +367,7 @@ void NativeView::ResetScaling() {
   ResetScalingForView(view_);
 }
 
-void NativeView::SetScale(const gin_helper::Dictionary& options) {
+void NativeView::SetScale(const ScaleAnimationOptions& options) {
   SetScaleForView(view_, options);
 }
 
@@ -381,7 +380,7 @@ float NativeView::GetScaleY() {
 }
 
 void NativeView::SetOpacity(const double opacity,
-                            const gin_helper::Dictionary& options) {
+                            const AnimationOptions& options) {
   SetOpacityForView(view_, opacity, options);
 }
 
