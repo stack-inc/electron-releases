@@ -9,16 +9,13 @@
 
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_contents_observer.h"
+#include "shell/browser/ui/view_utils.h"
 #include "third_party/skia/include/core/SkColor.h"
 
 namespace gfx {
 class Image;
 class Rect;
 }  // namespace gfx
-
-namespace gin_helper {
-class Dictionary;
-}
 
 namespace electron {
 
@@ -52,17 +49,17 @@ class NativeBrowserView : public content::WebContentsObserver {
   virtual void SetAutoResizeFlags(uint8_t flags) = 0;
   virtual void SetBounds(const gfx::Rect& bounds) = 0;
   virtual void SetBounds(const gfx::Rect& bounds,
-                         const gin_helper::Dictionary& options) = 0;
+                         const BoundsAnimationOptions& options) = 0;
   virtual gfx::Rect GetBounds() = 0;
   virtual void SetBackgroundColor(SkColor color) = 0;
   virtual void SetViewBounds(const gfx::Rect& bounds) = 0;
   virtual gfx::Rect GetViewBounds() = 0;
   virtual void ResetScaling() = 0;
-  virtual void SetScale(const gin_helper::Dictionary& options) = 0;
+  virtual void SetScale(const ScaleAnimationOptions& options) = 0;
   virtual float GetScaleX() = 0;
   virtual float GetScaleY() = 0;
   virtual void SetOpacity(const double opacity,
-                          const gin_helper::Dictionary& options) = 0;
+                          const AnimationOptions& options) = 0;
   virtual double GetOpacity() = 0;
   virtual void SetVisible(bool visible) = 0;
   virtual bool IsVisible() = 0;

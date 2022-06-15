@@ -17,6 +17,7 @@
 #include "shell/browser/native_browser_view.h"
 #include "shell/browser/native_window.h"
 #include "shell/browser/ui/native_wrapper_browser_view.h"
+#include "shell/browser/ui/view_utils.h"
 #include "shell/common/api/api.mojom.h"
 #include "shell/common/gin_helper/constructible.h"
 #include "shell/common/gin_helper/error_thrower.h"
@@ -88,7 +89,7 @@ class BrowserView : public gin::Wrappable<BrowserView>,
   void SetViewBounds(const gfx::Rect& bounds);
   gfx::Rect GetViewBounds();
   void ResetScaling();
-  void SetScale(const gin_helper::Dictionary& options);
+  void SetScale(const ScaleAnimationOptions& options);
   float GetScaleX();
   float GetScaleY();
   void SetOpacity(const double opacity, gin::Arguments* args);
