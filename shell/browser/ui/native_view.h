@@ -5,18 +5,16 @@
 #include "base/observer_list.h"
 #include "base/observer_list_types.h"
 #include "base/supports_user_data.h"
+#include "shell/browser/ui/view_utils.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "ui/gfx/geometry/point.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/size.h"
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#include "ui/views/animation/bounds_animator.h"
 #include "ui/views/view_observer.h"
 #endif
-
-namespace gin_helper {
-class Dictionary;
-}
 
 #if BUILDFLAG(IS_MAC)
 #ifdef __OBJC__
@@ -168,7 +166,7 @@ class NativeView : public base::RefCounted<NativeView>,
 
   // Change position and size.
   virtual void SetBounds(const gfx::Rect& bounds,
-                         const gin_helper::Dictionary& options);
+                         const BoundsAnimationOptions& options);
 
   // Get position and size.
   gfx::Rect GetBounds() const;
@@ -227,10 +225,10 @@ class NativeView : public base::RefCounted<NativeView>,
   void SetClippingInsets(const ClippingInsetOptions& options);
 
   void ResetScaling();
-  void SetScale(const gin_helper::Dictionary& options);
+  void SetScale(const ScaleAnimationOptions& options);
   float GetScaleX();
   float GetScaleY();
-  void SetOpacity(const double opacity, const gin_helper::Dictionary& options);
+  void SetOpacity(const double opacity, const AnimationOptions& options);
   double GetOpacity();
 
   // Get parent.
@@ -297,7 +295,7 @@ class NativeView : public base::RefCounted<NativeView>,
 #endif  // BUILDFLAG(IS_MAC)
 
 #if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
-void NotifyDidScroll(NativeView* view);
+  void NotifyDidScroll(NativeView* view);
 #endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
   // Notify that view's size has changed.
@@ -305,6 +303,10 @@ void NotifyDidScroll(NativeView* view);
 
   // Notify that native view is destroyed.
   void NotifyViewIsDeleting();
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  views::BoundsAnimator* GetOrCreateBoundsAnimator();
+#endif
 
  protected:
   ~NativeView() override;
@@ -318,6 +320,7 @@ void NotifyDidScroll(NativeView* view);
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   // views::ViewObserver:
   void OnViewBoundsChanged(views::View* observed_view) override;
+  void OnViewRemovedFromWidget(views::View* observed_view) override;
   void OnViewIsDeleting(views::View* observed_view) override;
 #endif
 
@@ -345,6 +348,7 @@ void NotifyDidScroll(NativeView* view);
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   bool delete_view_ = true;
   gfx::Rect bounds_;
+  std::unique_ptr<views::BoundsAnimator> bounds_animator_;
 #endif
 };
 

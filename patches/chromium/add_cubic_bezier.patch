@@ -1,0 +1,97 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin <martin@getstack.app>
+Date: Thu, 18 Nov 2021 23:32:23 -0500
+Subject: Added cubic bezier to BoundsAnimator
+
+
+diff --git a/ui/gfx/animation/slide_animation.cc b/ui/gfx/animation/slide_animation.cc
+index d525fbb1ed1b0..5a15fb64a1da4 100644
+--- a/ui/gfx/animation/slide_animation.cc
++++ b/ui/gfx/animation/slide_animation.cc
+@@ -72,7 +72,10 @@ void SlideAnimation::BeginAnimating(Direction direction) {
+ }
+ 
+ void SlideAnimation::AnimateToState(double state) {
+-  state = Tween::CalculateValue(tween_type_, base::clamp(state, 0.0, 1.0));
++if (cubic_bezier_.get())
++    state = cubic_bezier_->Solve(base::clamp(state, 0.0, 1.0));
++  else
++    state = Tween::CalculateValue(tween_type_, base::clamp(state, 0.0, 1.0));
+   if (state == 1.0)
+     direction_ = absl::nullopt;
+ 
+diff --git a/ui/gfx/animation/slide_animation.h b/ui/gfx/animation/slide_animation.h
+index 4f11356a64a06..953231370b5c6 100644
+--- a/ui/gfx/animation/slide_animation.h
++++ b/ui/gfx/animation/slide_animation.h
+@@ -9,6 +9,7 @@
+ #include "third_party/abseil-cpp/absl/types/optional.h"
+ #include "ui/gfx/animation/linear_animation.h"
+ #include "ui/gfx/animation/tween.h"
++#include "ui/gfx/geometry/cubic_bezier.h"
+ 
+ namespace gfx {
+ 
+@@ -72,6 +73,9 @@ class ANIMATION_EXPORT SlideAnimation : public LinearAnimation {
+   virtual void SetSlideDuration(base::TimeDelta duration);
+   base::TimeDelta GetSlideDuration() const { return slide_duration_; }
+   void SetTweenType(Tween::Type tween_type) { tween_type_ = tween_type; }
++  void SetCubicBezier(CubicBezier cubic_bezier) {
++    cubic_bezier_ = std::make_unique<CubicBezier>(cubic_bezier);
++  }
+ 
+   // Dampens the reduction in duration for an animation which starts partway.
+   // The default value of 1 has no effect.
+@@ -111,6 +115,7 @@ class ANIMATION_EXPORT SlideAnimation : public LinearAnimation {
+   raw_ptr<AnimationDelegate> target_;
+ 
+   Tween::Type tween_type_ = Tween::EASE_OUT;
++  std::unique_ptr<CubicBezier> cubic_bezier_;
+ 
+   // Current animation direction, or nullopt if not animating.
+   absl::optional<Direction> direction_;
+diff --git a/ui/views/animation/bounds_animator.cc b/ui/views/animation/bounds_animator.cc
+index 312efee14d3d6..742bf442ddeda 100644
+--- a/ui/views/animation/bounds_animator.cc
++++ b/ui/views/animation/bounds_animator.cc
+@@ -183,6 +183,9 @@ std::unique_ptr<gfx::SlideAnimation> BoundsAnimator::CreateAnimation() {
+   auto animation = std::make_unique<gfx::SlideAnimation>(this);
+   animation->SetContainer(container_.get());
+   animation->SetSlideDuration(animation_duration_);
++  if (cubic_bezier_.get())
++    animation->SetCubicBezier(*cubic_bezier_);
++  else
+   animation->SetTweenType(tween_type_);
+   return animation;
+ }
+diff --git a/ui/views/animation/bounds_animator.h b/ui/views/animation/bounds_animator.h
+index 87364f55e410c..4e74115c4c115 100644
+--- a/ui/views/animation/bounds_animator.h
++++ b/ui/views/animation/bounds_animator.h
+@@ -14,6 +14,7 @@
+ #include "ui/gfx/animation/animation_container.h"
+ #include "ui/gfx/animation/animation_container_observer.h"
+ #include "ui/gfx/animation/tween.h"
++#include "ui/gfx/geometry/cubic_bezier.h"
+ #include "ui/gfx/geometry/rect.h"
+ #include "ui/views/animation/animation_delegate_views.h"
+ #include "ui/views/views_export.h"
+@@ -100,6 +101,10 @@ class VIEWS_EXPORT BoundsAnimator : public AnimationDelegateViews {
+   // Sets the tween type for new animations. Default is EASE_OUT.
+   void set_tween_type(gfx::Tween::Type type) { tween_type_ = type; }
+ 
++  void set_cubic_bezier(double p1x, double p1y, double p2x, double p2y) {
++    cubic_bezier_ = std::make_unique<gfx::CubicBezier>(p1x, p1y, p2x, p2y);
++  }
++
+   void AddObserver(BoundsAnimatorObserver* observer);
+   void RemoveObserver(BoundsAnimatorObserver* observer);
+ 
+@@ -200,6 +205,7 @@ class VIEWS_EXPORT BoundsAnimator : public AnimationDelegateViews {
+   base::TimeDelta animation_duration_ = base::Milliseconds(200);
+ 
+   gfx::Tween::Type tween_type_ = gfx::Tween::EASE_OUT;
++  std::unique_ptr<gfx::CubicBezier> cubic_bezier_;
+ };
+ 
+ }  // namespace views
