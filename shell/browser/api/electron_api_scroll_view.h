@@ -42,7 +42,7 @@ class ScrollView : public BaseView {
 #endif  // BUILDFLAG(IS_MAC)
 
 #if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
-void OnDidScroll(NativeView* observed_view) override;
+  void OnDidScroll(NativeView* observed_view) override;
 #endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
   void SetContentView(v8::Local<v8::Value> value);
@@ -63,9 +63,8 @@ void OnDidScroll(NativeView* observed_view) override;
   void SetScrollPosition(gfx::Point point);
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
-  void ScrollToPoint(gfx::Point point, const gin_helper::Dictionary& options);
-  void ScrollPointToCenter(gfx::Point point,
-                           const gin_helper::Dictionary& options);
+  void ScrollToPoint(gfx::Point point, const AnimationOptions& options);
+  void ScrollPointToCenter(gfx::Point point, const AnimationOptions& options);
   void SetOverlayScrollbar(bool overlay);
   bool IsOverlayScrollbar() const;
   void SetScrollWheelFactor(double factor);
@@ -82,8 +81,8 @@ void OnDidScroll(NativeView* observed_view) override;
   bool GetDrawOverflowIndicator() const;
 #endif
 #if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
-void SetScrollEventsEnabled(bool enable);
-bool IsScrollEventsEnabled();
+  void SetScrollEventsEnabled(bool enable);
+  bool IsScrollEventsEnabled();
 #endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
  private:

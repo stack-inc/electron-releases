@@ -183,12 +183,12 @@ gfx::Point ScrollView::GetMaximumScrollPosition() const {
 }
 
 void ScrollView::ScrollToPoint(gfx::Point point,
-                               const gin_helper::Dictionary& options) {
+                               const AnimationOptions& options) {
   scroll_->ScrollToPoint(point, options);
 }
 
 void ScrollView::ScrollPointToCenter(gfx::Point point,
-                                     const gin_helper::Dictionary& options) {
+                                     const AnimationOptions& options) {
   scroll_->ScrollPointToCenter(point, options);
 }
 

@@ -4,7 +4,6 @@
 
 #include "base/strings/string_util.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
-#include "shell/common/gin_helper/dictionary.h"
 
 namespace {
 
@@ -356,60 +355,43 @@ gfx::Point NativeScrollView::GetMaximumScrollPosition() const {
 }
 
 void NativeScrollView::ScrollToPoint(gfx::Point point,
-                                     const gin_helper::Dictionary& options) {
+                                     const AnimationOptions& options) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNative());
-  float duration = 0.4;
-  options.Get("duration", &duration);
-  std::string tfunction_name;
-  if (options.Get("timingFunction", &tfunction_name)) {
-    tfunction_name = base::ToLowerASCII(tfunction_name);
-    base::TrimWhitespaceASCII(tfunction_name, base::TRIM_ALL, &tfunction_name);
-  }
 
   NSAnimationCurve animation_curve = NSAnimationEaseInOut;
-  if (tfunction_name == "linear") {
+  if (options.timing_function == TimingFunction::kLinear)
     animation_curve = NSAnimationLinear;
-  } else if (tfunction_name == "easein") {
+  else if (options.timing_function == TimingFunction::kEaseIn)
     animation_curve = NSAnimationEaseIn;
-  } else if (tfunction_name == "easeout") {
+  else if (options.timing_function == TimingFunction::kEaseOut)
     animation_curve = NSAnimationEaseOut;
-  } else if (tfunction_name == "easeineaseout") {
+  else if (options.timing_function == TimingFunction::kEaseInEaseOut)
     animation_curve = NSAnimationEaseInOut;
-  }
 
   [ScrollViewAnimation animatedScrollToPoint:NSMakePoint(point.x(), point.y())
                                 inScrollView:scroll
-                                 forDuration:duration
+                                 forDuration:options.duration
                           withAnimationCurve:animation_curve];
 }
 
-void NativeScrollView::ScrollPointToCenter(
-    gfx::Point point,
-    const gin_helper::Dictionary& options) {
+void NativeScrollView::ScrollPointToCenter(gfx::Point point,
+                                           const AnimationOptions& options) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNative());
-  float duration = 0.4;
-  options.Get("duration", &duration);
-  std::string tfunction_name;
-  if (options.Get("timingFunction", &tfunction_name)) {
-    tfunction_name = base::ToLowerASCII(tfunction_name);
-    base::TrimWhitespaceASCII(tfunction_name, base::TRIM_ALL, &tfunction_name);
-  }
 
   NSAnimationCurve animation_curve = NSAnimationEaseInOut;
-  if (tfunction_name == "linear") {
+  if (options.timing_function == TimingFunction::kLinear)
     animation_curve = NSAnimationLinear;
-  } else if (tfunction_name == "easein") {
+  else if (options.timing_function == TimingFunction::kEaseIn)
     animation_curve = NSAnimationEaseIn;
-  } else if (tfunction_name == "easeout") {
+  else if (options.timing_function == TimingFunction::kEaseOut)
     animation_curve = NSAnimationEaseOut;
-  } else if (tfunction_name == "easeineaseout") {
+  else if (options.timing_function == TimingFunction::kEaseInEaseOut)
     animation_curve = NSAnimationEaseInOut;
-  }
 
   [ScrollViewAnimation
       animatedScrollPointToCenter:NSMakePoint(point.x(), point.y())
                      inScrollView:scroll
-                      forDuration:duration
+                      forDuration:options.duration
                withAnimationCurve:animation_curve];
 }
 

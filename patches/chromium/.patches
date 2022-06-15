@@ -128,3 +128,4 @@ expose_v8initializer_codegenerationcheckcallbackinmainthread.patch
 cherry-pick-43637378b14e.patch
 fix_debug_configuration.patch
 enable_ui_compositor_scroll_with_layers_and_optimization.patch
+add_cubic_bezier.patch
