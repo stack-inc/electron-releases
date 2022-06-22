@@ -350,8 +350,8 @@ gfx::Point NativeScrollView::GetMaximumScrollPosition() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNative());
   NSRect docBounds = scroll.documentView.bounds;
   NSRect clipBounds = scroll.contentView.bounds;
-  return gfx::Point(NSMaxX(docBounds) - NSWidth(clipBounds),
-                    NSMaxY(docBounds) - NSHeight(clipBounds));
+  return gfx::Point(std::max(0.0, NSMaxX(docBounds) - NSWidth(clipBounds)),
+                    std::max(0.0, NSMaxY(docBounds) - NSHeight(clipBounds)));
 }
 
 void NativeScrollView::ScrollToPoint(gfx::Point point,
