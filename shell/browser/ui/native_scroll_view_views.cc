@@ -51,9 +51,9 @@ void NativeScrollView::InitScrollView(
     scroll_view = new views::ScrollView();
   }
 
-  on_contents_scrolled_subscription_ = scroll_view->AddContentsScrolledCallback(
-      base::BindRepeating(&NativeScrollView::OnDidScroll,
-          base::Unretained(this)));
+  on_contents_scrolled_subscription_ =
+      scroll_view->AddContentsScrolledCallback(base::BindRepeating(
+          &NativeScrollView::OnDidScroll, base::Unretained(this)));
   SetNativeView(scroll_view);
 
   if (horizontal_mode)
@@ -84,6 +84,24 @@ void NativeScrollView::SetContentSize(const gfx::Size& size) {
   if (!content_view_.get())
     return;
   content_view_->GetNative()->SetSize(size);
+}
+
+void NativeScrollView::SetScrollPosition(gfx::Point point) {
+  ScrollRectToVisible(gfx::Rect(point.x(), point.y(), 1, 1));
+}
+
+gfx::Point NativeScrollView::GetScrollPosition() const {
+  gfx::Rect rect = GetVisibleRect();
+  return gfx::Point(rect.x(), rect.y());
+}
+
+gfx::Point NativeScrollView::GetMaximumScrollPosition() const {
+  if (!GetNative() || !content_view_.get())
+    return gfx::Point();
+  gfx::Size content_size = GetContentSize();
+  gfx::Rect visible_rect = GetVisibleRect();
+  return gfx::Point(std::max(0, content_size.width() - visible_rect.width()),
+                    std::max(0, content_size.height() - visible_rect.height()));
 }
 
 void NativeScrollView::SetHorizontalScrollBarMode(ScrollBarMode mode) {
@@ -172,6 +190,12 @@ int NativeScrollView::GetMaxHeight() const {
     return 0;
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   return scroll->GetMaxHeight();
+}
+
+void NativeScrollView::ScrollRectToVisible(const gfx::Rect& rect) {
+  if (!content_view_.get())
+    return;
+  content_view_->GetNative()->ScrollRectToVisible(rect);
 }
 
 gfx::Rect NativeScrollView::GetVisibleRect() const {

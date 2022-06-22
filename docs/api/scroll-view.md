@@ -272,17 +272,17 @@ The scroll view’s vertical scrolling elasticity mode.
 
 Returns `string` - The scroll view’s vertical scrolling elasticity mode.
 
-#### `view.setScrollPosition(point)` _macOS_ _Experimental_
+#### `view.setScrollPosition(point)` _Experimental_
 
 * `point` [Point](structures/point.md) - The point in the `contentView` to scroll to.
 
 Scroll to the horizontal (`point.x`) and vertical (`point.y`) position.
 
-#### `view.getScrollPosition()` _macOS_ _Experimental_
+#### `view.getScrollPosition()` _Experimental_
 
 Returns [`Point`](structures/point.md) - The horizontal and vertical scroll position.
 
-#### `view.getMaximumScrollPosition()` _macOS_ _Experimental_
+#### `view.getMaximumScrollPosition()` _Experimental_
 
 Returns [`Point`](structures/point.md) - The maximum horizontal and vertical scroll position.
 
@@ -340,9 +340,15 @@ Returns `Integer` - The max height for the bounded scroll view.
 
 This is negative value if the view is not bounded.
 
+#### `view.scrollRectToVisible(rect)` _Windows_ _Experimental_
+
+* `rect` [`Rectangle`](structures/rectangle.md) - The region in the `contentView` to scroll to.
+
+Scrolls the specified region, in this View's coordinate system, to be visible.
+
 #### `view.getVisibleRect()` _Windows_ _Experimental_
 
-Returns [`Rectangle`](structures/rectangle.md) - The visible region of the content View.
+Returns [`Rectangle`](structures/rectangle.md) - The visible region of the `contentView`.
 
 #### `view.setAllowKeyboardScrolling(allow)` _Windows_ _Experimental_
 
