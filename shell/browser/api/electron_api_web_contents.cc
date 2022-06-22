@@ -136,6 +136,7 @@
 #include "third_party/blink/public/mojom/frame/fullscreen.mojom.h"
 #include "third_party/blink/public/mojom/messaging/transferable_message.mojom.h"
 #include "third_party/blink/public/mojom/renderer_preferences.mojom.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 #include "ui/base/cursor/cursor.h"
 #include "ui/base/cursor/mojom/cursor_type.mojom-shared.h"
 #include "ui/display/screen.h"
@@ -405,6 +406,60 @@ void OnCapturePageDone(gin_helper::Promise<gfx::Image> promise,
   promise.Resolve(gfx::Image::CreateFrom1xBitmap(bitmap));
 
   capture_handle.RunAndReset();
+}
+
+struct ColorOccurrence {
+  ColorOccurrence(uint32_t c, int o) : color(c), occurrence(o) {}
+
+  uint32_t color;
+  int occurrence;
+};
+
+void CalculateDominantColors(
+    gin_helper::Promise<std::vector<std::string>> promise,
+    int max_colors,
+    const SkBitmap& bitmap) {
+  SkImageInfo info =
+      SkImageInfo::Make(bitmap.width(), bitmap.height(), kRGBA_8888_SkColorType,
+                        kUnpremul_SkAlphaType, SkColorSpace::MakeSRGB());
+  std::unique_ptr<uint32_t[]> buffer(
+      new uint32_t[info.computeMinByteSize() / 4]);
+  if (!bitmap.readPixels(info, buffer.get(), info.minRowBytes(), 0, 0))
+    promise.Resolve(std::vector<std::string>());
+
+  int buffer_size = bitmap.width() * bitmap.height();
+  std::map<uint32_t, int> color_map;
+  for (int i = 0; i < buffer_size; i++) {
+    uint32_t color = buffer[i];
+    auto it = color_map.find(color);
+    if (it == color_map.end())
+      color_map[color] = 1;
+    else
+      color_map[color] = it->second + 1;
+  }
+
+  std::vector<ColorOccurrence> col_occurs;
+  for (auto entry : color_map)
+    col_occurs.push_back(ColorOccurrence(entry.first, entry.second));
+  std::sort(col_occurs.begin(), col_occurs.end(),
+            [](const auto& col_occur1, const auto& col_occur2) {
+              return col_occur1.occurrence > col_occur2.occurrence;
+            });
+
+  std::vector<std::string> dominant_colors;
+  int i = 0;
+  for (const auto& col_occur : col_occurs) {
+    int32_t color = col_occur.color;
+    std::string dominant_color = base::StringPrintf(
+        "#%02X%02X%02X%02X", (color & 0x000000ff), ((color & 0x0000ff00) >> 8),
+        ((color & 0x00ff0000) >> 16), ((color & 0xff000000) >> 24));
+    dominant_colors.push_back(dominant_color);
+    i++;
+    if (i == max_colors)
+      break;
+  }
+
+  promise.Resolve(dominant_colors);
 }
 
 absl::optional<base::TimeDelta> GetCursorBlinkInterval() {
@@ -3196,9 +3251,8 @@ void WebContents::StartDrag(const gin_helper::Dictionary& item,
   }
 }
 
-void WebContents::OnScreenshotTaken(
-    gin_helper::Promise<gfx::Image> promise,
-    const gfx::Image& image) {
+void WebContents::OnScreenshotTaken(gin_helper::Promise<gfx::Image> promise,
+                                    const gfx::Image& image) {
   promise.Resolve(image);
 }
 
@@ -3210,20 +3264,19 @@ v8::Local<v8::Promise> WebContents::CaptureScreenshot(gin::Arguments* args) {
   // get rect arguments if they exist
   args->GetNext(&rect);
 
-  //if (web_contents()->GetVisibility() != content::Visibility::VISIBLE) {
-    ThumbnailTabHelper* thumbnail_helper =
-        ThumbnailTabHelper::FromWebContents(web_contents());
-    DCHECK(thumbnail_helper);
-    if (thumbnail_helper->thumbnail()) {
-      auto subscription = thumbnail_helper->thumbnail()->Subscribe();
-      subscription->SetUncompressedImageCallback(base::BindRepeating(
-          &OnThumbnailReady, base::Passed(std::move(subscription)),
-          base::Passed(base::BindOnce(&WebContents::OnScreenshotTaken,
-                                      GetWeakPtr(),
-                                      std::move(promise)))));
-      thumbnail_helper->thumbnail()->RequestThumbnailImage();
-      return handle;
-    }
+  // if (web_contents()->GetVisibility() != content::Visibility::VISIBLE) {
+  ThumbnailTabHelper* thumbnail_helper =
+      ThumbnailTabHelper::FromWebContents(web_contents());
+  DCHECK(thumbnail_helper);
+  if (thumbnail_helper->thumbnail()) {
+    auto subscription = thumbnail_helper->thumbnail()->Subscribe();
+    subscription->SetUncompressedImageCallback(base::BindRepeating(
+        &OnThumbnailReady, base::Passed(std::move(subscription)),
+        base::Passed(base::BindOnce(&WebContents::OnScreenshotTaken,
+                                    GetWeakPtr(), std::move(promise)))));
+    thumbnail_helper->thumbnail()->RequestThumbnailImage();
+    return handle;
+  }
   //}
 
 #if 0
@@ -3371,6 +3424,57 @@ void WebContents::DecrementCapturerCount(gin::Arguments* args) {
 
 bool WebContents::IsBeingCaptured() {
   return web_contents()->IsBeingCaptured();
+}
+
+v8::Local<v8::Promise> WebContents::GetDominantColors(gin::Arguments* args) {
+  gfx::Rect rect;
+  int max_colors = 1;
+  gin_helper::Promise<std::vector<std::string>> promise(args->isolate());
+  v8::Local<v8::Promise> handle = promise.GetHandle();
+
+  // get rect arguments if they exist
+  args->GetNext(&rect);
+  // get maxColors argument if it exists
+  if (args->GetNext(&max_colors))
+    max_colors = std::max(1, max_colors);
+
+  auto* const view = web_contents()->GetRenderWidgetHostView();
+  if (!view) {
+    promise.Resolve(std::vector<std::string>());
+    return handle;
+  }
+
+#if !BUILDFLAG(IS_MAC)
+  // If the view's renderer is suspended this may fail on Windows/Linux -
+  // bail if so. See CopyFromSurface in
+  // content/public/browser/render_widget_host_view.h.
+  auto* rfh = web_contents()->GetMainFrame();
+  if (rfh &&
+      rfh->GetVisibilityState() == blink::mojom::PageVisibilityState::kHidden) {
+    promise.Resolve(std::vector<std::string>());
+    return handle;
+  }
+#endif  // BUILDFLAG(IS_MAC)
+
+  // Capture full page if user doesn't specify a |rect|.
+  const gfx::Size view_size =
+      rect.IsEmpty() ? view->GetViewBounds().size() : rect.size();
+
+  // By default, the requested bitmap size is the view size in screen
+  // coordinates.  However, if there's more pixel detail available on the
+  // current system, increase the requested bitmap size to capture it all.
+  gfx::Size bitmap_size = view_size;
+  const gfx::NativeView native_view = view->GetNativeView();
+  const float scale = display::Screen::GetScreen()
+                          ->GetDisplayNearestView(native_view)
+                          .device_scale_factor();
+  if (scale > 1.0f)
+    bitmap_size = gfx::ScaleToCeiledSize(view_size, scale);
+
+  view->CopyFromSurface(
+      gfx::Rect(rect.origin(), view_size), bitmap_size,
+      base::BindOnce(&CalculateDominantColors, std::move(promise), max_colors));
+  return handle;
 }
 
 void WebContents::OnCursorChanged(const content::WebCursor& webcursor) {
@@ -4199,6 +4303,7 @@ v8::Local<v8::ObjectTemplate> WebContents::FillObjectTemplate(
       .SetMethod("copyImageAt", &WebContents::CopyImageAt)
       .SetMethod("captureScreenshot", &WebContents::CaptureScreenshot)
       .SetMethod("capturePage", &WebContents::CapturePage)
+      .SetMethod("getDominantColors", &WebContents::GetDominantColors)
       .SetMethod("setEmbedder", &WebContents::SetEmbedder)
       .SetMethod("setDevToolsWebContents", &WebContents::SetDevToolsWebContents)
       .SetMethod("getNativeView", &WebContents::GetNativeView)
