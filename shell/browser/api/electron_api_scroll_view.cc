@@ -169,6 +169,7 @@ void ScrollView::SetVerticalScrollElasticity(std::string elasticity) {
 std::string ScrollView::GetVerticalScrollElasticity() const {
   return ConvertFromScrollElasticity(scroll_->GetVerticalScrollElasticity());
 }
+#endif  // BUILDFLAG(IS_MAC)
 
 void ScrollView::SetScrollPosition(gfx::Point point) {
   scroll_->SetScrollPosition(point);
@@ -182,6 +183,7 @@ gfx::Point ScrollView::GetMaximumScrollPosition() const {
   return scroll_->GetMaximumScrollPosition();
 }
 
+#if BUILDFLAG(IS_MAC)
 void ScrollView::ScrollToPoint(gfx::Point point,
                                const AnimationOptions& options) {
   scroll_->ScrollToPoint(point, options);
@@ -220,6 +222,10 @@ int ScrollView::GetMinHeight() const {
 
 int ScrollView::GetMaxHeight() const {
   return scroll_->GetMaxHeight();
+}
+
+void ScrollView::ScrollRectToVisible(const gfx::Rect& rect) {
+  scroll_->ScrollRectToVisible(rect);
 }
 
 gfx::Rect ScrollView::GetVisibleRect() const {
@@ -312,10 +318,12 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
                  &ScrollView::SetVerticalScrollElasticity)
       .SetMethod("getVerticalScrollElasticity",
                  &ScrollView::GetVerticalScrollElasticity)
+#endif
       .SetMethod("setScrollPosition", &ScrollView::SetScrollPosition)
       .SetMethod("getScrollPosition", &ScrollView::GetScrollPosition)
       .SetMethod("getMaximumScrollPosition",
                  &ScrollView::GetMaximumScrollPosition)
+#if BUILDFLAG(IS_MAC)
       .SetMethod("scrollToPoint", &ScrollView::ScrollToPoint)
       .SetMethod("scrollPointToCenter", &ScrollView::ScrollPointToCenter)
       .SetMethod("setOverlayScrollbar", &ScrollView::SetOverlayScrollbar)
@@ -327,6 +335,7 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("clipHeightTo", &ScrollView::ClipHeightTo)
       .SetMethod("getMinHeight", &ScrollView::GetMinHeight)
       .SetMethod("getMaxHeight", &ScrollView::GetMaxHeight)
+      .SetMethod("scrollRectToVisible", &ScrollView::ScrollRectToVisible)
       .SetMethod("getVisibleRect", &ScrollView::GetVisibleRect)
       .SetMethod("setAllowKeyboardScrolling",
                  &ScrollView::SetAllowKeyboardScrolling)
