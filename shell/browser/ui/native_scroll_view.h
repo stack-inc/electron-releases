@@ -41,11 +41,11 @@ class NativeScrollView : public NativeView {
   void SetContentSize(const gfx::Size& size);
   gfx::Size GetContentSize() const;
 
-#if BUILDFLAG(IS_MAC)
   void SetScrollPosition(gfx::Point point);
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
 
+#if BUILDFLAG(IS_MAC)
   void ScrollToPoint(gfx::Point point, const AnimationOptions& options);
   void ScrollPointToCenter(gfx::Point point, const AnimationOptions& options);
 
@@ -74,6 +74,7 @@ class NativeScrollView : public NativeView {
   void ClipHeightTo(int min_height, int max_height);
   int GetMinHeight() const;
   int GetMaxHeight() const;
+  void ScrollRectToVisible(const gfx::Rect& rect);
   gfx::Rect GetVisibleRect() const;
   void SetAllowKeyboardScrolling(bool allow);
   bool GetAllowKeyboardScrolling() const;
