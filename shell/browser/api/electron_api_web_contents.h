@@ -278,6 +278,8 @@ class WebContents : public ExclusiveAccessContext,
   // done.
   v8::Local<v8::Promise> CapturePage(gin::Arguments* args);
 
+  v8::Local<v8::Promise> GetDominantColors(gin::Arguments* args);
+
   // Methods for creating <webview>.
   bool IsGuest() const;
   void AttachToIframe(content::WebContents* embedder_web_contents,
