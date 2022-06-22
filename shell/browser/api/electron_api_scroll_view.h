@@ -60,9 +60,11 @@ class ScrollView : public BaseView {
   std::string GetHorizontalScrollElasticity() const;
   void SetVerticalScrollElasticity(std::string elasticity);
   std::string GetVerticalScrollElasticity() const;
+#endif
   void SetScrollPosition(gfx::Point point);
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
+#if BUILDFLAG(IS_MAC)
   void ScrollToPoint(gfx::Point point, const AnimationOptions& options);
   void ScrollPointToCenter(gfx::Point point, const AnimationOptions& options);
   void SetOverlayScrollbar(bool overlay);
@@ -74,6 +76,7 @@ class ScrollView : public BaseView {
   void ClipHeightTo(int min_height, int max_height);
   int GetMinHeight() const;
   int GetMaxHeight() const;
+  void ScrollRectToVisible(const gfx::Rect& rect);
   gfx::Rect GetVisibleRect() const;
   void SetAllowKeyboardScrolling(bool allow);
   bool GetAllowKeyboardScrolling() const;
