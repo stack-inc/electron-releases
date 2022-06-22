@@ -1396,6 +1396,15 @@ Decrease the capturer count by one. The page will be set to hidden or occluded s
 browser window is hidden or occluded and the capturer count reaches zero. If you want to
 decrease the hidden capturer count instead you should set `stayHidden` to true.
 
+#### `contents.getDominantColors([rect, maxColors])`
+
+* `rect` [Rectangle](structures/rectangle.md) (optional) - The area of the page to be captured for dominant color's calculation.
+* `maxColors` Integer (optional) - The maximum dominant colors resolved by the promise.
+
+Returns `Promise<string[]>` - Resolves with an array of dominant colors sorted by maximum occurrence.
+
+Captures a snapshot of the page within `rect` and calculates the dominant colors for the area. Omitting `rect` will capture the whole visible page.
+
 #### `contents.getPrinters()` _Deprecated_
 
 Get the system printer list.
