@@ -1392,6 +1392,15 @@ decrease the hidden capturer count instead you should set `stayHidden` to true.
 **Deprecated:** This API's functionality is now handled automatically within `contents.capturePage()`.
 See [breaking changes](../breaking-changes.md).
 
+#### `contents.getDominantColors([rect, maxColors])`
+
+* `rect` [Rectangle](structures/rectangle.md) (optional) - The area of the page to be captured for dominant color's calculation.
+* `maxColors` Integer (optional) - The maximum dominant colors resolved by the promise.
+
+Returns `Promise<string[]>` - Resolves with an array of dominant colors sorted by maximum occurrence.
+
+Captures a snapshot of the page within `rect` and calculates the dominant colors for the area. Omitting `rect` will capture the whole visible page.
+
 #### `contents.getPrinters()` _Deprecated_
 
 Get the system printer list.
