@@ -14,6 +14,7 @@ void NativeView::SetNativeView(NATIVEVIEW view) {
     if (delete_view_)
       delete view_;
   }
+
   view_ = view;
   view_->AddObserver(this);
 }
@@ -44,6 +45,13 @@ void NativeView::OnViewBoundsChanged(views::View* observed_view) {
 void NativeView::OnViewIsDeleting(views::View* observed_view) {
   view_ = nullptr;
   NotifyViewIsDeleting();
+}
+
+void NativeView::OnViewHierarchyChanged(
+      views::View* observed_view,
+      const views::ViewHierarchyChangedDetails& details) {
+  SetRoundedCorners(GetRoundedCorners());
+  SetClickThrough(IsClickThrough());
 }
 
 void NativeView::SetBounds(const gfx::Rect& bounds,
@@ -117,7 +125,11 @@ void NativeView::SetBackgroundColor(SkColor color) {
 
 void NativeView::SetRoundedCorners(
     const NativeView::RoundedCornersOptions& options) {
+  rounded_corners_ = options;
   auto* view = GetNative();
+  if (!view)
+    return;
+
   view->SetPaintToLayer();
   view->layer()->SetFillsBoundsOpaquely(false);
 
@@ -130,9 +142,21 @@ void NativeView::SetRoundedCorners(
   view->layer()->SetIsFastRoundedCorner(true);
 }
 
+void NativeView::SetClickThrough(bool click_through) {
+  is_click_through_ = click_through;
+  auto* view = GetNative();
+  if (!view)
+    return;
+
+  view->SetCanProcessEventsWithinSubtree(!click_through);
+}
+
 void NativeView::SetClippingInsets(
     const NativeView::ClippingInsetOptions& options) {
   auto* view = GetNative();
+  if (!view)
+    return;
+
   view->SetPaintToLayer();
   view->layer()->SetFillsBoundsOpaquely(false);
 

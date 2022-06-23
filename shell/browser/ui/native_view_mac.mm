@@ -319,6 +319,7 @@ bool NativeView::WantsLayer() const {
 void NativeView::SetRoundedCorners(
     const NativeView::RoundedCornersOptions& options) {
   if (@available(macOS 10.13, *)) {
+    rounded_corners_ = options;
     SetWantsLayer(true);
     auto* view = GetNative();
     view.layer.masksToBounds = YES;

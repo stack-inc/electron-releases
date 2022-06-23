@@ -223,6 +223,7 @@ class NativeView : public base::RefCounted<NativeView>,
 #endif
 
   virtual void SetRoundedCorners(const RoundedCornersOptions& options);
+  RoundedCornersOptions GetRoundedCorners() const;
 
   void SetClippingInsets(const ClippingInsetOptions& options);
 
@@ -257,7 +258,7 @@ class NativeView : public base::RefCounted<NativeView>,
   void SetZIndex(int z_index);
   int GetZIndex() const;
 
-  void SetClickThrough(bool click_through);
+  virtual void SetClickThrough(bool click_through);
   bool IsClickThrough() const;
 
   virtual void DetachChildView(NativeView* view);
@@ -319,6 +320,9 @@ void NotifyDidScroll(NativeView* view);
   // views::ViewObserver:
   void OnViewBoundsChanged(views::View* observed_view) override;
   void OnViewIsDeleting(views::View* observed_view) override;
+  void OnViewHierarchyChanged(
+      views::View* observed_view,
+      const views::ViewHierarchyChangedDetails& details) override;
 #endif
 
   virtual void SetWindowForChildren(NativeWindow* window);
@@ -341,6 +345,7 @@ void NotifyDidScroll(NativeView* view);
   int z_index_ = 1;
 
   bool is_click_through_ = false;
+  RoundedCornersOptions rounded_corners_;
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   bool delete_view_ = true;
