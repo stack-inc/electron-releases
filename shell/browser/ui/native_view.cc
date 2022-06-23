@@ -35,6 +35,10 @@ void NativeView::SetVisible(bool visible) {
   SetVisibleImpl(visible);
 }
 
+NativeView::RoundedCornersOptions NativeView::GetRoundedCorners() const {
+  return rounded_corners_;
+}
+
 void NativeView::SetParent(NativeView* parent) {
   if (parent) {
     SetWindow(parent->window_);
@@ -68,9 +72,11 @@ int NativeView::GetZIndex() const {
   return z_index_;
 }
 
+#if BUILDFLAG(IS_MAC)
 void NativeView::SetClickThrough(bool click_through) {
   is_click_through_ = click_through;
 }
+#endif  // BUILDFLAG(IS_MAC)
 
 bool NativeView::IsClickThrough() const {
   return is_click_through_;
