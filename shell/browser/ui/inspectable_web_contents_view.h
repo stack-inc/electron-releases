@@ -57,6 +57,7 @@ class InspectableWebContentsView {
   // GetInitiallyFocusedView() to set initial focus to web view.
   virtual views::View* GetWebView() = 0;
   virtual void SetCornerRadii(const gfx::RoundedCornersF& corner_radii) = 0;
+  virtual void SetClickThrough(bool click_through) = 0;
 #else
   virtual gfx::NativeView GetNativeView() const = 0;
 #endif
