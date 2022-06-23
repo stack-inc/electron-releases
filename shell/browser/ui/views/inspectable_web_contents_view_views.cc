@@ -23,6 +23,7 @@
 #include "ui/views/window/client_view.h"
 
 /***** stack *****/
+#include "ui/aura/window.h"
 #include "ui/base/ui_base_features.h"
 
 #include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
@@ -155,13 +156,36 @@ void InspectableWebContentsViewViews::SetCornerRadii(
           !inspectable_web_contents_->GetWebContents()->GetNativeView()))
     return;
 
+  if (devtools_web_view_ && devtools_web_view_->GetVisible())
+    return;
+
   auto* holder = static_cast<views::WebView*>(contents_web_view_)->holder();
   if (!holder || !holder->GetNativeViewContainer())
     return;
 
-  if (!devtools_web_view_ || !devtools_web_view_->GetVisible()) {
-    holder->SetCornerRadii(corner_radii);
-  }
+  holder->SetCornerRadii(corner_radii);
+}
+
+void InspectableWebContentsViewViews::SetClickThrough(bool click_through) {
+  if (!contents_web_view_ || !inspectable_web_contents_ ||
+      (inspectable_web_contents_->IsGuest() ||
+          !inspectable_web_contents_->GetWebContents()->GetNativeView()))
+    return;
+
+  if (devtools_web_view_ && devtools_web_view_->GetVisible())
+    return;
+
+  auto* holder = static_cast<views::WebView*>(contents_web_view_)->holder();
+  if (!holder || !holder->GetNativeViewContainer())
+    return;
+
+  aura::Window* native_view_container = holder->GetNativeViewContainer();
+  if (!native_view_container)
+    return;
+
+  native_view_container->SetEventTargetingPolicy(click_through ?
+      aura::EventTargetingPolicy::kNone :
+      aura::EventTargetingPolicy::kTargetAndDescendants);
 }
 
 void InspectableWebContentsViewViews::ShowDevTools(bool activate) {
