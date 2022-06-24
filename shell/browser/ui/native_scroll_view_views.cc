@@ -87,12 +87,26 @@ void NativeScrollView::SetContentSize(const gfx::Size& size) {
 }
 
 void NativeScrollView::SetScrollPosition(gfx::Point point) {
-  ScrollRectToVisible(gfx::Rect(point.x(), point.y(), 1, 1));
+  if (!GetNative() || !content_view_.get())
+    return;
+  auto* scroll = static_cast<views::ScrollView*>(GetNative());
+  gfx::Size content_size = GetContentSize();
+  gfx::Rect visible_rect = scroll->GetVisibleRect();
+  int max_x_position = std::max(0, content_size.width() - visible_rect.width());
+  int max_y_position =
+      std::max(0, content_size.height() - visible_rect.height());
+  gfx::Rect new_visible_rect(std::min(std::max(0, point.x()), max_x_position),
+                             std::min(std::max(0, point.y()), max_y_position),
+                             visible_rect.width(), visible_rect.height());
+  content_view_->GetNative()->ScrollRectToVisible(new_visible_rect);
 }
 
 gfx::Point NativeScrollView::GetScrollPosition() const {
-  gfx::Rect rect = GetVisibleRect();
-  return gfx::Point(rect.x(), rect.y());
+  if (!GetNative())
+    return gfx::Point();
+  auto* scroll = static_cast<views::ScrollView*>(GetNative());
+  gfx::Rect visible_rect = scroll->GetVisibleRect();
+  return gfx::Point(visible_rect.x(), visible_rect.y());
 }
 
 gfx::Point NativeScrollView::GetMaximumScrollPosition() const {
