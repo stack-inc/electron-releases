@@ -149,6 +149,7 @@ std::string phaseToString(NSEventPhase phase) {
 - (void)setNativeBackgroundColor:(SkColor)color {
 }
 
+#if 0
 - (void)resizeSubviewsWithOldSize:(NSSize)oldBoundsSize {
   // Automatically resize the content view when ScrollView is larger than the
   // content size.
@@ -161,6 +162,7 @@ std::string phaseToString(NSEventPhase phase) {
   [self.documentView setFrameSize:content_size];
   [super resizeSubviewsWithOldSize:oldBoundsSize];
 }
+#endif
 
 - (void)scrollWheel:(NSEvent*)event {
   if (scroll_wheel_swapped_ && event.subtype == NSEventSubtypeMouseEvent) {
@@ -308,12 +310,14 @@ void NativeScrollView::InitScrollView(
           (vertical_mode.value() == ScrollBarMode::kEnabled) ? YES : NO;
   }
   [scroll.contentView setCopiesOnScroll:NO];
+  [scroll.contentView setAutoresizesSubviews:NO];
   SetNativeView(scroll);
 }
 
 void NativeScrollView::SetContentViewImpl(NativeView* view) {
   auto* scroll = static_cast<NSScrollView*>(GetNative());
   scroll.documentView = view->GetNative();
+  [scroll.documentView setAutoresizingMask:NSViewNotSizable];
 }
 
 void NativeScrollView::DetachChildViewImpl() {
