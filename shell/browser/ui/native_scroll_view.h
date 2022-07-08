@@ -15,13 +15,11 @@ namespace electron {
 
 enum class ScrollBarMode { kDisabled, kHiddenButEnabled, kEnabled };
 
-#if BUILDFLAG(IS_MAC)
 enum class ScrollElasticity {
   kAutomatic = 0,  // NSScrollElasticityAutomatic = 0
   kNone = 1,       // NSScrollElasticityNone = 1
   kAllowed = 2,    // NSScrollElasticityAllowed = 2
 };
-#endif
 
 class NativeScrollView : public NativeView {
  public:
@@ -45,26 +43,25 @@ class NativeScrollView : public NativeView {
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
 
-#if BUILDFLAG(IS_MAC)
-  void ScrollToPoint(gfx::Point point, const AnimationOptions& options);
-  void ScrollPointToCenter(gfx::Point point, const AnimationOptions& options);
-
-  void SetOverlayScrollbar(bool overlay);
-  bool IsOverlayScrollbar() const;
-#endif
-
   void SetHorizontalScrollBarMode(ScrollBarMode mode);
   ScrollBarMode GetHorizontalScrollBarMode() const;
   void SetVerticalScrollBarMode(ScrollBarMode mode);
   ScrollBarMode GetVerticalScrollBarMode() const;
   void SetScrollWheelSwapped(bool swap);
   bool IsScrollWheelSwapped();
-
-#if BUILDFLAG(IS_MAC)
+  void SetScrollEventsEnabled(bool enable);
+  bool IsScrollEventsEnabled();
   void SetHorizontalScrollElasticity(ScrollElasticity elasticity);
   ScrollElasticity GetHorizontalScrollElasticity() const;
   void SetVerticalScrollElasticity(ScrollElasticity elasticity);
   ScrollElasticity GetVerticalScrollElasticity() const;
+
+#if BUILDFLAG(IS_MAC)
+  void ScrollToPoint(gfx::Point point, const AnimationOptions& options);
+  void ScrollPointToCenter(gfx::Point point, const AnimationOptions& options);
+
+  void SetOverlayScrollbar(bool overlay);
+  bool IsOverlayScrollbar() const;
 
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor();
@@ -84,11 +81,6 @@ class NativeScrollView : public NativeView {
 
   void OnDidScroll();
 #endif
-
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
-  void SetScrollEventsEnabled(bool enable);
-  bool IsScrollEventsEnabled();
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
  protected:
   ~NativeScrollView() override;
