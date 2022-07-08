@@ -6,12 +6,14 @@
 namespace electron {
 
 MouseCapture::MouseCapture(NativeView* view) : view_(view) {
-  NSEventMask event_mask =
-      NSLeftMouseDownMask | NSLeftMouseUpMask | NSRightMouseDownMask |
-      NSRightMouseUpMask | NSMouseMovedMask | NSLeftMouseDraggedMask |
-      NSRightMouseDraggedMask | NSMouseEnteredMask | NSMouseExitedMask |
-      NSScrollWheelMask | NSOtherMouseDownMask | NSOtherMouseUpMask |
-      NSOtherMouseDraggedMask;
+  NSEventMask event_mask = NSEventMaskLeftMouseDown | NSEventMaskLeftMouseUp |
+                           NSEventMaskRightMouseDown | NSEventMaskRightMouseUp |
+                           NSEventMaskMouseMoved | NSEventMaskLeftMouseDragged |
+                           NSEventMaskRightMouseDragged |
+                           NSEventMaskMouseEntered | NSEventMaskMouseExited |
+                           NSEventMaskScrollWheel | NSEventMaskOtherMouseDown |
+                           NSEventMaskOtherMouseUp |
+                           NSEventMaskOtherMouseDragged;
   local_monitor_ = [NSEvent
       addLocalMonitorForEventsMatchingMask:event_mask
                                    handler:^NSEvent*(NSEvent* event) {
