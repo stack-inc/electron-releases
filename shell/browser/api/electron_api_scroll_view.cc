@@ -31,7 +31,6 @@ std::string ConvertFromScrollBarMode(ScrollBarMode mode) {
   return "enabled";
 }
 
-#if BUILDFLAG(IS_MAC)
 ScrollElasticity ConvertToScrollElasticity(std::string elasticity) {
   if (elasticity == "none")
     return ScrollElasticity::kNone;
@@ -47,7 +46,6 @@ std::string ConvertFromScrollElasticity(ScrollElasticity elasticity) {
     return "allowed";
   return "automatic";
 }
-#endif
 
 }  // namespace
 
@@ -94,11 +92,9 @@ void ScrollView::OnScrollWheel(NativeView* observed_view,
 }
 #endif  // BUILDFLAG(IS_MAC)
 
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 void ScrollView::OnDidScroll(NativeView* observed_view) {
   Emit("did-scroll");
 }
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
 void ScrollView::SetContentView(v8::Local<v8::Value> value) {
   gin::Handle<BaseView> content_view;
@@ -153,7 +149,14 @@ bool ScrollView::IsScrollWheelSwapped() {
   return scroll_->IsScrollWheelSwapped();
 }
 
-#if BUILDFLAG(IS_MAC)
+void ScrollView::SetScrollEventsEnabled(bool enable) {
+  scroll_->SetScrollEventsEnabled(enable);
+}
+
+bool ScrollView::IsScrollEventsEnabled() {
+  return scroll_->IsScrollEventsEnabled();
+}
+
 void ScrollView::SetHorizontalScrollElasticity(std::string elasticity) {
   scroll_->SetHorizontalScrollElasticity(ConvertToScrollElasticity(elasticity));
 }
@@ -169,7 +172,6 @@ void ScrollView::SetVerticalScrollElasticity(std::string elasticity) {
 std::string ScrollView::GetVerticalScrollElasticity() const {
   return ConvertFromScrollElasticity(scroll_->GetVerticalScrollElasticity());
 }
-#endif  // BUILDFLAG(IS_MAC)
 
 void ScrollView::SetScrollPosition(gfx::Point point) {
   scroll_->SetScrollPosition(point);
@@ -249,16 +251,6 @@ bool ScrollView::GetDrawOverflowIndicator() const {
 }
 #endif
 
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
-void ScrollView::SetScrollEventsEnabled(bool enable) {
-  scroll_->SetScrollEventsEnabled(enable);
-}
-
-bool ScrollView::IsScrollEventsEnabled() {
-  return scroll_->IsScrollEventsEnabled();
-}
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
-
 // static
 gin_helper::WrappableBase* ScrollView::New(gin_helper::ErrorThrower thrower,
                                            gin::Arguments* args) {
@@ -309,7 +301,6 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("isScrollWheelSwapped", &ScrollView::IsScrollWheelSwapped)
       .SetMethod("setScrollEventsEnabled", &ScrollView::SetScrollEventsEnabled)
       .SetMethod("isScrollEventsEnabled", &ScrollView::IsScrollEventsEnabled)
-#if BUILDFLAG(IS_MAC)
       .SetMethod("setHorizontalScrollElasticity",
                  &ScrollView::SetHorizontalScrollElasticity)
       .SetMethod("getHorizontalScrollElasticity",
@@ -318,7 +309,6 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
                  &ScrollView::SetVerticalScrollElasticity)
       .SetMethod("getVerticalScrollElasticity",
                  &ScrollView::GetVerticalScrollElasticity)
-#endif
       .SetMethod("setScrollPosition", &ScrollView::SetScrollPosition)
       .SetMethod("getScrollPosition", &ScrollView::GetScrollPosition)
       .SetMethod("getMaximumScrollPosition",

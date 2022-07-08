@@ -85,7 +85,7 @@ Creates the new scroll view.
 
 Objects created with `new ScrollView` emit the following events:
 
-#### Event: 'did-scroll' _macOS_ _Windows_ _Experimental_
+#### Event: 'did-scroll' _Experimental_
 
 Returns:
 
@@ -245,7 +245,7 @@ Controls how the vertical scroll bar appears and functions.
 
 Returns `string` - vertical scrollbar mode.
 
-#### `view.setHorizontalScrollElasticity(elasticity)` _macOS_ _Experimental_
+#### `view.setHorizontalScrollElasticity(elasticity)` _Experimental_
 
 * `elasticity` string - Can be `automatic`, `none`, `allowed`. Default is `automatic`.
 
@@ -258,17 +258,17 @@ or the vertical scroller is hidden and the horizontal scroller is visible.
 * `none` - Disallow scrolling beyond document bounds on this axis.
 * `allowed` - Allow content to be scrolled past its bounds on this axis in an elastic fashion.
 
-#### `view.getHorizontalScrollElasticity()` _macOS_ _Experimental_
+#### `view.getHorizontalScrollElasticity()` _Experimental_
 
 Returns `string` - The scroll view’s horizontal scrolling elasticity mode.
 
-#### `view.setVerticalScrollElasticity(elasticity)` _macOS_ _Experimental_
+#### `view.setVerticalScrollElasticity(elasticity)` _Experimental_
 
 * `elasticity` string - Can be `automatic`, `none`, `allowed`. Default is `automatic`.
 
 The scroll view’s vertical scrolling elasticity mode.
 
-#### `view.getVerticalScrollElasticity()` _macOS_ _Experimental_
+#### `view.getVerticalScrollElasticity()` _Experimental_
 
 Returns `string` - The scroll view’s vertical scrolling elasticity mode.
 
@@ -294,21 +294,21 @@ Returns [`Point`](structures/point.md) - The maximum horizontal and vertical scr
 
 Returns boolean - The scroller style used by the scroll view.
 
-#### `view.setScrollEventsEnabled(enable)` _macOS_ _Windows_ _Experimental_
+#### `view.setScrollEventsEnabled(enable)` _Experimental_
 
 * `enable` boolean - Whether the scroll events are enabled. Default is `false`.
 
-#### `view.isScrollEventsEnabled()` _macOS_ _Experimental_
+#### `view.isScrollEventsEnabled()` _Experimental_
 
 Returns `boolean` - Whether the scroll events are enabled.
 
-#### `view.setScrollWheelSwapped(swap)` _macOS_ _Experimental_
+#### `view.setScrollWheelSwapped(swap)` _Experimental_
 
 * `swap` boolean - Whether the mouse wheel should scroll horizontally. Default is `false`.
 
 Swaps the behaviour of mouse wheel.
 
-#### `view.isScrollWheelSwapped()` _macOS_ _Experimental_
+#### `view.isScrollWheelSwapped()` _Experimental_
 
 Returns `boolean` - Whether the mouse wheel scrolls horizontally.
 
