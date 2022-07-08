@@ -40,10 +40,7 @@ class ScrollView : public BaseView {
                      std::string phase,
                      std::string momentum_phase) override;
 #endif  // BUILDFLAG(IS_MAC)
-
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
   void OnDidScroll(NativeView* observed_view) override;
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
   void SetContentView(v8::Local<v8::Value> value);
   v8::Local<v8::Value> GetContentView() const;
@@ -55,12 +52,12 @@ class ScrollView : public BaseView {
   std::string GetVerticalScrollBarMode() const;
   void SetScrollWheelSwapped(bool swap);
   bool IsScrollWheelSwapped();
-#if BUILDFLAG(IS_MAC)
+  void SetScrollEventsEnabled(bool enable);
+  bool IsScrollEventsEnabled();
   void SetHorizontalScrollElasticity(std::string elasticity);
   std::string GetHorizontalScrollElasticity() const;
   void SetVerticalScrollElasticity(std::string elasticity);
   std::string GetVerticalScrollElasticity() const;
-#endif
   void SetScrollPosition(gfx::Point point);
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
@@ -83,10 +80,6 @@ class ScrollView : public BaseView {
   void SetDrawOverflowIndicator(bool indicator);
   bool GetDrawOverflowIndicator() const;
 #endif
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
-  void SetScrollEventsEnabled(bool enable);
-  bool IsScrollEventsEnabled();
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
  private:
   NativeScrollView* scroll_;
