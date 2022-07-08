@@ -185,6 +185,28 @@ bool NativeScrollView::IsScrollWheelSwapped() {
   return scroll->GetTreatAllScrollEventsAsHorizontal();
 }
 
+void NativeScrollView::SetScrollEventsEnabled(bool enable) {
+  scroll_events_ = enable;
+}
+
+bool NativeScrollView::IsScrollEventsEnabled() {
+  return scroll_events_;
+}
+
+void NativeScrollView::SetHorizontalScrollElasticity(
+    ScrollElasticity elasticity) {}
+
+ScrollElasticity NativeScrollView::GetHorizontalScrollElasticity() const {
+  return ScrollElasticity::kNone;
+}
+
+void NativeScrollView::SetVerticalScrollElasticity(
+    ScrollElasticity elasticity) {}
+
+ScrollElasticity NativeScrollView::GetVerticalScrollElasticity() const {
+  return ScrollElasticity::kNone;
+}
+
 void NativeScrollView::ClipHeightTo(int min_height, int max_height) {
   if (!GetNative())
     return;
@@ -258,14 +280,6 @@ void NativeScrollView::SetSmoothScroll(bool enable) {
 void NativeScrollView::OnDidScroll() {
   if (IsScrollEventsEnabled())
     NotifyDidScroll(this);
-}
-
-void NativeScrollView::SetScrollEventsEnabled(bool enable) {
-  scroll_events_ = enable;
-}
-
-bool NativeScrollView::IsScrollEventsEnabled() {
-  return scroll_events_;
 }
 
 }  // namespace electron

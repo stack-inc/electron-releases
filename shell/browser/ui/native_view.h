@@ -132,9 +132,7 @@ class NativeView : public base::RefCounted<NativeView>,
                                std::string momentum_phase) {}
 #endif  // BUILDFLAG(IS_MAC)
 
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
     virtual void OnDidScroll(NativeView* observed_view) {}
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
     virtual void OnSizeChanged(NativeView* observed_view,
                                gfx::Size old_size,
@@ -295,9 +293,7 @@ class NativeView : public base::RefCounted<NativeView>,
                          std::string momentum_phase);
 #endif  // BUILDFLAG(IS_MAC)
 
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
   void NotifyDidScroll(NativeView* view);
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
   // Notify that view's size has changed.
   virtual void NotifySizeChanged(gfx::Size old_size, gfx::Size new_size);

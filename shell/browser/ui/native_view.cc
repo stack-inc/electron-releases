@@ -72,12 +72,6 @@ int NativeView::GetZIndex() const {
   return z_index_;
 }
 
-#if BUILDFLAG(IS_MAC)
-void NativeView::SetClickThrough(bool click_through) {
-  is_click_through_ = click_through;
-}
-#endif  // BUILDFLAG(IS_MAC)
-
 bool NativeView::IsClickThrough() const {
   return is_click_through_;
 }
@@ -164,12 +158,10 @@ void NativeView::NotifyScrollWheel(NativeView* view,
 }
 #endif  // BUILDFLAG(IS_MAC)
 
-#if defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 void NativeView::NotifyDidScroll(NativeView* view) {
   for (Observer& observer : observers_)
     observer.OnDidScroll(view);
 }
-#endif  // defined(TOOLKIT_VIEWS) || BUILDFLAG(IS_MAC)
 
 void NativeView::NotifySizeChanged(gfx::Size old_size, gfx::Size new_size) {
   for (Observer& observer : observers_)
