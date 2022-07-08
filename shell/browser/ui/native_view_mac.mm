@@ -17,26 +17,26 @@ NativeView* g_captured_view = nullptr;
 
 EventType EventTypeFromNS(NSEvent* event) {
   switch ([event type]) {
-    case NSLeftMouseDown:
+    case NSEventTypeLeftMouseDown:
       return EventType::kLeftMouseDown;
-    case NSRightMouseDown:
+    case NSEventTypeRightMouseDown:
       return EventType::kRightMouseDown;
-    case NSOtherMouseDown:
+    case NSEventTypeOtherMouseDown:
       return EventType::kOtherMouseDown;
-    case NSLeftMouseUp:
+    case NSEventTypeLeftMouseUp:
       return EventType::kLeftMouseUp;
-    case NSRightMouseUp:
+    case NSEventTypeRightMouseUp:
       return EventType::kRightMouseUp;
-    case NSOtherMouseUp:
+    case NSEventTypeOtherMouseUp:
       return EventType::kOtherMouseUp;
-    case NSLeftMouseDragged:
-    case NSRightMouseDragged:
-    case NSOtherMouseDragged:
-    case NSMouseMoved:
+    case NSEventTypeLeftMouseDragged:
+    case NSEventTypeRightMouseDragged:
+    case NSEventTypeOtherMouseDragged:
+    case NSEventTypeMouseMoved:
       return EventType::kMouseMove;
-    case NSMouseEntered:
+    case NSEventTypeMouseEntered:
       return EventType::kMouseEnter;
-    case NSMouseExited:
+    case NSEventTypeMouseExited:
       return EventType::kMouseLeave;
     default:
       return EventType::kUnknown;
