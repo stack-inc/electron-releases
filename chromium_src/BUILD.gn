@@ -318,6 +318,8 @@ static_library("chrome") {
       "//chrome/renderer/extensions/extension_hooks_delegate.h",
       "//chrome/renderer/extensions/tabs_hooks_delegate.cc",
       "//chrome/renderer/extensions/tabs_hooks_delegate.h",
+      "//electron/shell/browser/extensions/api/streams_private/streams_private_api.cc",
+      "//electron/shell/browser/extensions/api/streams_private/streams_private_api.h",
     ]
 
     if (enable_pdf_viewer) {
