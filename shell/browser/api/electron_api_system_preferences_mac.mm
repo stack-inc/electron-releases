@@ -32,6 +32,7 @@
 #include "shell/common/node_includes.h"
 #include "shell/common/process_util.h"
 #include "skia/ext/skia_utils_mac.h"
+#include "ui/base/cocoa/permissions_utils.h"
 #include "ui/native_theme/native_theme.h"
 
 namespace gin {
@@ -604,8 +605,12 @@ v8::Local<v8::Promise> SystemPreferences::AskForMediaAccess(
     const std::string& media_type) {
   gin_helper::Promise<bool> promise(isolate);
   v8::Local<v8::Promise> handle = promise.GetHandle();
-
-  if (auto type = ParseMediaType(media_type)) {
+  if (media_type == "screen") {
+    if (@available(macOS 10.15, *)) {
+      CGWindowListCreateImage(CGRectMake(0, 0, 1, 1), kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+    }
+    promise.Resolve(ui::TryPromptUserForScreenCapture());
+  } else if (auto type = ParseMediaType(media_type)) {
     if (@available(macOS 10.14, *)) {
       __block gin_helper::Promise<bool> p = std::move(promise);
       [AVCaptureDevice requestAccessForMediaType:type
