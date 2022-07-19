@@ -28,10 +28,6 @@ class NativeScrollView : public NativeView {
 
   // NativeView:
   void DetachChildView(NativeView* view) override;
-  void TriggerBeforeunloadEvents() override;
-#if BUILDFLAG(IS_MAC)
-  void UpdateDraggableRegions() override;
-#endif
 
   void SetContentView(scoped_refptr<NativeView> view);
   NativeView* GetContentView() const;

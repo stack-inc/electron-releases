@@ -30,11 +30,4 @@ void NativeWrapperBrowserView::DetachBrowserViewImpl() {
   }
 }
 
-void NativeWrapperBrowserView::UpdateDraggableRegions() {
-  if (api_browser_view_) {
-    api_browser_view_->view()->UpdateDraggableRegions(
-        api_browser_view_->view()->GetDraggableRegions());
-  }
-}
-
 }  // namespace electron

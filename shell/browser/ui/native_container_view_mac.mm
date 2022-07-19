@@ -73,9 +73,4 @@ void NativeContainerView::RearrangeChildViews() {
   [CATransaction commit];
 }
 
-void NativeContainerView::UpdateDraggableRegions() {
-  for (auto view : children_)
-    view->UpdateDraggableRegions();
-}
-
 }  // namespace electron

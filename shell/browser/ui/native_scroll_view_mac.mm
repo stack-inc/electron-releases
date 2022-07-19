@@ -515,9 +515,4 @@ double NativeScrollView::GetScrollWheelFactor() {
   return [scroll scrollWheelFactor];
 }
 
-void NativeScrollView::UpdateDraggableRegions() {
-  if (content_view_.get())
-    content_view_->UpdateDraggableRegions();
-}
-
 }  // namespace electron
