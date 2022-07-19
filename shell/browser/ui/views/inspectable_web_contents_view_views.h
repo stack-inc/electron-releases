@@ -10,6 +10,7 @@
 #include "base/compiler_specific.h"
 #include "chrome/browser/devtools/devtools_contents_resizing_strategy.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
+#include "third_party/skia/include/core/SkRegion.h"
 #include "ui/views/controls/image_view.h"
 #include "ui/views/view.h"
 
@@ -21,14 +22,15 @@ class WidgetDelegate;
 
 namespace electron {
 
-class InspectableWebContents;
-
 class InspectableWebContentsViewViews : public InspectableWebContentsView,
                                         public views::View {
  public:
   explicit InspectableWebContentsViewViews(
       InspectableWebContents* inspectable_web_contents);
   ~InspectableWebContentsViewViews() override;
+
+  bool IsContainedInDraggableRegion(views::View* root_view,
+                                    const gfx::Point& location);
 
   // InspectableWebContentsView:
   views::View* GetView() override;
@@ -45,6 +47,8 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
   void SetTitle(const std::u16string& title) override;
   void ShowThumbnail(gfx::Image thumbnail) override;
   void HideThumbnail() override;
+  void UpdateDraggableRegions(
+      const std::vector<mojom::DraggableRegionPtr>& regions) override;
 
   // views::View:
   void Layout() override;
@@ -54,16 +58,9 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
   void SetStopPaintBackground(bool stop_paint_background);
   /*****************/
 
-  InspectableWebContents* inspectable_web_contents() {
-    return inspectable_web_contents_;
-  }
-
   const std::u16string& GetTitle() const { return title_; }
 
  private:
-  // Owns us.
-  InspectableWebContents* inspectable_web_contents_;
-
   std::unique_ptr<views::Widget> devtools_window_;
   views::WebView* devtools_window_web_view_ = nullptr;
   views::View* contents_web_view_ = nullptr;
@@ -78,6 +75,8 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
   /***** stack *****/
   bool stop_paint_background_ = false;
   /*****************/
+
+  std::unique_ptr<SkRegion> draggable_region_;
 };
 
 }  // namespace electron

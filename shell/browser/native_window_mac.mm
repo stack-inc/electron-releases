@@ -33,7 +33,6 @@
 #include "shell/browser/ui/cocoa/root_view_mac.h"
 #include "shell/browser/ui/cocoa/window_buttons_proxy.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
-#include "shell/browser/ui/inspectable_web_contents_view.h"
 #include "shell/browser/window_list.h"
 #include "shell/common/gin_converters/gfx_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
@@ -1308,7 +1307,6 @@ void NativeWindowMac::AddChildView(NativeView* view) {
     return;
   }
 
-  add_base_view(view);
   auto* native_view = view->GetNative();
   [[window_ contentView] addSubview:native_view
                          positioned:NSWindowAbove
@@ -1330,7 +1328,6 @@ bool NativeWindowMac::RemoveChildView(NativeView* view) {
 
   view->SetWindow(nullptr);
   [view->GetNative() removeFromSuperview];
-  remove_base_view(view);
 
   [CATransaction commit];
 
@@ -1346,8 +1343,6 @@ void NativeWindowMac::SetTopChildView(NativeView* view) {
     return;
   }
 
-  remove_base_view(view);
-  add_base_view(view);
   auto* native_view = view->GetNative();
   [[window_ contentView] addSubview:native_view
                          positioned:NSWindowAbove

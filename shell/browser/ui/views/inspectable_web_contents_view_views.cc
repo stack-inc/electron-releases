@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "base/strings/utf_string_conversions.h"
+#include "shell/browser/ui/drag_util.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_delegate.h"
 #include "shell/browser/ui/inspectable_web_contents_view_delegate.h"
@@ -89,7 +90,7 @@ InspectableWebContentsView* CreateInspectableContentsView(
 
 InspectableWebContentsViewViews::InspectableWebContentsViewViews(
     InspectableWebContents* inspectable_web_contents)
-    : inspectable_web_contents_(inspectable_web_contents),
+    : InspectableWebContentsView(inspectable_web_contents),
       //! devtools_web_view_(new views::WebView(nullptr)),
       title_(u"Developer Tools") {
   /***** stack *****/
@@ -139,6 +140,19 @@ InspectableWebContentsViewViews::~InspectableWebContentsViewViews() {
         devtools_window_->GetWindowBoundsInScreen());
 }
 
+bool InspectableWebContentsViewViews::IsContainedInDraggableRegion(
+    views::View* root_view,
+    const gfx::Point& location) {
+  if (!draggable_region_.get())
+    return false;
+  // Draggable regions are defined relative to the web contents.
+  gfx::Point point_in_contents_web_view_coords(location);
+  views::View::ConvertPointToTarget(root_view, this,
+                                    &point_in_contents_web_view_coords);
+  return draggable_region_->contains(point_in_contents_web_view_coords.x(),
+                                     point_in_contents_web_view_coords.y());
+}
+
 views::View* InspectableWebContentsViewViews::GetView() {
   return this;
 }
@@ -151,7 +165,7 @@ void InspectableWebContentsViewViews::SetCornerRadii(
     const gfx::RoundedCornersF& corner_radii) {
   if (!contents_web_view_ || !inspectable_web_contents_ ||
       (inspectable_web_contents_->IsGuest() ||
-          !inspectable_web_contents_->GetWebContents()->GetNativeView()))
+       !inspectable_web_contents_->GetWebContents()->GetNativeView()))
     return;
 
   if (devtools_web_view_ && devtools_web_view_->GetVisible())
@@ -167,7 +181,7 @@ void InspectableWebContentsViewViews::SetCornerRadii(
 void InspectableWebContentsViewViews::SetClickThrough(bool click_through) {
   if (!contents_web_view_ || !inspectable_web_contents_ ||
       (inspectable_web_contents_->IsGuest() ||
-          !inspectable_web_contents_->GetWebContents()->GetNativeView()))
+       !inspectable_web_contents_->GetWebContents()->GetNativeView()))
     return;
 
   if (devtools_web_view_ && devtools_web_view_->GetVisible())
@@ -181,9 +195,9 @@ void InspectableWebContentsViewViews::SetClickThrough(bool click_through) {
   if (!native_view_container)
     return;
 
-  native_view_container->SetEventTargetingPolicy(click_through ?
-      aura::EventTargetingPolicy::kNone :
-      aura::EventTargetingPolicy::kTargetAndDescendants);
+  native_view_container->SetEventTargetingPolicy(
+      click_through ? aura::EventTargetingPolicy::kNone
+                    : aura::EventTargetingPolicy::kTargetAndDescendants);
 }
 
 void InspectableWebContentsViewViews::ShowDevTools(bool activate) {
@@ -303,6 +317,14 @@ void InspectableWebContentsViewViews::HideThumbnail() {
     thumbnail_view_ = nullptr;
     Layout();
   }
+}
+
+void InspectableWebContentsViewViews::UpdateDraggableRegions(
+    const std::vector<mojom::DraggableRegionPtr>& regions) {
+  if (&draggable_regions_ == &regions)
+    return;
+  draggable_regions_ = mojo::Clone(regions);
+  draggable_region_ = DraggableRegionsToSkRegion(draggable_regions_);
 }
 
 void InspectableWebContentsViewViews::Layout() {

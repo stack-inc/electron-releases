@@ -21,7 +21,7 @@
 #include "shell/browser/native_browser_view_views.h"
 #include "shell/browser/ui/drag_util.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
-#include "shell/browser/ui/inspectable_web_contents_view.h"
+#include "shell/browser/ui/views/inspectable_web_contents_view_views.h"
 #include "shell/browser/ui/views/root_view.h"
 #include "shell/browser/web_contents_preferences.h"
 #include "shell/browser/web_view_manager.h"
@@ -1311,7 +1311,6 @@ void NativeWindowViews::AddChildView(NativeView* view) {
   if (!view)
     return;
 
-  add_base_view(view);
   content_view()->AddChildView(view->GetNative());
   view->SetWindow(this);
 }
@@ -1325,7 +1324,6 @@ bool NativeWindowViews::RemoveChildView(NativeView* view) {
 
   view->SetWindow(nullptr);
   content_view()->RemoveChildView(view->GetNative());
-  remove_base_view(view);
   return true;
 }
 
@@ -1336,8 +1334,6 @@ void NativeWindowViews::SetTopChildView(NativeView* view) {
   if (!view)
     return;
 
-  remove_base_view(view);
-  add_base_view(view);
   content_view()->ReorderChildView(view->GetNative(), -1);
   view->SetWindow(this);
 }
@@ -1642,11 +1638,11 @@ bool NativeWindowViews::ShouldDescendIntoChildForEventHandling(
     const gfx::Point& location) {
   // App window should claim mouse events that fall within any BrowserViews'
   // draggable region.
-  for (auto* view : browser_views()) {
-    auto* native_view = static_cast<NativeBrowserViewViews*>(view);
-    auto* view_draggable_region = native_view->draggable_region();
-    if (view_draggable_region &&
-        view_draggable_region->contains(location.x(), location.y()))
+  for (auto* view : inspectable_views()) {
+    auto* inspectable_view =
+        static_cast<InspectableWebContentsViewViews*>(view);
+    if (inspectable_view->IsContainedInDraggableRegion(content_view(),
+                                                       location))
       return false;
   }
 

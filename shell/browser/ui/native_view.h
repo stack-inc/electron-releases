@@ -259,12 +259,6 @@ class NativeView : public base::RefCounted<NativeView>,
 
   virtual void DetachChildView(NativeView* view);
 
-  virtual void TriggerBeforeunloadEvents();
-
-#if BUILDFLAG(IS_MAC)
-  virtual void UpdateDraggableRegions();
-#endif
-
   void AddObserver(Observer* observer);
   void RemoveObserver(Observer* observer);
 
