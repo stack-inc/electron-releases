@@ -14,8 +14,6 @@
 
 namespace electron {
 
-class InspectableWebContents;
-
 class InspectableWebContentsViewMac : public InspectableWebContentsView {
  public:
   explicit InspectableWebContentsViewMac(
@@ -36,15 +34,10 @@ class InspectableWebContentsViewMac : public InspectableWebContentsView {
   void SetTitle(const std::u16string& title) override;
   void ShowThumbnail(gfx::Image thumbnail) override;
   void HideThumbnail() override;
-
-  InspectableWebContents* inspectable_web_contents() {
-    return inspectable_web_contents_;
-  }
+  void UpdateDraggableRegions(
+      const std::vector<mojom::DraggableRegionPtr>& regions) override;
 
  private:
-  // Owns us.
-  InspectableWebContents* inspectable_web_contents_;
-
   base::scoped_nsobject<ElectronInspectableWebContentsView> view_;
 };
 

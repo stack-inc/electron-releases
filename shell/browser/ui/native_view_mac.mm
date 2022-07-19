@@ -393,6 +393,4 @@ void NativeView::SetClickThrough(bool click_through) {
   is_click_through_ = click_through;
 }
 
-void NativeView::UpdateDraggableRegions() {}
-
 }  // namespace electron

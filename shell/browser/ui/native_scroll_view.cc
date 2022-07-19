@@ -41,11 +41,6 @@ void NativeScrollView::DetachChildView(NativeView* view) {
   NotifyChildViewDetached(view);
 }
 
-void NativeScrollView::TriggerBeforeunloadEvents() {
-  if (content_view_.get())
-    content_view_->TriggerBeforeunloadEvents();
-}
-
 void NativeScrollView::SetWindowForChildren(NativeWindow* window) {
   if (content_view_.get())
     content_view_->SetWindow(window);

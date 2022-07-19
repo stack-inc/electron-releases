@@ -14,10 +14,6 @@ class NativeContainerView : public NativeView {
   // NativeView:
   bool IsContainer() const override;
   void DetachChildView(NativeView* view) override;
-  void TriggerBeforeunloadEvents() override;
-#if BUILDFLAG(IS_MAC)
-  void UpdateDraggableRegions() override;
-#endif
 
   // Add/Remove children.
   void AddChildView(scoped_refptr<NativeView> view);

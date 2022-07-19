@@ -8,6 +8,7 @@
 
 #include <string>
 
+#include "shell/common/api/api.mojom.h"
 #include "ui/gfx/native_widget_types.h"
 
 class DevToolsContentsResizingStrategy;
@@ -28,18 +29,28 @@ class View;
 
 namespace electron {
 
+class InspectableWebContents;
 class InspectableWebContentsViewDelegate;
 
 class InspectableWebContentsView {
  public:
-  InspectableWebContentsView() {}
-  virtual ~InspectableWebContentsView() {}
+  explicit InspectableWebContentsView(
+      InspectableWebContents* inspectable_web_contents);
+  virtual ~InspectableWebContentsView();
+
+  InspectableWebContents* inspectable_web_contents() {
+    return inspectable_web_contents_;
+  }
 
   // The delegate manages its own life.
   void SetDelegate(InspectableWebContentsViewDelegate* delegate) {
     delegate_ = delegate;
   }
   InspectableWebContentsViewDelegate* GetDelegate() const { return delegate_; }
+
+  const std::vector<mojom::DraggableRegionPtr>& GetDraggableRegions() const {
+    return draggable_regions_;
+  }
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   // Returns the container control, which has devtools view attached.
@@ -65,6 +76,16 @@ class InspectableWebContentsView {
   virtual void SetTitle(const std::u16string& title) = 0;
   virtual void ShowThumbnail(gfx::Image thumbnail) = 0;
   virtual void HideThumbnail() = 0;
+
+  // Called when the window needs to update its draggable region.
+  virtual void UpdateDraggableRegions(
+      const std::vector<mojom::DraggableRegionPtr>& regions) = 0;
+
+ protected:
+  // Owns us.
+  InspectableWebContents* inspectable_web_contents_;
+
+  std::vector<mojom::DraggableRegionPtr> draggable_regions_;
 
  private:
   InspectableWebContentsViewDelegate* delegate_ = nullptr;  // weak references.

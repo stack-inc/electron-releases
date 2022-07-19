@@ -22,11 +22,6 @@ void NativeContainerView::DetachChildView(NativeView* view) {
     NotifyChildViewDetached(view);
 }
 
-void NativeContainerView::TriggerBeforeunloadEvents() {
-  for (auto view : children_)
-    view->TriggerBeforeunloadEvents();
-}
-
 void NativeContainerView::SetWindowForChildren(NativeWindow* window) {
   for (auto view : children_)
     view->SetWindow(window);

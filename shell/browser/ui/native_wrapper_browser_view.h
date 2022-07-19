@@ -21,10 +21,6 @@ class NativeWrapperBrowserView : public NativeView {
   // NativeView:
   void SetBounds(const gfx::Rect& bounds,
                  const BoundsAnimationOptions& options) override;
-  void TriggerBeforeunloadEvents() override;
-#if BUILDFLAG(IS_MAC)
-  void UpdateDraggableRegions() override;
-#endif
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   void SetRoundedCorners(const RoundedCornersOptions& options) override;
