@@ -219,8 +219,8 @@ void BrowserWindow::OnCloseButtonClicked(bool* prevent_default) {
   api_web_contents_->NotifyUserActivation();
 
   // Trigger beforeunload events for associated BrowserViews.
-  for (NativeBrowserView* view : window_->browser_views()) {
-    auto* vwc = view->web_contents();
+  for (InspectableWebContentsView* view : window_->inspectable_views()) {
+    auto* vwc = view->inspectable_web_contents()->GetWebContents();
     auto* api_web_contents = api::WebContents::From(vwc);
 
     // Required to make beforeunload handler work.
@@ -233,12 +233,6 @@ void BrowserWindow::OnCloseButtonClicked(bool* prevent_default) {
       }
     }
   }
-
-  if (window_->GetContentView())
-    window_->GetContentView()->TriggerBeforeunloadEvents();
-
-  for (NativeView* view : window_->base_views())
-    view->TriggerBeforeunloadEvents();
 
   if (web_contents()->NeedToFireBeforeUnloadOrUnloadEvents()) {
     web_contents()->DispatchBeforeUnload(false /* auto_cancel */);
@@ -281,14 +275,8 @@ void BrowserWindow::OnWindowResize() {
   if (!draggable_regions_.empty()) {
     UpdateDraggableRegions(draggable_regions_);
   } else {
-    for (NativeBrowserView* view : window_->browser_views()) {
+    for (InspectableWebContentsView* view : window_->inspectable_views())
       view->UpdateDraggableRegions(view->GetDraggableRegions());
-    }
-    if (window_->GetContentView())
-      window_->GetContentView()->UpdateDraggableRegions();
-    for (NativeView* view : window_->base_views()) {
-      view->UpdateDraggableRegions();
-    }
   }
 #endif
   BaseWindow::OnWindowResize();

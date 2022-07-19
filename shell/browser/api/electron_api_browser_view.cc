@@ -107,7 +107,15 @@ void BrowserView::SetOwnerWindow(BaseWindow* window) {
   if (web_contents())
     web_contents()->SetOwnerWindow(window ? window->window() : nullptr);
 
+  if (owner_window_.get()) {
+    owner_window_->window()->remove_inspectable_view(
+        view_->GetInspectableWebContentsView());
+  }
+
   owner_window_ = window ? window->GetWeakPtr() : nullptr;
+
+  if (owner_window_.get() && view_->GetInspectableWebContentsView())
+    owner_window_->window()->add_inspectable_view(view_->GetInspectableWebContentsView());
 }
 
 void BrowserView::SetOwnerView(NativeWrapperBrowserView* view) {
@@ -135,7 +143,10 @@ void BrowserView::WebContentsDestroyed() {
 
 void BrowserView::OnDraggableRegionsUpdated(
     const std::vector<mojom::DraggableRegionPtr>& regions) {
-  view_->UpdateDraggableRegions(regions);
+  InspectableWebContentsView* iwc_view = view_->GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  iwc_view->UpdateDraggableRegions(regions);
 }
 
 // static

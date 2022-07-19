@@ -36,12 +36,6 @@ class NativeBrowserViewMac : public NativeBrowserView {
   double GetOpacity() override;
   void SetVisible(bool visible) override;
   bool IsVisible() override;
-
-  void UpdateDraggableRegions(
-      const std::vector<mojom::DraggableRegionPtr>& regions) override;
-
-  void UpdateDraggableRegions(
-      const std::vector<gfx::Rect>& drag_exclude_rects) override;
 };
 
 }  // namespace electron
