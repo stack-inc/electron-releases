@@ -326,13 +326,13 @@ void NativeView::SetRoundedCorners(
 
     CACornerMask mask = 0;
     if (options.top_left)
-      mask |= kCALayerMinXMaxYCorner;
-    if (options.top_right)
-      mask |= kCALayerMaxXMaxYCorner;
-    if (options.bottom_left)
       mask |= kCALayerMinXMinYCorner;
-    if (options.bottom_right)
+    if (options.top_right)
       mask |= kCALayerMaxXMinYCorner;
+    if (options.bottom_left)
+      mask |= kCALayerMinXMaxYCorner;
+    if (options.bottom_right)
+      mask |= kCALayerMaxXMaxYCorner;
     view.layer.maskedCorners = mask;
   }
 }
