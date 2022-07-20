@@ -272,6 +272,7 @@ It creates a new `BrowserWindow` with native properties as set by the `options`.
     tab button to your window's tab bar and allows your `app` and window to
     receive the `new-window-for-tab` event.
   * `webPreferences` Object (optional) - Settings of web page's features.
+    * `optimizeForScroll` boolean (optional) - Whether to enable optymalization for ScrollView.
     * `devTools` boolean (optional) - Whether to enable DevTools. If it is set to `false`, can not use `BrowserWindow.webContents.openDevTools()` to open DevTools. Default is `true`.
     * `nodeIntegration` boolean (optional) - Whether node integration is enabled.
       Default is `false`.
