@@ -189,7 +189,7 @@ class NativeView : public base::RefCounted<NativeView>,
   bool IsFocusable() const;
 
   // Display related styles.
-  void SetBackgroundColor(SkColor color);
+  virtual void SetBackgroundColor(SkColor color);
 
 #if BUILDFLAG(IS_MAC)
   void SetVisualEffectMaterial(VisualEffectMaterial material);
