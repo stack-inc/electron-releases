@@ -515,4 +515,8 @@ double NativeScrollView::GetScrollWheelFactor() {
   return [scroll scrollWheelFactor];
 }
 
+void NativeScrollView::SetBackgroundColor(SkColor color) {
+  NativeView::SetBackgroundColor(color);
+}
+
 }  // namespace electron

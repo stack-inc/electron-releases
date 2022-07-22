@@ -27,6 +27,7 @@ class NativeScrollView : public NativeView {
                    absl::optional<ScrollBarMode> vertical_mode);
 
   // NativeView:
+  void SetBackgroundColor(SkColor color) override;
   void DetachChildView(NativeView* view) override;
 
   void SetContentView(scoped_refptr<NativeView> view);

@@ -51,6 +51,8 @@ void NativeScrollView::InitScrollView(
     scroll_view = new views::ScrollView();
   }
 
+  scroll_view->SetBackgroundColor(absl::optional<SkColor>());
+
   on_contents_scrolled_subscription_ =
       scroll_view->AddContentsScrolledCallback(base::BindRepeating(
           &NativeScrollView::OnDidScroll, base::Unretained(this)));
@@ -280,6 +282,13 @@ void NativeScrollView::SetSmoothScroll(bool enable) {
 void NativeScrollView::OnDidScroll() {
   if (IsScrollEventsEnabled())
     NotifyDidScroll(this);
+}
+
+void NativeScrollView::SetBackgroundColor(SkColor color) {
+  if (!GetNative())
+    return;
+  auto* scroll = static_cast<views::ScrollView*>(GetNative());
+  scroll->SetBackgroundColor(color);
 }
 
 }  // namespace electron
