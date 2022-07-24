@@ -1,5 +1,6 @@
 #include "shell/browser/ui/native_scroll_view.h"
 
+#include "base/cxx17_backports.h"
 #include "ui/base/ui_base_features.h"
 #include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/scroll_view.h"
@@ -92,32 +93,51 @@ void NativeScrollView::SetScrollPosition(gfx::Point point) {
   if (!GetNative() || !content_view_.get())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
-  gfx::Size content_size = GetContentSize();
+  gfx::Size content_size = scroll->contents()->bounds().size();
   gfx::Rect visible_rect = scroll->GetVisibleRect();
   int max_x_position = std::max(0, content_size.width() - visible_rect.width());
   int max_y_position =
       std::max(0, content_size.height() - visible_rect.height());
-  gfx::Rect new_visible_rect(std::min(std::max(0, point.x()), max_x_position),
-                             std::min(std::max(0, point.y()), max_y_position),
+  gfx::Rect new_visible_rect(base::clamp(point.x(), 0, max_x_position),
+                             base::clamp(point.y(), 0, max_y_position),
                              visible_rect.width(), visible_rect.height());
+
+  // If a scrollBar is disabled, then we need to enable it when performing
+  // ScrollView::ScrollToOffset, otherwise updating scrollBar positions is not
+  // executed.
+  auto horiz_mode = scroll->GetHorizontalScrollBarMode();
+  if (horiz_mode == views::ScrollView::ScrollBarMode::kDisabled)
+    scroll->SetHorizontalScrollBarMode(
+        views::ScrollView::ScrollBarMode::kHiddenButEnabled);
+  auto vert_mode = scroll->GetHorizontalScrollBarMode();
+  if (vert_mode == views::ScrollView::ScrollBarMode::kDisabled)
+    scroll->SetVerticalScrollBarMode(
+        views::ScrollView::ScrollBarMode::kHiddenButEnabled);
+
   content_view_->GetNative()->ScrollRectToVisible(new_visible_rect);
+
+  if (horiz_mode == views::ScrollView::ScrollBarMode::kDisabled)
+    scroll->SetHorizontalScrollBarMode(horiz_mode);
+  if (vert_mode == views::ScrollView::ScrollBarMode::kDisabled)
+    scroll->SetVerticalScrollBarMode(vert_mode);
 }
 
 gfx::Point NativeScrollView::GetScrollPosition() const {
   if (!GetNative())
     return gfx::Point();
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
-  gfx::Rect visible_rect = scroll->GetVisibleRect();
-  return gfx::Point(visible_rect.x(), visible_rect.y());
+  return scroll->GetVisibleRect().origin();
 }
 
 gfx::Point NativeScrollView::GetMaximumScrollPosition() const {
-  if (!GetNative() || !content_view_.get())
+  if (!GetNative())
     return gfx::Point();
-  gfx::Size content_size = GetContentSize();
-  gfx::Rect visible_rect = GetVisibleRect();
-  return gfx::Point(std::max(0, content_size.width() - visible_rect.width()),
-                    std::max(0, content_size.height() - visible_rect.height()));
+  auto* scroll = static_cast<views::ScrollView*>(GetNative());
+  gfx::Size content_size = scroll->contents()->bounds().size();
+  gfx::Size viewport_size = scroll->GetVisibleRect().size();
+  return gfx::Point(
+      std::max(0, content_size.width() - viewport_size.width()),
+      std::max(0, content_size.height() - viewport_size.height()));
 }
 
 void NativeScrollView::SetHorizontalScrollBarMode(ScrollBarMode mode) {
