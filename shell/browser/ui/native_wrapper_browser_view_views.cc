@@ -30,8 +30,8 @@ void NativeWrapperBrowserView::SetRoundedCorners(
   iwc_view->SetCornerRadii(corner_radii);
 }
 
-void NativeWrapperBrowserView::SetClickThrough(bool click_through) {
-  NativeView::SetClickThrough(click_through);
+void NativeWrapperBrowserView::UpdateClickThrough() {
+  NativeView::UpdateClickThrough();
 
   if (!api_browser_view_)
     return;
@@ -41,7 +41,7 @@ void NativeWrapperBrowserView::SetClickThrough(bool click_through) {
   if (!iwc_view)
     return;
 
-  iwc_view->SetClickThrough(click_through);
+  iwc_view->SetClickThrough(IsClickThrough());
 }
 
 void NativeWrapperBrowserView::InitWrapperBrowserView() {
