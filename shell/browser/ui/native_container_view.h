@@ -14,6 +14,9 @@ class NativeContainerView : public NativeView {
   // NativeView:
   bool IsContainer() const override;
   void DetachChildView(NativeView* view) override;
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  void UpdateClickThrough() override;
+#endif
 
   // Add/Remove children.
   void AddChildView(scoped_refptr<NativeView> view);

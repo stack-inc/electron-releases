@@ -72,10 +72,6 @@ int NativeView::GetZIndex() const {
   return z_index_;
 }
 
-bool NativeView::IsClickThrough() const {
-  return is_click_through_;
-}
-
 void NativeView::DetachChildView(NativeView* view) {}
 
 void NativeView::AddObserver(Observer* observer) {
