@@ -393,4 +393,8 @@ void NativeView::SetClickThrough(bool click_through) {
   is_click_through_ = click_through;
 }
 
+bool NativeView::IsClickThrough() const {
+  return is_click_through_;
+}
+
 }  // namespace electron

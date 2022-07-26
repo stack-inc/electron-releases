@@ -254,8 +254,12 @@ class NativeView : public base::RefCounted<NativeView>,
   void SetZIndex(int z_index);
   int GetZIndex() const;
 
-  virtual void SetClickThrough(bool click_through);
+  void SetClickThrough(bool click_through);
   bool IsClickThrough() const;
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  virtual void UpdateClickThrough();
+  views::BoundsAnimator* GetOrCreateBoundsAnimator();
+#endif
 
   virtual void DetachChildView(NativeView* view);
 
@@ -294,10 +298,6 @@ class NativeView : public base::RefCounted<NativeView>,
 
   // Notify that native view is destroyed.
   void NotifyViewIsDeleting();
-
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
-  views::BoundsAnimator* GetOrCreateBoundsAnimator();
-#endif
 
  protected:
   ~NativeView() override;
