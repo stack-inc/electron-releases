@@ -55,10 +55,10 @@ void NativeView::OnViewIsDeleting(views::View* observed_view) {
 }
 
 void NativeView::OnViewHierarchyChanged(
-      views::View* observed_view,
-      const views::ViewHierarchyChangedDetails& details) {
+    views::View* observed_view,
+    const views::ViewHierarchyChangedDetails& details) {
   SetRoundedCorners(GetRoundedCorners());
-  SetClickThrough(IsClickThrough());
+  UpdateClickThrough();
 }
 
 void NativeView::SetBounds(const gfx::Rect& bounds,
@@ -149,15 +149,6 @@ void NativeView::SetRoundedCorners(
   view->layer()->SetIsFastRoundedCorner(true);
 }
 
-void NativeView::SetClickThrough(bool click_through) {
-  is_click_through_ = click_through;
-  auto* view = GetNative();
-  if (!view)
-    return;
-
-  view->SetCanProcessEventsWithinSubtree(!click_through);
-}
-
 void NativeView::SetClippingInsets(
     const NativeView::ClippingInsetOptions& options) {
   auto* view = GetNative();
@@ -206,6 +197,27 @@ double NativeView::GetOpacity() {
   if (view_)
     return GetOpacityForView(view_);
   return 1.0;
+}
+
+void NativeView::SetClickThrough(bool click_through) {
+  is_click_through_ = click_through;
+  UpdateClickThrough();
+}
+
+bool NativeView::IsClickThrough() const {
+  if (is_click_through_)
+    return true;
+  else if (parent_)
+    return parent_->IsClickThrough();
+  return false;
+}
+
+void NativeView::UpdateClickThrough() {
+  auto* view = GetNative();
+  if (!view)
+    return;
+
+  view->SetCanProcessEventsWithinSubtree(!IsClickThrough());
 }
 
 views::BoundsAnimator* NativeView::GetOrCreateBoundsAnimator() {
