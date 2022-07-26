@@ -51,4 +51,11 @@ void NativeContainerView::RearrangeChildViews() {
   }
 }
 
+void NativeContainerView::UpdateClickThrough() {
+  NativeView::UpdateClickThrough();
+
+  for (auto it = children_.begin(); it != children_.end(); it++)
+    (*it)->UpdateClickThrough();
+}
+
 }  // namespace electron

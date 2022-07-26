@@ -24,7 +24,7 @@ class NativeWrapperBrowserView : public NativeView {
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   void SetRoundedCorners(const RoundedCornersOptions& options) override;
-  void SetClickThrough(bool click_through) override;
+  void UpdateClickThrough() override;
 #endif
 
  protected:
