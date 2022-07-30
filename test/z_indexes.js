@@ -1,4 +1,4 @@
-const { app, BaseView, BrowserView, BaseWindow, BrowserWindow, ContainerView, WrapperBrowserView } = require('electron')
+const { app, BaseView, BaseWindow, BrowserWindow, ContainerView, WebBrowserView } = require('electron')
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1400, height: 1200 })
@@ -13,44 +13,56 @@ app.whenReady().then(() => {
   webContentView.setBackgroundColor("#1F2937")
   webContentView.setBounds({x: 50, y: 50, width: 250, height: 250})
   contents.addChildView(webContentView)
-  const browserView = new BrowserView()
-  browserView.webContents.loadURL('https://electronjs.org')
-  const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView })
-  wrapperBrowserView.setBounds({x: 0, y: 0, width: 200, height: 200})
-  webContentView.addChildView(wrapperBrowserView)
+  const webBrowserView = new WebBrowserView({
+    webPreferences: {
+      optimizeForScroll : true,
+    }
+  })
+  webBrowserView.webContents.loadURL('https://electronjs.org')
+  webBrowserView.setBounds({x: 0, y: 0, width: 200, height: 200})
+  webContentView.addChildView(webBrowserView)
 
   const webContentView2 = new ContainerView()
   webContentView2.zIndex = 4;
   webContentView2.setBackgroundColor("#1F2937")
   webContentView2.setBounds({x: 350, y: 50, width: 250, height: 250})
   contents.addChildView(webContentView2)
-  const browserView2 = new BrowserView()
-  browserView2.webContents.loadURL('https://electronjs.org')
-  const wrapperBrowserView2 = new WrapperBrowserView({ 'browserView': browserView2 })
-  wrapperBrowserView2.setBounds({x: 0, y: 0, width: 200, height: 200})
-  webContentView2.addChildView(wrapperBrowserView2)
+  const webBrowserView2 = new WebBrowserView({
+    webPreferences: {
+      optimizeForScroll : true,
+    }
+  })
+  webBrowserView2.webContents.loadURL('https://electronjs.org')
+  webBrowserView2.setBounds({x: 0, y: 0, width: 200, height: 200})
+  webContentView2.addChildView(webBrowserView2)
 
   const webContentView3 = new ContainerView()
   webContentView3.zIndex = 1;
   webContentView3.setBackgroundColor("#1F2937")
   webContentView3.setBounds({x: 650, y: 50, width: 250, height: 250})
   contents.addChildView(webContentView3)
-  const browserView3 = new BrowserView()
-  browserView3.webContents.loadURL('https://electronjs.org')
-  const wrapperBrowserView3 = new WrapperBrowserView({ 'browserView': browserView3 })
-  wrapperBrowserView3.setBounds({x: 0, y: 0, width: 200, height: 200})
-  webContentView3.addChildView(wrapperBrowserView3)
+  const webBrowserView3 = new WebBrowserView({
+    webPreferences: {
+      optimizeForScroll : true,
+    }
+  })
+  webBrowserView3.webContents.loadURL('https://electronjs.org')
+  webBrowserView3.setBounds({x: 0, y: 0, width: 200, height: 200})
+  webContentView3.addChildView(webBrowserView3)
 
   const webContentView4 = new ContainerView()
   webContentView4.zIndex = 3;
   webContentView4.setBackgroundColor("#1F2937")
   webContentView4.setBounds({x: 950, y: 50, width: 250, height: 250})
   contents.addChildView(webContentView4)
-  const browserView4 = new BrowserView()
-  browserView4.webContents.loadURL('https://electronjs.org')
-  const wrapperBrowserView4 = new WrapperBrowserView({ 'browserView': browserView4 })
-  wrapperBrowserView4.setBounds({x: 0, y: 0, width: 200, height: 200})
-  webContentView4.addChildView(wrapperBrowserView4)
+  const webBrowserView4 = new WebBrowserView({
+    webPreferences: {
+      optimizeForScroll : true,
+    }
+  })
+  webBrowserView4.webContents.loadURL('https://electronjs.org')
+  webBrowserView4.setBounds({x: 0, y: 0, width: 200, height: 200})
+  webContentView4.addChildView(webBrowserView4)
 
   contents.rearrangeChildViews()
 })

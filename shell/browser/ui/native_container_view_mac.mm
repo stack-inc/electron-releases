@@ -8,13 +8,6 @@
 
 namespace electron {
 
-void NativeContainerView::InitContainerView() {
-  if (!IsVibrant())
-    SetNativeView([[ElectronNativeView alloc] init]);
-  else
-    SetNativeView([[ElectronNativeVibrantView alloc] init]);
-}
-
 void NativeContainerView::AddChildViewImpl(NativeView* view) {
   [GetNative() addSubview:view->GetNative()];
   NativeViewPrivate* priv = [GetNative() nativeViewPrivate];
