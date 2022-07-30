@@ -52,6 +52,7 @@ void NativeScrollView::InitScrollView(
     scroll_view = new views::ScrollView();
   }
 
+  scroll_view->set_owned_by_client();
   scroll_view->SetBackgroundColor(absl::optional<SkColor>());
 
   on_contents_scrolled_subscription_ =
@@ -69,7 +70,6 @@ void NativeScrollView::SetContentViewImpl(NativeView* view) {
   if (!GetNative() || !view)
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
-  view->set_delete_view(false);
   UpdateScrollBars(scroll, smooth_scroll_);
   auto content_view = std::unique_ptr<views::View>(view->GetNative());
   scroll->SetContents(std::move(content_view));
@@ -80,7 +80,6 @@ void NativeScrollView::DetachChildViewImpl() {
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   scroll->SetContents(nullptr);
-  content_view_->set_delete_view(true);
 }
 
 void NativeScrollView::SetContentSize(const gfx::Size& size) {

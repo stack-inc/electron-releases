@@ -36,6 +36,7 @@ export const browserModuleList: ElectronInternal.ModuleEntry[] = [
   { name: 'Tray', loader: () => require('./tray') },
   { name: 'utilityProcess', loader: () => require('./utility-process') },
   { name: 'View', loader: () => require('./view') },
+  { name: 'WebBrowserView', loader: () => require('./web-browser-view') },
   { name: 'webContents', loader: () => require('./web-contents') },
   { name: 'WebContentsView', loader: () => require('./web-contents-view') },
   { name: 'webFrameMain', loader: () => require('./web-frame-main') },

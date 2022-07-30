@@ -1,7 +1,7 @@
-// BrowserViews in scroll, use setContentBaseView for BrowserWindow
+// WebBrowserViews in scroll, use setContentBaseView for BrowserWindow
 
 const path = require("path");
-const { app, BrowserView, BaseWindow, BrowserWindow, ContainerView, ScrollView, WrapperBrowserView } = require("electron");
+const { app, BaseWindow, BrowserWindow, ContainerView, ScrollView, WebBrowserView } = require("electron");
 
 const APP_WIDTH = 600;
 const GAP = 30;
@@ -75,25 +75,24 @@ function createWindow () {
       //marginRight: GAP,
     //});
     //webContentView.addChildView(chrome);
-    const browserView = new BrowserView({
+    const webBrowserView = new WebBrowserView({
       webPreferences: {
         optimizeForScroll : true,
       }
     });
-    browserView.webContents.loadURL(url);
-    browserView.setBackgroundColor("#ffffff");
-    const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView });
-    wrapperBrowserView.setBounds({x: 0, y: 100, width: 600, height: 440});
+    webBrowserView.webContents.loadURL(url);
+    webBrowserView.setBackgroundColor("#ffffff");
+    webBrowserView.setBounds({x: 0, y: 100, width: 600, height: 440});
     const panel = new ContainerView();
     panel.setBackgroundColor("#00ff00");
     panel.setBounds({x: 0, y: 0, width: 600, height: 70});
     const webContentView = new ContainerView();
     webContentView.setBounds({x: i*(APP_WIDTH + GAP)+GAP, y: 30, width: 600, height: 540});
     webContentView.addChildView(panel);
-    webContentView.addChildView(wrapperBrowserView);
+    webContentView.addChildView(webBrowserView);
     scrollContent.addChildView(webContentView);
-    browserView.webContents.on('did-finish-load', async() => {
-      browserView.webContents.getDominantColors({x:0, y:0, width:600, height:5}, 10).then(colors => {
+    webBrowserView.webContents.on('did-finish-load', async() => {
+      webBrowserView.webContents.getDominantColors({x:0, y:0, width:600, height:5}, 10).then(colors => {
         console.log("url: " + url + ", dominant colors: " + colors);
         panel.setBackgroundColor(colors[0]);
       });

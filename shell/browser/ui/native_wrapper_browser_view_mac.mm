@@ -6,10 +6,6 @@
 
 namespace electron {
 
-void NativeWrapperBrowserView::InitWrapperBrowserView() {
-  SetNativeView([[ElectronNativeView alloc] init]);
-}
-
 void NativeWrapperBrowserView::SetBrowserViewImpl() {
   if (api_browser_view_->view()->GetInspectableWebContentsView()) {
     auto* view = api_browser_view_->view()

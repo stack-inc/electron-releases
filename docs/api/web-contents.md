@@ -782,7 +782,7 @@ Emitted when the devtools window instructs the webContents to reload
 Returns:
 
 * `event` Event
-* `webPreferences` WebPreferences - The web preferences that will be used by the guest
+* `webPreferences` [WebPreferences](structures/web-preferences.md) - The web preferences that will be used by the guest
   page. This object can be modified to adjust the preferences for the guest
   page.
 * `params` Record<string, string> - The other `<webview>` parameters such as the `src` URL.

@@ -1,7 +1,7 @@
-// BrowserViews in scroll, use setContentBaseView for BrowserWindow
+// WebBrowserViews in scroll, use setContentBaseView for BrowserWindow
 
 const path = require("path");
-const { app, BrowserView, BaseWindow, BrowserWindow, ContainerView, ScrollView, WrapperBrowserView, screen } = require("electron");
+const { app, BaseWindow, BrowserWindow, ContainerView, ScrollView, WebBrowserView, screen } = require("electron");
 
 const APP_WIDTH = 600;
 const GAP = 30;
@@ -87,27 +87,26 @@ function createWindow() {
       //marginRight: GAP,
     //});
     //webContentView.addChildView(chrome);
-    const browserView = new BrowserView({
+    const webBrowserView = new WebBrowserView({
       webPreferences: {
         optimizeForScroll: true,
       }
     });
-    browserView.webContents.loadURL(url);
-    browserView.setBackgroundColor("#ffffff");
-    const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView });
-    wrapperBrowserView.setBounds({ x: 0, y: 0, width: 600, height: 900 });
+    webBrowserView.webContents.loadURL(url);
+    webBrowserView.setBackgroundColor("#ffffff");
+    webBrowserView.setBounds({ x: 0, y: 0, width: 600, height: 900 });
     const webContentView = new ContainerView();
     webContentView.setBounds({ x: i * (APP_WIDTH + GAP) + GAP, y: 30, width: 600, height: 900 });
-    webContentView.addChildView(wrapperBrowserView);
+    webContentView.addChildView(webBrowserView);
     scrollContent.addChildView(webContentView);
 
-    browserView.webContents.on('enter-html-full-screen', function () {
+    webBrowserView.webContents.on('enter-html-full-screen', function () {
       const { bounds: screenBounds } = screen.getDisplayMatching(win.getBounds());
       console.log("enter-html-full-screen - screenBounds: {" + screenBounds.x + ", " + screenBounds.y + ", " + screenBounds.width + ", " + screenBounds.height + "}");
-      webContentView.removeChildView(wrapperBrowserView);
-      win.addChildView(wrapperBrowserView);
-      wrapperBrowserView.setBounds({ ...screenBounds, x: 0, y: 0 });
-      browserView.webContents.focus();
+      webContentView.removeChildView(webBrowserView);
+      win.addChildView(webBrowserView);
+      webBrowserView.setBounds({ ...screenBounds, x: 0, y: 0 });
+      webBrowserView.webContents.focus();
       const pos = scroll.getScrollPosition();
       const max_pos = scroll.getMaximumScrollPosition();
       console.log("scroll position after entering full screen: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
@@ -115,11 +114,11 @@ function createWindow() {
       console.log("content size after entering full screen: (" + content_size.width + ", " + content_size.height + ")");
 
       const leave = () => {
-        browserView.webContents.executeJavaScript('document.webkitExitFullscreen();');
-        win.removeChildView(wrapperBrowserView);
-        webContentView.addChildView(wrapperBrowserView);
-        wrapperBrowserView.setBounds({ x: 0, y: 0, width: 600, height: 900 });
-        browserView.webContents.focus();
+        webBrowserView.webContents.executeJavaScript('document.webkitExitFullscreen();');
+        win.removeChildView(webBrowserView);
+        webContentView.addChildView(webBrowserView);
+        webBrowserView.setBounds({ x: 0, y: 0, width: 600, height: 900 });
+        webBrowserView.webContents.focus();
         const pos2 = scroll.getScrollPosition();
         const max_pos2 = scroll.getMaximumScrollPosition();
         console.log("scroll position after leaving full screen: (" + pos2.x + ", " + pos2.y + "); maximum position: (" + max_pos2.x + ", " + max_pos2.y + ")");
@@ -139,7 +138,7 @@ function createWindow() {
           console.log("scroll position before entering full screen: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
           setTimeout(() => {
             win.setFullScreen(true);
-            browserView.webContents.emit('enter-html-full-screen');
+            webBrowserView.webContents.emit('enter-html-full-screen');
 
             setTimeout(() => {
               win.setFullScreen(false);

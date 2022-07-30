@@ -1,4 +1,4 @@
-const { app, BrowserView, BaseWindow, BrowserWindow, ContainerView, WrapperBrowserView } = require('electron')
+const { app, BaseWindow, BrowserWindow, ContainerView, WebBrowserView } = require('electron')
 
 function finishFadeIn(view) {
   console.log("finish fade in - opacity: " + view.getOpacity())
@@ -26,13 +26,16 @@ app.whenReady().then(() => {
   webContentView.setBounds({x: 400, y: 200, width: 650, height: 650})
   win.addChildView(webContentView)
 
-  const browserView = new BrowserView()
-  browserView.webContents.loadURL('https://electronjs.org')
-  const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView })
-  wrapperBrowserView.setBounds({x: 0, y: 0, width: 600, height: 600})
-  webContentView.addChildView(wrapperBrowserView)
+  const webBrowserView = new WebBrowserView({
+    webPreferences: {
+      optimizeForScroll : true,
+    }
+  })
+  webBrowserView.webContents.loadURL('https://electronjs.org')
+  webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 600})
+  webContentView.addChildView(webBrowserView)
 
-  browserView.webContents.on('did-finish-load', () => {
+  webBrowserView.webContents.on('did-finish-load', () => {
     setTimeout(startFadeOut, 2000, webContentView)
   })
 })
