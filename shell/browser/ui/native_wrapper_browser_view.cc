@@ -6,9 +6,8 @@
 
 namespace electron {
 
-NativeWrapperBrowserView::NativeWrapperBrowserView() {
-  InitWrapperBrowserView();
-}
+NativeWrapperBrowserView::NativeWrapperBrowserView()
+    : NativeView(false, false) {}
 
 NativeWrapperBrowserView::~NativeWrapperBrowserView() = default;
 

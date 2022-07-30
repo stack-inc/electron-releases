@@ -20,7 +20,7 @@ Process: [Main](../glossary.md#main-process)
 ```javascript
 // In the main process.
 const path = require("path");
-const { app, BrowserView, BaseWindow, ContainerView, ScrollView, WrapperBrowserView } = require("electron");
+const { app, BaseWindow, ContainerView, ScrollView, WebBrowserView } = require("electron");
 
 const WEBVIEW_WIDTH = 600;
 const GAP = 30;
@@ -59,15 +59,14 @@ app.whenReady().then(() => {
   scrollContent.setBounds({x: 0, y: 0, width: URLS.length * (WEBVIEW_WIDTH + GAP), height: 600});
 
   for (var i = 1; i <= URLS.length; i++) {
-    const browserView = new BrowserView();
-    browserView.setBackgroundColor("#ffffff");
-    const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView });
+    const webBrowserView = new WebBrowserView();
+    webBrowserView.setBackgroundColor("#ffffff");
     const webContentView = new ContainerView();
-    webContentView.addChildView(wrapperBrowserView);
-    wrapperBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
+    webContentView.addChildView(webBrowserView);
+    webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
     scrollContent.addChildView(webContentView);
     webContentView.setBounds({x: i*(WEBVIEW_WIDTH + GAP)+GAP, y: 30, width: 600, height: 540});
-    browserView.webContents.loadURL(URLS[i-1]);
+    webBrowserView.webContents.loadURL(URLS[i-1]);
   }
 });
 ```

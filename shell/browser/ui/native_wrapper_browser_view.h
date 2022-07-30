@@ -33,7 +33,6 @@ class NativeWrapperBrowserView : public NativeView {
   // NativeView:
   void SetWindowForChildren(NativeWindow* window) override;
 
-  void InitWrapperBrowserView();
   void SetBrowserViewImpl();
   void DetachBrowserViewImpl();
 

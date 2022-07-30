@@ -160,7 +160,8 @@ class NativeView : public base::RefCounted<NativeView>,
     int right = 0;
   };
 
-  NativeView(bool vibrant = false, bool blurred = false);
+  NativeView();
+  NativeView(bool vibrant, bool blurred);
 
   // Change position and size.
   virtual void SetBounds(const gfx::Rect& bounds,

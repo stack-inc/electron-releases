@@ -20,7 +20,9 @@ void NativeView::SetNativeView(NATIVEVIEW view) {
 }
 
 void NativeView::InitView() {
-  SetNativeView(new views::View());
+  auto* view = new views::View();
+  view->set_owned_by_client();
+  SetNativeView(view);
 }
 
 void NativeView::DestroyView() {
