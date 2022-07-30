@@ -7,9 +7,7 @@
 namespace electron {
 
 NativeContainerView::NativeContainerView(bool vibrant, bool blurred)
-    : NativeView(vibrant, blurred) {
-  InitContainerView();
-}
+    : NativeView(vibrant, blurred) {}
 
 NativeContainerView::~NativeContainerView() = default;
 

@@ -20,8 +20,10 @@ NativeView::RoundedCornersOptions::RoundedCornersOptions() = default;
 
 NativeView::ClippingInsetOptions::ClippingInsetOptions() = default;
 
+NativeView::NativeView() = default;
+
 NativeView::NativeView(bool vibrant, bool blurred)
-    : view_(nullptr), vibrant_(vibrant), blurred_(blurred) {
+    : vibrant_(vibrant), blurred_(blurred) {
   InitView();
 }
 

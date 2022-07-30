@@ -8,6 +8,7 @@
 #include "shell/browser/ui/view_utils.h"
 #include "shell/common/gin_helper/error_thrower.h"
 #include "shell/common/gin_helper/trackable_object.h"
+#include "third_party/skia/include/core/SkColor.h"
 
 namespace gin {
 class Arguments;
@@ -118,6 +119,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   v8::Local<v8::Value> GetParentView() const;
   v8::Local<v8::Value> GetParentWindow() const;
 
+  virtual void SetBackgroundColorImpl(const SkColor& color);
   virtual void ResetChildView(BaseView* view);
   virtual void ResetChildViews();
 

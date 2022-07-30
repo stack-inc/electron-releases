@@ -72,6 +72,7 @@
   V(electron_browser_base_window)        \
   V(electron_browser_tray)               \
   V(electron_browser_view)               \
+  V(electron_browser_web_browser_view)   \
   V(electron_browser_web_contents)       \
   V(electron_browser_web_contents_view)  \
   V(electron_browser_web_frame_main)     \
