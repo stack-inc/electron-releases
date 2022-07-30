@@ -1,7 +1,7 @@
-// BrowserViews in scroll, use setContentBaseView for BaseWindow
+// WebBrowserViews in scroll, use setContentBaseView for BaseWindow
 
 const path = require("path");
-const { app, BrowserView, BaseWindow, ContainerView, ScrollView, WrapperBrowserView } = require("electron");
+const { app, BaseWindow, ContainerView, ScrollView, WebBrowserView } = require("electron");
 
 const APP_WIDTH = 600;
 const GAP = 30;
@@ -114,14 +114,17 @@ function createWindow () {
       //marginRight: GAP,
     //});
     //webContentView.addChildView(chrome);
-    const browserView = new BrowserView();
-    browserView.webContents.loadURL(url);
-    browserView.setBackgroundColor("#ffffff");
-    const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView });
-    wrapperBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
+    const webBrowserView = new WebBrowserView({
+      webPreferences: {
+        optimizeForScroll : true,
+      }
+    });
+    webBrowserView.webContents.loadURL(url);
+    webBrowserView.setBackgroundColor("#ffffff");
+    webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
     const webContentView = new ContainerView();
     webContentView.setBounds({x: i*(APP_WIDTH + GAP)+GAP, y: 30, width: 600, height: 540});
-    webContentView.addChildView(wrapperBrowserView);
+    webContentView.addChildView(webBrowserView);
     scrollContent.addChildView(webContentView);
 
   };

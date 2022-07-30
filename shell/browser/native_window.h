@@ -51,6 +51,7 @@ class NativeBrowserView;
 
 namespace api {
 class BrowserView;
+class WebBrowserView;
 }
 
 #if BUILDFLAG(IS_MAC)
@@ -388,6 +389,7 @@ class NativeWindow : public base::SupportsUserData,
 
  protected:
   friend class api::BrowserView;
+  friend class api::WebBrowserView;
 
   NativeWindow(const gin_helper::Dictionary& options, NativeWindow* parent);
 

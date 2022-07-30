@@ -303,7 +303,9 @@ bool BaseView::IsFocusable() const {
 }
 
 void BaseView::SetBackgroundColor(const std::string& color_name) {
-  view_->SetBackgroundColor(ParseCSSColor(color_name));
+  const SkColor color = ParseCSSColor(color_name);
+  view_->SetBackgroundColor(color);
+  SetBackgroundColorImpl(color);
 }
 
 #if BUILDFLAG(IS_MAC)
@@ -452,6 +454,8 @@ bool BaseView::EnsureDetachFromParent() {
   }
   return true;
 }
+
+void BaseView::SetBackgroundColorImpl(const SkColor& color) {}
 
 void BaseView::ResetChildView(BaseView* view) {}
 

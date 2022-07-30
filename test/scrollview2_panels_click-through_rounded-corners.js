@@ -1,7 +1,7 @@
-// BrowserViews in scroll, use setContentBaseView for BrowserWindow
+// WebBrowserViews in scroll, use setContentBaseView for BrowserWindow
 
 const path = require("path");
-const { app, BrowserView, BaseWindow, BrowserWindow, ContainerView, ScrollView, WrapperBrowserView } = require("electron");
+const { app, BaseWindow, BrowserWindow, ContainerView, ScrollView, WebBrowserView } = require("electron");
 
 const APP_WIDTH = 600;
 const GAP = 30;
@@ -72,33 +72,31 @@ function createWindow () {
       //marginRight: GAP,
     //});
     //webContentView.addChildView(chrome);
-    const panelBrowserView = new BrowserView({
+    const panelWebBrowserView = new WebBrowserView({
       webPreferences: {
         optimizeForScroll : true,
       }
     });
-    panelBrowserView.webContents.loadFile(__dirname + '/page_panel.html');
-    panelBrowserView.setBackgroundColor("#ffffff");
-    const panelWrapperBrowserView = new WrapperBrowserView({ 'browserView': panelBrowserView });
-    panelWrapperBrowserView.setBounds({x: 0, y: 0, width: 600, height: 200});
-    panelWrapperBrowserView.setRoundedCorners({ 'radius': 10, 'topLeft': true, 'topRight': true, 'bottomLeft': false, 'bottomRight': false });
-    panelWrapperBrowserView.clickThrough = true;
+    panelWebBrowserView.webContents.loadFile(__dirname + '/page_panel.html');
+    panelWebBrowserView.setBackgroundColor("#ffffff");
+    panelWebBrowserView.setBounds({x: 0, y: 0, width: 600, height: 200});
+    panelWebBrowserView.setRoundedCorners({ 'radius': 10, 'topLeft': true, 'topRight': true, 'bottomLeft': false, 'bottomRight': false });
+    panelWebBrowserView.clickThrough = true;
 
-    const browserView = new BrowserView({
+    const webBrowserView = new WebBrowserView({
       webPreferences: {
         optimizeForScroll : true,
       }
     });
-    browserView.webContents.loadURL(url);
-    browserView.setBackgroundColor("#ffffff");
-    const wrapperBrowserView = new WrapperBrowserView({ 'browserView': browserView });
-    wrapperBrowserView.setBounds({x: 0, y: 200, width: 600, height: 540});
-    wrapperBrowserView.setRoundedCorners({ 'radius': 10, 'topLeft': false, 'topRight': false, 'bottomLeft': true, 'bottomRight': true });
+    webBrowserView.webContents.loadURL(url);
+    webBrowserView.setBackgroundColor("#ffffff");
+    webBrowserView.setBounds({x: 0, y: 200, width: 600, height: 540});
+    webBrowserView.setRoundedCorners({ 'radius': 10, 'topLeft': false, 'topRight': false, 'bottomLeft': true, 'bottomRight': true });
 
     const webContentView = new ContainerView();
     webContentView.setBounds({x: i*(APP_WIDTH + GAP)+GAP, y: 30, width: 600, height: 740});
-    webContentView.addChildView(panelWrapperBrowserView);
-    webContentView.addChildView(wrapperBrowserView);
+    webContentView.addChildView(panelWebBrowserView);
+    webContentView.addChildView(webBrowserView);
     scrollContent.addChildView(webContentView);
   };
 

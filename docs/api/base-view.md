@@ -226,8 +226,8 @@ Returns `boolean` - Returns `true` if this view is focusable, enabled and drawn.
 
 #### `view.setBackgroundColor(color)` _Experimental_
 
-* `color` string - Color in `#aarrggbb` or `#argb` form. The alpha channel is
-  optional.
+* `color` string - Color in Hex, RGB, ARGB, HSL, HSLA or named CSS color format. The alpha channel is
+  optional for the hex type.
 
 Change the background color of the view.
 

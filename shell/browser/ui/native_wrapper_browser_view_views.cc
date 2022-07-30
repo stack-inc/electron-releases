@@ -44,10 +44,6 @@ void NativeWrapperBrowserView::UpdateClickThrough() {
   iwc_view->SetClickThrough(IsClickThrough());
 }
 
-void NativeWrapperBrowserView::InitWrapperBrowserView() {
-  SetNativeView(new views::View());
-}
-
 void NativeWrapperBrowserView::SetBrowserViewImpl() {
   if (!GetNative())
     return;

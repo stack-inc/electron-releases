@@ -1,9 +1,5 @@
-// WebBrowserViews in scroll, use setContentBaseView for BaseWindow
-// 1. for each webBrowserView: captures and shows thumbnail
-// 2. zoom out
-// 3. for each webBrowserView hide thumbnail
+// WebBrowserViews in scroll, use setContentBaseView for BrowserWindow
 
-const fs = require('fs')
 const path = require("path");
 const { app, BaseWindow, BrowserWindow, ContainerView, ScrollView, WebBrowserView } = require("electron");
 
@@ -28,37 +24,10 @@ const APPS = [
 ];
 
 global.win = null;
-global.webBrowserViews = Array(APPS.length);
-
-function showWebBrowserViews() {
-  for (var i = 0; i < APPS.length; i++)
-    webBrowserViews[i].show();
-}
-
-function finishZoomIn(view) {
-  bounds = view.getBounds()
-  console.log("bounds after zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
-  const scaleX = view.getScaleX()
-  const scaleY = view.getScaleY()
-  console.log("scale after zooming in: (" + scaleX + ", " + scaleY + ")")
-
-  setTimeout(showWebBrowserViews, 10000)
-}
-
-function startZoomIn(view) {
-  bounds = view.getBounds()
-  console.log("bounds before zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
-  const scaleX = view.getScaleX()
-  const scaleY = view.getScaleY()
-  console.log("scale before zooming in: (" + scaleX + ", " + scaleY + ")")
-
-  view.setScale({"scaleX": 0.2, "scaleY": 0.2, "adjustFrame": true, "animation": {"duration": 5, timingFunction: "easeIn"}, "anchorX": "left", "anchorY": "top"})
-  setTimeout(finishZoomIn, 6000, view)
-}
 
 function createWindow () {
   // Create window.
-  win = new BaseWindow({ autoHideMenuBar: true, width: 1400, height: 1000 });
+  win = new BrowserWindow({ autoHideMenuBar: true, width: 1400, height: 1000 });
 
   // The content view.
   const contentView = new ContainerView();
@@ -76,6 +45,7 @@ function createWindow () {
   scroll.setBounds({x: 0, y: 0, width: 1377, height: 600});
   scroll.setHorizontalScrollBarMode("enabled");
   scroll.setVerticalScrollBarMode("disabled");
+  scroll.setScrollWheelSwapped(true);
 
   contentView.addChildView(scroll);
 
@@ -87,9 +57,9 @@ function createWindow () {
     //padding: 30,
     //flexShrink: 0,
   //});
-  scrollContent.setBackgroundColor("#FF0000");
   scroll.setContentView(scrollContent);
   scroll.setContentSize({ width: APPS.length * (APP_WIDTH + GAP), height: 600 });
+  scrollContent.setBackgroundColor("#FF0000");
 
   // Webview
   const addWebview = function (scrollContent, url, i) {
@@ -105,10 +75,8 @@ function createWindow () {
     const webBrowserView = new WebBrowserView({
       webPreferences: {
         optimizeForScroll : true,
-        "show": false,
       }
     });
-    webBrowserViews[i] = webBrowserView;
     webBrowserView.webContents.loadURL(url);
     webBrowserView.setBackgroundColor("#ffffff");
     webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
@@ -116,57 +84,39 @@ function createWindow () {
     webContentView.setBounds({x: i*(APP_WIDTH + GAP)+GAP, y: 30, width: 600, height: 540});
     webContentView.addChildView(webBrowserView);
     scrollContent.addChildView(webContentView);
+
+    webBrowserView.webContents.once('dom-ready', () => {
+      if (url.includes('github.com')) {
+        setTimeout(async () => {
+          try {
+console.log('@@browserView.webContents.executeJavaScript')
+            await webBrowserView.webContents.executeJavaScript(`
+              navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: {
+                  mandatory: {
+                    chromeMediaSource: 'desktop',
+                    chromeMediaSourceId: 'screen:5:0',
+                    minWidth: 1280,
+                    maxWidth: 1280,
+                    minHeight: 720,
+                    maxHeight: 720
+                  }
+                }
+              })
+            `)
+          } catch (error) {
+            console.log('@@' + error)
+          }
+        }, 2000)
+      }
+    })
   };
 
   var i = 0;
   APPS.forEach((app) => {
     addWebview(scrollContent, app, i++);
   });
-
-  for (var i = 0; i < APPS.length; i++)
-    captureScreenshotForApp(i);
-
-  setTimeout(startZoomIn, 20000, scrollContent)
-}
-
-function captureScreenshotForApp(index) {
-  console.log('capturing ' + index + ' page...')
-  let offscreenWindow = new BrowserWindow({
-      width: 600,
-      height: 540,
-      show: false,
-      webPreferences: {
-          offscreen: true
-      }
-  });
-
-  offscreenWindow.loadURL(APPS[index]);
-  offscreenWindow.webContents.on('did-finish-load', async() => {
-    let start_hrtime = process.hrtime();
-    // Get screenshot (thumbnail)
-    let nativeImage = await offscreenWindow.webContents.captureScreenshot().then(image => {
-      let stop_hrtime = process.hrtime(start_hrtime);
-      console.log(`Time Taken to screenshot for ${APPS[index]}: ${(stop_hrtime[0] * 1e9 + stop_hrtime[1])/1e9} seconds`);
-      fs.writeFileSync('test' + index + '.png', image.toPNG(), (err) => {
-        if (err) throw err;
-      });
-      console.log('It\'s saved!');
-      webBrowserViews[index].hide(true, image);
-      return image.toDataURL();
-    });
-  });
-}
-
-function captureScreenshots() {
-    offscreenWindow = new BrowserWindow({
-        width: 600,
-        height: 540,
-        show: false,
-        webPreferences: {
-            offscreen: true
-        }
-    })
-  captureScreenshotForApp(0)
 }
 
 // This method will be called when Electron has finished
