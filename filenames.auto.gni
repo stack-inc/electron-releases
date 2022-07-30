@@ -64,6 +64,7 @@ auto_filenames = {
     "docs/api/touch-bar-spacer.md",
     "docs/api/touch-bar.md",
     "docs/api/tray.md",
+    "docs/api/web-browser-view.md",
     "docs/api/web-contents.md",
     "docs/api/web-frame-main.md",
     "docs/api/web-frame.md",
@@ -135,6 +136,7 @@ auto_filenames = {
     "docs/api/structures/upload-file.md",
     "docs/api/structures/upload-raw-data.md",
     "docs/api/structures/user-default-types.md",
+    "docs/api/structures/web-preferences.md",
     "docs/api/structures/web-request-filter.md",
     "docs/api/structures/web-source.md",
   ]
@@ -229,6 +231,7 @@ auto_filenames = {
     "lib/browser/api/view.ts",
     "lib/browser/api/views/image-view.ts",
     "lib/browser/api/web-contents-view.ts",
+    "lib/browser/api/web-browser-view.ts",
     "lib/browser/api/web-contents.ts",
     "lib/browser/api/web-frame-main.ts",
     "lib/browser/api/wrapper-browser-view.ts",
