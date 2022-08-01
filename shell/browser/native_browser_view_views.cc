@@ -114,16 +114,6 @@ void NativeBrowserViewViews::SetBounds(const gfx::Rect& bounds) {
   view->SchedulePaint();
 }
 
-void NativeBrowserViewViews::SetBounds(const gfx::Rect& bounds,
-                                       const BoundsAnimationOptions& options) {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return;
-  auto* view = iwc_view->GetView();
-  SetBoundsForView(view, bounds, options);
-  ResetAutoResizeProportions();
-}
-
 gfx::Rect NativeBrowserViewViews::GetBounds() {
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
@@ -144,79 +134,6 @@ void NativeBrowserViewViews::SetBackgroundColor(SkColor color) {
   auto* view = iwc_view->GetView();
   view->SetBackground(views::CreateSolidBackground(color));
   view->SchedulePaint();
-}
-
-void NativeBrowserViewViews::SetViewBounds(const gfx::Rect& bounds) {
-  SetBounds(bounds);
-}
-
-gfx::Rect NativeBrowserViewViews::GetViewBounds() {
-  return GetBounds();
-}
-
-void NativeBrowserViewViews::ResetScaling() {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return;
-  auto* view = iwc_view->GetView();
-  ResetScalingForView(view);
-}
-
-void NativeBrowserViewViews::SetScale(const ScaleAnimationOptions& options) {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return;
-  auto* view = iwc_view->GetView();
-  SetScaleForView(view, options);
-}
-
-float NativeBrowserViewViews::GetScaleX() {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return 1.0;
-  auto* view = iwc_view->GetView();
-  return GetScaleXForView(view);
-}
-
-float NativeBrowserViewViews::GetScaleY() {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return 1.0;
-  auto* view = iwc_view->GetView();
-  return GetScaleYForView(view);
-}
-
-void NativeBrowserViewViews::SetOpacity(const double opacity,
-                                        const AnimationOptions& options) {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return;
-  auto* view = iwc_view->GetView();
-  SetOpacityForView(view, opacity, options);
-}
-
-double NativeBrowserViewViews::GetOpacity() {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return 1.0;
-  auto* view = iwc_view->GetView();
-  return GetOpacityForView(view);
-}
-
-void NativeBrowserViewViews::SetVisible(bool visible) {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return;
-  auto* view = iwc_view->GetView();
-  view->SetVisible(visible);
-}
-
-bool NativeBrowserViewViews::IsVisible() {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return false;
-  auto* view = iwc_view->GetView();
-  return view->GetVisible();
 }
 
 // static
