@@ -219,7 +219,7 @@ class NativeView : public base::RefCounted<NativeView>,
   bool WantsLayer() const;
 #endif
 
-  virtual void SetRoundedCorners(const RoundedCornersOptions& options);
+  void SetRoundedCorners(const RoundedCornersOptions& options);
   RoundedCornersOptions GetRoundedCorners() const;
 
   void SetClippingInsets(const ClippingInsetOptions& options);

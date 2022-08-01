@@ -553,14 +553,6 @@ void InspectableWebContents::UpdateDevToolsZoomLevel(double level) {
   pref_service_->SetDouble(kDevToolsZoomPref, level);
 }
 
-void InspectableWebContents::SetClickThrough(bool click_through) {
-  is_click_through_ = click_through;
-}
-
-bool InspectableWebContents::IsClickThrough() const {
-  return is_click_through_;
-}
-
 void InspectableWebContents::ActivateWindow() {
   // Set the zoom level.
   SetZoomLevelForWebContents(GetDevToolsWebContents(), GetDevToolsZoomLevel());
