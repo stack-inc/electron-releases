@@ -1,4 +1,4 @@
-const { app, BrowserView, BaseWindow, BrowserWindow } = require('electron')
+const { app, BaseWindow, BrowserWindow, WebBrowserView } = require('electron')
 
 function finishFadeIn(view) {
   console.log("finish fade in - opacity: " + view.getOpacity())
@@ -21,8 +21,8 @@ function startFadeOut(view) {
 app.whenReady().then(() => {
   const win = new BaseWindow({ width: 1400, height: 1200 })
 
-  const view = new BrowserView()
-  win.setBrowserView(view)
+  const view = new WebBrowserView()
+  win.addChildView(view)
   view.setBounds({ x: 400, y: 200, width: 600, height: 600 })
   view.webContents.loadURL('https://electronjs.org')
 
