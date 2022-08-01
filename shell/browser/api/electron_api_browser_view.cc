@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "content/browser/renderer_host/render_widget_host_view_base.h"  // nogncheck
-#include "content/browser/web_contents/web_contents_impl.h"  // nogncheck
 #include "content/public/browser/render_widget_host_view.h"
 #include "shell/browser/api/electron_api_base_window.h"
 #include "shell/browser/api/electron_api_web_contents.h"
@@ -17,7 +16,6 @@
 #include "shell/browser/web_contents_preferences.h"
 #include "shell/common/color_util.h"
 #include "shell/common/gin_converters/gfx_converter.h"
-#include "shell/common/gin_converters/image_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
@@ -118,16 +116,6 @@ void BrowserView::SetOwnerWindow(BaseWindow* window) {
     owner_window_->window()->add_inspectable_view(view_->GetInspectableWebContentsView());
 }
 
-void BrowserView::SetOwnerView(NativeWrapperBrowserView* view) {
-  owner_view_ = view;
-
-  // Ensure WebContents and BrowserView owner windows are in sync.
-  NativeWindow* window = view ? view->GetWindow() : nullptr;
-  if (web_contents())
-    web_contents()->SetOwnerWindow(window);
-  owner_window_ = window ? window->GetWeakPtr() : nullptr;
-}
-
 BrowserView::~BrowserView() {
   if (web_contents()) {  // destroy() called without closing WebContents
     web_contents()->RemoveObserver(this);
@@ -170,10 +158,8 @@ void BrowserView::SetAutoResize(AutoResizeFlags flags) {
   view_->SetAutoResizeFlags(flags);
 }
 
-void BrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
-  BoundsAnimationOptions options;
-  args->GetNext(&options);
-  view_->SetBounds(bounds, options);
+void BrowserView::SetBounds(const gfx::Rect& bounds) {
+  view_->SetBounds(bounds);
 }
 
 gfx::Rect BrowserView::GetBounds() {
@@ -203,84 +189,12 @@ void BrowserView::SetBackgroundColor(const std::string& color_name) {
   }
 }
 
-void BrowserView::SetViewBounds(const gfx::Rect& bounds) {
-  view_->SetViewBounds(bounds);
-}
-
-gfx::Rect BrowserView::GetViewBounds() {
-  return view_->GetViewBounds();
-}
-
-void BrowserView::ResetScaling() {
-  view_->ResetScaling();
-}
-
-void BrowserView::SetScale(const ScaleAnimationOptions& options) {
-  view_->SetScale(options);
-}
-
-float BrowserView::GetScaleX() {
-  return view_->GetScaleX();
-}
-
-float BrowserView::GetScaleY() {
-  return view_->GetScaleY();
-}
-
-void BrowserView::SetOpacity(const double opacity, gin::Arguments* args) {
-  AnimationOptions options;
-  args->GetNext(&options);
-  view_->SetOpacity(opacity, options);
-}
-
-double BrowserView::GetOpacity() {
-  return view_->GetOpacity();
-}
-
-void BrowserView::SetVisible(bool visible) {
-  view_->SetVisible(visible);
-}
-
-bool BrowserView::IsVisible() {
-  return view_->IsVisible();
-}
-
-void BrowserView::Hide(bool freeze, gfx::Image thumbnail) {
-  if (freeze && !page_frozen_) {
-    auto* wc =
-        static_cast<content::WebContentsImpl*>(web_contents()->web_contents());
-    wc->WasHidden();
-    wc->SetPageFrozen(true);
-    page_frozen_ = true;
-  }
-  view_->ShowThumbnail(thumbnail);
-}
-
-void BrowserView::Show() {
-  if (page_frozen_) {
-    auto* wc =
-        static_cast<content::WebContentsImpl*>(web_contents()->web_contents());
-    wc->SetPageFrozen(false);
-    wc->WasShown();
-    page_frozen_ = false;
-  }
-  view_->HideThumbnail();
-}
-
 v8::Local<v8::Value> BrowserView::GetWebContents(v8::Isolate* isolate) {
   if (web_contents_.IsEmpty()) {
     return v8::Null(isolate);
   }
 
   return v8::Local<v8::Value>::New(isolate, web_contents_);
-}
-
-void BrowserView::SetClickThrough(bool clickThrough) {
-  view_->GetInspectableWebContents()->SetClickThrough(clickThrough);
-}
-
-bool BrowserView::IsClickThrough() const {
-  return view_->GetInspectableWebContents()->IsClickThrough();
 }
 
 // static
@@ -292,21 +206,7 @@ v8::Local<v8::ObjectTemplate> BrowserView::FillObjectTemplate(
       .SetMethod("setBounds", &BrowserView::SetBounds)
       .SetMethod("getBounds", &BrowserView::GetBounds)
       .SetMethod("setBackgroundColor", &BrowserView::SetBackgroundColor)
-      .SetMethod("setViewBounds", &BrowserView::SetViewBounds)
-      .SetMethod("getViewBounds", &BrowserView::GetViewBounds)
-      .SetMethod("resetScaling", &BrowserView::ResetScaling)
-      .SetMethod("setScale", &BrowserView::SetScale)
-      .SetMethod("getScaleX", &BrowserView::GetScaleX)
-      .SetMethod("getScaleY", &BrowserView::GetScaleY)
-      .SetMethod("setOpacity", &BrowserView::SetOpacity)
-      .SetMethod("getOpacity", &BrowserView::GetOpacity)
-      .SetMethod("setVisible", &BrowserView::SetVisible)
-      .SetMethod("isVisible", &BrowserView::IsVisible)
-      .SetMethod("hide", &BrowserView::Hide)
-      .SetMethod("show", &BrowserView::Show)
       .SetProperty("webContents", &BrowserView::GetWebContents)
-      .SetProperty("clickThrough", &BrowserView::IsClickThrough,
-                   &BrowserView::SetClickThrough)
       .Build();
 }
 
