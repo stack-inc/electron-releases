@@ -16,13 +16,10 @@
 #include "shell/browser/extended_web_contents_observer.h"
 #include "shell/browser/native_browser_view.h"
 #include "shell/browser/native_window.h"
-#include "shell/browser/ui/native_wrapper_browser_view.h"
-#include "shell/browser/ui/view_utils.h"
 #include "shell/common/api/api.mojom.h"
 #include "shell/common/gin_helper/constructible.h"
 #include "shell/common/gin_helper/error_thrower.h"
 #include "shell/common/gin_helper/pinnable.h"
-#include "ui/gfx/image/image.h"
 
 namespace gfx {
 class Rect;
@@ -36,7 +33,6 @@ namespace electron::api {
 
 class WebContents;
 class BaseWindow;
-class WrapperBrowserView;
 
 class BrowserView : public gin::Wrappable<BrowserView>,
                     public gin_helper::Constructible<BrowserView>,
@@ -59,10 +55,8 @@ class BrowserView : public gin::Wrappable<BrowserView>,
   NativeBrowserView* view() const { return view_.get(); }
 
   BaseWindow* owner_window() const { return owner_window_.get(); }
-  NativeWrapperBrowserView* owner_view() const { return owner_view_.get(); }
 
   void SetOwnerWindow(BaseWindow* window);
-  void SetOwnerView(NativeWrapperBrowserView* view);
 
   int32_t ID() const { return id_; }
 
@@ -73,8 +67,6 @@ class BrowserView : public gin::Wrappable<BrowserView>,
   BrowserView& operator=(const BrowserView&) = delete;
 
  protected:
-  friend class WrapperBrowserView;
-
   BrowserView(gin::Arguments* args, const gin_helper::Dictionary& options);
   ~BrowserView() override;
 
@@ -83,33 +75,16 @@ class BrowserView : public gin::Wrappable<BrowserView>,
 
  private:
   void SetAutoResize(AutoResizeFlags flags);
-  void SetBounds(const gfx::Rect& bounds, gin::Arguments* args);
+  void SetBounds(const gfx::Rect& bounds);
   gfx::Rect GetBounds();
   void SetBackgroundColor(const std::string& color_name);
-  void SetViewBounds(const gfx::Rect& bounds);
-  gfx::Rect GetViewBounds();
-  void ResetScaling();
-  void SetScale(const ScaleAnimationOptions& options);
-  float GetScaleX();
-  float GetScaleY();
-  void SetOpacity(const double opacity, gin::Arguments* args);
-  double GetOpacity();
-  void SetVisible(bool visible);
-  bool IsVisible();
-  void Hide(bool freeze, gfx::Image thumbnail);
-  void Show();
   v8::Local<v8::Value> GetWebContents(v8::Isolate*);
-  void SetClickThrough(bool clickThrough);
-  bool IsClickThrough() const;
 
   v8::Global<v8::Value> web_contents_;
   class WebContents* api_web_contents_ = nullptr;
 
   std::unique_ptr<NativeBrowserView> view_;
   base::WeakPtr<BaseWindow> owner_window_;
-  scoped_refptr<NativeWrapperBrowserView> owner_view_;
-
-  bool page_frozen_ = false;
 
   int32_t id_;
 };
