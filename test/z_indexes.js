@@ -1,14 +1,14 @@
-const { app, BaseView, BaseWindow, BrowserWindow, ContainerView, WebBrowserView } = require('electron')
+const { app, BaseView, BaseWindow, BrowserWindow, WebBrowserView } = require('electron')
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1400, height: 1200 })
   // win.loadURL("https://bitbucket.org");
 
-  const contents = new ContainerView()
+  const contents = new BaseView()
   contents.setBounds({x: 0, y: 0, width: 1300, height: 1100})
   win.addChildView(contents)
 
-  const webContentView = new ContainerView()
+  const webContentView = new BaseView()
   webContentView.zIndex = 2;
   webContentView.setBackgroundColor("#1F2937")
   webContentView.setBounds({x: 50, y: 50, width: 250, height: 250})
@@ -22,7 +22,7 @@ app.whenReady().then(() => {
   webBrowserView.setBounds({x: 0, y: 0, width: 200, height: 200})
   webContentView.addChildView(webBrowserView)
 
-  const webContentView2 = new ContainerView()
+  const webContentView2 = new BaseView()
   webContentView2.zIndex = 4;
   webContentView2.setBackgroundColor("#1F2937")
   webContentView2.setBounds({x: 350, y: 50, width: 250, height: 250})
@@ -36,7 +36,7 @@ app.whenReady().then(() => {
   webBrowserView2.setBounds({x: 0, y: 0, width: 200, height: 200})
   webContentView2.addChildView(webBrowserView2)
 
-  const webContentView3 = new ContainerView()
+  const webContentView3 = new BaseView()
   webContentView3.zIndex = 1;
   webContentView3.setBackgroundColor("#1F2937")
   webContentView3.setBounds({x: 650, y: 50, width: 250, height: 250})
@@ -50,7 +50,7 @@ app.whenReady().then(() => {
   webBrowserView3.setBounds({x: 0, y: 0, width: 200, height: 200})
   webContentView3.addChildView(webBrowserView3)
 
-  const webContentView4 = new ContainerView()
+  const webContentView4 = new BaseView()
   webContentView4.zIndex = 3;
   webContentView4.setBackgroundColor("#1F2937")
   webContentView4.setBounds({x: 950, y: 50, width: 250, height: 250})

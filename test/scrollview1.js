@@ -1,7 +1,7 @@
 // WebBrowserViews in scroll, use setContentBaseView for BaseWindow
 
 const path = require("path");
-const { app, BaseWindow, ContainerView, ScrollView, WebBrowserView } = require("electron");
+const { app, BaseView, BaseWindow, ScrollView, WebBrowserView } = require("electron");
 
 const APP_WIDTH = 600;
 const GAP = 30;
@@ -30,7 +30,7 @@ function createWindow () {
   win = new BaseWindow({ autoHideMenuBar: true, width: 1400, height: 1000 });
 
   // The content view.
-  const contentView = new ContainerView();
+  const contentView = new BaseView();
   //contentView.setStyle({ flexDirection: "row", backgroundColor: "#1F2937" });
   contentView.setBackgroundColor("#1F2937");
   contentView.setBounds({x: 0, y: 0, width: 1378, height: 600});
@@ -50,7 +50,7 @@ function createWindow () {
   contentView.addChildView(scroll);
 
   // Scroll content
-  const scrollContent = new ContainerView();
+  const scrollContent = new BaseView();
   //scrollContent.setStyle({
     //flexDirection: "row",
     //flex: 1,
@@ -80,7 +80,7 @@ function createWindow () {
     webBrowserView.webContents.loadURL(url);
     webBrowserView.setBackgroundColor("#ffffff");
     webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
-    const webContentView = new ContainerView();
+    const webContentView = new BaseView();
     webContentView.setBounds({x: i*(APP_WIDTH + GAP)+GAP, y: 30, width: 600, height: 540});
     webContentView.addChildView(webBrowserView);
     scrollContent.addChildView(webContentView);

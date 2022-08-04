@@ -82,6 +82,13 @@ void NativeScrollView::DetachChildViewImpl() {
   scroll->SetContents(nullptr);
 }
 
+void NativeScrollView::UpdateClickThrough() {
+  NativeView::UpdateClickThrough();
+
+  if (content_view_.get())
+    content_view_->UpdateClickThrough();
+}
+
 void NativeScrollView::SetContentSize(const gfx::Size& size) {
   if (!content_view_.get())
     return;
