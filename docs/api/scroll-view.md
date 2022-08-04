@@ -20,7 +20,7 @@ Process: [Main](../glossary.md#main-process)
 ```javascript
 // In the main process.
 const path = require("path");
-const { app, BaseWindow, ContainerView, ScrollView, WebBrowserView } = require("electron");
+const { app, BaseView, BaseWindow, ScrollView, WebBrowserView } = require("electron");
 
 const WEBVIEW_WIDTH = 600;
 const GAP = 30;
@@ -41,7 +41,7 @@ app.whenReady().then(() => {
   win = new BaseWindow({ autoHideMenuBar: true, width: 1400, height: 700 });
 
   // The content view.
-  const contentView = new ContainerView();
+  const contentView = new BaseView();
   contentView.setBackgroundColor("#1F2937");
   win.setContentBaseView(contentView);
   contentView.setBounds({x: 0, y: 0, width: 1378, height: 600});
@@ -54,14 +54,14 @@ app.whenReady().then(() => {
   scroll.setBounds({x: 0, y: 0, width: 1377, height: 600});
 
   // Scroll content
-  const scrollContent = new ContainerView();
+  const scrollContent = new BaseView();
   scroll.setContentView(scrollContent);
   scrollContent.setBounds({x: 0, y: 0, width: URLS.length * (WEBVIEW_WIDTH + GAP), height: 600});
 
   for (var i = 1; i <= URLS.length; i++) {
     const webBrowserView = new WebBrowserView();
     webBrowserView.setBackgroundColor("#ffffff");
-    const webContentView = new ContainerView();
+    const webContentView = new BaseView();
     webContentView.addChildView(webBrowserView);
     webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
     scrollContent.addChildView(webContentView);

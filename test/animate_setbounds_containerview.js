@@ -1,4 +1,4 @@
-const { app, BaseWindow, BrowserWindow, ContainerView, WebBrowserView } = require('electron')
+const { app, BaseView, BaseWindow, BrowserWindow, WebBrowserView } = require('electron')
 
 function finishSettingBounds(view) {
   bounds = view.getBounds()
@@ -14,7 +14,7 @@ function settingBounds(view) {
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1400, height: 1200 })
 
-  const webContentView = new ContainerView()
+  const webContentView = new BaseView()
   webContentView.setBackgroundColor("#1F2937")
   webContentView.setBounds({x: 400, y: 200, width: 650, height: 650})
   win.addChildView(webContentView)

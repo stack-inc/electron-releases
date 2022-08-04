@@ -2,7 +2,6 @@
 
 #include <utility>
 
-#include "shell/browser/ui/native_container_view.h"
 #include "ui/gfx/geometry/size_conversions.h"
 
 namespace electron {
@@ -11,7 +10,7 @@ NativeScrollView::NativeScrollView(
     absl::optional<ScrollBarMode> horizontal_mode,
     absl::optional<ScrollBarMode> vertical_mode) {
   InitScrollView(horizontal_mode, vertical_mode);
-  SetContentView(new NativeContainerView);
+  SetContentView(new NativeView());
 }
 
 NativeScrollView::~NativeScrollView() = default;
@@ -33,6 +32,8 @@ gfx::Size NativeScrollView::GetContentSize() const {
 }
 
 void NativeScrollView::DetachChildView(NativeView* view) {
+  NativeView::DetachChildView(view);
+
   if (!view || content_view_.get() != view)
     return;
   DetachChildViewImpl();
@@ -42,6 +43,8 @@ void NativeScrollView::DetachChildView(NativeView* view) {
 }
 
 void NativeScrollView::SetWindowForChildren(NativeWindow* window) {
+  NativeView::SetWindowForChildren(window);
+
   if (content_view_.get())
     content_view_->SetWindow(window);
 }

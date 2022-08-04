@@ -28,6 +28,9 @@ class NativeScrollView : public NativeView {
 
   // NativeView:
   void SetBackgroundColor(SkColor color) override;
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  void UpdateClickThrough() override;
+#endif
   void DetachChildView(NativeView* view) override;
 
   void SetContentView(scoped_refptr<NativeView> view);
