@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "shell/browser/ui/native_view.h"
 #include "shell/browser/ui/view_utils.h"
@@ -72,7 +73,6 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
                      gfx::Size new_size) override;
   void OnViewIsDeleting(NativeView* observed_view) override;
 
-  bool IsContainer() const;
   void SetZIndex(int z_index);
   int GetZIndex() const;
   void SetClickThrough(bool clickThrough);
@@ -116,6 +116,10 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   float GetScaleY();
   void SetOpacity(const double opacity, gin::Arguments* args);
   double GetOpacity();
+  void AddChildView(v8::Local<v8::Value> value);
+  void RemoveChildView(v8::Local<v8::Value> value);
+  void RearrangeChildViews();
+  std::vector<v8::Local<v8::Value>> GetViews() const;
   v8::Local<v8::Value> GetParentView() const;
   v8::Local<v8::Value> GetParentWindow() const;
 
@@ -125,6 +129,8 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
 
  private:
   scoped_refptr<NativeView> view_;
+
+  std::map<int32_t, v8::Global<v8::Value>> base_views_;
 
   // Reference to JS wrapper to prevent garbage collection.
   v8::Global<v8::Value> self_ref_;

@@ -57,6 +57,8 @@ ScrollView::ScrollView(gin::Arguments* args, NativeScrollView* scroll)
 ScrollView::~ScrollView() = default;
 
 void ScrollView::ResetChildView(BaseView* view) {
+  BaseView::ResetChildView(view);
+
   if (view->GetID() == content_view_id_) {
     content_view_id_ = 0;
     content_view_.Reset();
@@ -64,6 +66,8 @@ void ScrollView::ResetChildView(BaseView* view) {
 }
 
 void ScrollView::ResetChildViews() {
+  BaseView::ResetChildViews();
+
   content_view_id_ = 0;
   content_view_.Reset();
 }

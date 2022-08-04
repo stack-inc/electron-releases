@@ -236,10 +236,6 @@ void BaseView::OnViewIsDeleting(NativeView* observed_view) {
   base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, GetDestroyClosure());
 }
 
-bool BaseView::IsContainer() const {
-  return view_->IsContainer();
-}
-
 void BaseView::SetZIndex(int z_index) {
   view_->SetZIndex(z_index);
 }
@@ -421,6 +417,52 @@ int32_t BaseView::GetID() const {
   return weak_map_id();
 }
 
+void BaseView::AddChildView(v8::Local<v8::Value> value) {
+  if (!view_)
+    return;
+
+  gin::Handle<BaseView> base_view;
+  if (value->IsObject() && gin::ConvertFromV8(isolate(), value, &base_view)) {
+    auto get_that_view = base_views_.find(base_view->GetID());
+    if (get_that_view == base_views_.end()) {
+      if (!base_view->EnsureDetachFromParent())
+        return;
+      view_->AddChildView(base_view->view());
+      base_views_[base_view->GetID()].Reset(isolate(), value);
+    }
+  }
+}
+
+void BaseView::RemoveChildView(v8::Local<v8::Value> value) {
+  if (!view_)
+    return;
+
+  gin::Handle<BaseView> base_view;
+  if (value->IsObject() && gin::ConvertFromV8(isolate(), value, &base_view)) {
+    auto get_that_view = base_views_.find(base_view->GetID());
+    if (get_that_view != base_views_.end()) {
+      view_->RemoveChildView(base_view->view());
+      (*get_that_view).second.Reset(isolate(), value);
+      base_views_.erase(get_that_view);
+    }
+  }
+}
+
+void BaseView::RearrangeChildViews() {
+  view_->RearrangeChildViews();
+}
+
+std::vector<v8::Local<v8::Value>> BaseView::GetViews() const {
+  std::vector<v8::Local<v8::Value>> ret;
+
+  for (auto const& views_iter : base_views_) {
+    if (!views_iter.second.IsEmpty())
+      ret.push_back(v8::Local<v8::Value>::New(isolate(), views_iter.second));
+  }
+
+  return ret;
+}
+
 v8::Local<v8::Value> BaseView::GetParentView() const {
   NativeView* parent_view = view_->GetParent();
   if (parent_view) {
@@ -457,9 +499,35 @@ bool BaseView::EnsureDetachFromParent() {
 
 void BaseView::SetBackgroundColorImpl(const SkColor& color) {}
 
-void BaseView::ResetChildView(BaseView* view) {}
+void BaseView::ResetChildView(BaseView* view) {
+  auto get_that_view = base_views_.find(view->GetID());
+  if (get_that_view != base_views_.end()) {
+    (*get_that_view).second.Reset();
+    base_views_.erase(get_that_view);
+  }
+}
 
-void BaseView::ResetChildViews() {}
+void BaseView::ResetChildViews() {
+  v8::HandleScope scope(isolate());
+
+  for (auto& item : base_views_) {
+    gin::Handle<BaseView> base_view;
+    if (gin::ConvertFromV8(isolate(),
+                           v8::Local<v8::Value>::New(isolate(), item.second),
+                           &base_view) &&
+        !base_view.IsEmpty()) {
+      // There's a chance that the BaseView may have been reparented - only
+      // reset if the owner view is *this* view.
+      auto* parent_view = base_view->view()->GetParent();
+      if (parent_view && parent_view == view_)
+        base_view->view()->SetParent(nullptr);
+    }
+
+    item.second.Reset();
+  }
+
+  base_views_.clear();
+}
 
 // static
 gin_helper::WrappableBase* BaseView::New(gin_helper::ErrorThrower thrower,
@@ -486,7 +554,6 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
   gin_helper::Destroyable::MakeDestroyable(isolate, prototype);
   gin_helper::ObjectTemplateBuilder(isolate, prototype->PrototypeTemplate())
       .SetProperty("id", &BaseView::GetID)
-      .SetProperty("isContainer", &BaseView::IsContainer)
       .SetProperty("zIndex", &BaseView::GetZIndex, &BaseView::SetZIndex)
       .SetProperty("clickThrough", &BaseView::IsClickThrough,
                    &BaseView::SetClickThrough)
@@ -534,6 +601,10 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("getScaleY", &BaseView::GetScaleY)
       .SetMethod("setOpacity", &BaseView::SetOpacity)
       .SetMethod("getOpacity", &BaseView::GetOpacity)
+      .SetMethod("addChildView", &BaseView::AddChildView)
+      .SetMethod("removeChildView", &BaseView::RemoveChildView)
+      .SetMethod("rearrangeChildViews", &BaseView::RearrangeChildViews)
+      .SetMethod("getViews", &BaseView::GetViews)
       .SetMethod("getParentView", &BaseView::GetParentView)
       .SetMethod("getParentWindow", &BaseView::GetParentWindow)
       .Build();

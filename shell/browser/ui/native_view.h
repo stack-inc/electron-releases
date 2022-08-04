@@ -1,6 +1,8 @@
 #ifndef SHELL_BROWSER_UI_NATIVE_VIEW_H_
 #define SHELL_BROWSER_UI_NATIVE_VIEW_H_
 
+#include <vector>
+
 #include "base/memory/ref_counted.h"
 #include "base/observer_list.h"
 #include "base/observer_list_types.h"
@@ -231,6 +233,15 @@ class NativeView : public base::RefCounted<NativeView>,
   void SetOpacity(const double opacity, const AnimationOptions& options);
   double GetOpacity();
 
+  // Get children.
+  int ChildCount() const { return static_cast<int>(children_.size()); }
+
+  // Add/Remove children.
+  void AddChildView(scoped_refptr<NativeView> view);
+  bool RemoveChildView(NativeView* view);
+
+  void RearrangeChildViews();
+
   // Get parent.
   NativeView* GetParent() const { return parent_; }
 
@@ -245,9 +256,6 @@ class NativeView : public base::RefCounted<NativeView>,
   void BecomeContentView(NativeWindow* window);
 
   void SetWindow(NativeWindow* window);
-
-  // Whether this class inherits from Container.
-  virtual bool IsContainer() const;
 
   bool IsVibrant() const { return vibrant_; }
   bool IsBlurred() const { return blurred_; }
@@ -309,6 +317,9 @@ class NativeView : public base::RefCounted<NativeView>,
   void DestroyView();
   void SetVisibleImpl(bool visible);
 
+  void AddChildViewImpl(NativeView* view);
+  void RemoveChildViewImpl(NativeView* view);
+
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   // views::ViewObserver:
   void OnViewBoundsChanged(views::View* observed_view) override;
@@ -325,6 +336,9 @@ class NativeView : public base::RefCounted<NativeView>,
   friend class base::RefCounted<NativeView>;
 
   base::ObserverList<Observer> observers_;
+
+  // The view layer.
+  std::vector<scoped_refptr<NativeView>> children_;
 
   // Relationships.
   NativeView* parent_ = nullptr;
