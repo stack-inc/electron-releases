@@ -27,6 +27,8 @@ void NativeWebBrowserView::RenderViewReady() {
 }
 
 void NativeWebBrowserView::UpdateClickThrough() {
+  NativeView::UpdateClickThrough();
+
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
     return;

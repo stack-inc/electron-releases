@@ -1,7 +1,8 @@
 # BaseView
 
-A `BaseView` is a rectangle within the views View hierarchy. It is the base
-class for [`ContainerView`](container-view.md), [`ScrollView`](scroll-view.md).
+A `BaseView` is a rectangle within the views View hierarchy.
+It can be used to embed additional views hierarchy into a
+[`BrowserWindow`](browser-window.md).
 
 ## Class: BaseView
 
@@ -127,10 +128,6 @@ Objects created with `new BaseView` have the following properties:
 #### `view.id` _Readonly_ _Experimental_
 
 A `Integer` property representing the unique ID of the view. Each ID is unique among all `BaseView` instances of the entire Electron application.
-
-#### `view.isContainer` _Readonly_ _Experimental_
-
-A `boolean` property that determines whether this view is (or inherits from) [`ContainerView`](container-view.md).
 
 #### `view.zIndex` _Experimental_
 
@@ -422,6 +419,23 @@ In case one of the values : `duration`, `timingFunction`, `timingControlPoints` 
 #### `view.getOpacity()` _Experimental_
 
 Returns `number` - between 0.0 (fully transparent) and 1.0 (fully opaque).
+
+#### `view.addChildView(view)` _Experimental_
+
+* `view` BaseView
+
+#### `view.removeChildView(view)` _Experimental_
+
+* `view` BaseView
+
+#### `view.rearrangeChildViews()` _Experimental_
+
+Rearranges child views according to their z-indexes.
+
+#### `view.getViews()` _Experimental_
+
+Returns `BaseView[]` - an array of all BaseViews that have been attached
+with `addChildView`.
 
 #### `view.getParentView()` _Experimental_
 

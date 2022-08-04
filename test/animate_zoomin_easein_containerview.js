@@ -1,4 +1,4 @@
-const { app, BaseWindow, BrowserWindow, ContainerView, WebBrowserView } = require('electron')
+const { app, BaseView, BaseWindow, BrowserWindow, WebBrowserView } = require('electron')
 
 const anchors = [
   {"posX": "30", "posY": "30"},
@@ -42,7 +42,7 @@ function finishZoomIn(view) {
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1400, height: 1200 })
 
-  const webContentView = new ContainerView()
+  const webContentView = new BaseView()
   webContentView.setBackgroundColor("#1F2937")
   webContentView.setBounds({x: 400, y: 200, width: 600, height: 600})
   win.addChildView(webContentView)
