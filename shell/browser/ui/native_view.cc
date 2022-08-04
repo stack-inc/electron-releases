@@ -1,5 +1,9 @@
 #include "shell/browser/ui/native_view.h"
 
+#include <algorithm>
+#include <limits>
+#include <utility>
+
 #include "shell/browser/native_window.h"
 
 namespace electron {
@@ -41,6 +45,37 @@ NativeView::RoundedCornersOptions NativeView::GetRoundedCorners() const {
   return rounded_corners_;
 }
 
+void NativeView::AddChildView(scoped_refptr<NativeView> view) {
+  if (!GetNative() || !view)
+    return;
+  if (view == this || view->GetParent())
+    return;
+
+  view->SetParent(this);
+
+  AddChildViewImpl(view.get());
+  children_.insert(children_.begin() + ChildCount(), std::move(view));
+
+  RearrangeChildViews();
+}
+
+bool NativeView::RemoveChildView(NativeView* view) {
+  if (!GetNative() || !view)
+    return false;
+  const auto i(std::find(children_.begin(), children_.end(), view));
+  if (i == children_.end())
+    return false;
+
+  view->SetParent(nullptr);
+
+  RemoveChildViewImpl(view);
+  children_.erase(i);
+
+  RearrangeChildViews();
+
+  return true;
+}
+
 void NativeView::SetParent(NativeView* parent) {
   if (parent) {
     SetWindow(parent->window_);
@@ -60,10 +95,9 @@ void NativeView::SetWindow(NativeWindow* window) {
   SetWindowForChildren(window);
 }
 
-void NativeView::SetWindowForChildren(NativeWindow* window) {}
-
-bool NativeView::IsContainer() const {
-  return false;
+void NativeView::SetWindowForChildren(NativeWindow* window) {
+  for (auto view : children_)
+    view->SetWindow(window);
 }
 
 void NativeView::SetZIndex(int z_index) {
@@ -74,7 +108,10 @@ int NativeView::GetZIndex() const {
   return z_index_;
 }
 
-void NativeView::DetachChildView(NativeView* view) {}
+void NativeView::DetachChildView(NativeView* view) {
+  if (RemoveChildView(view))
+    NotifyChildViewDetached(view);
+}
 
 void NativeView::AddObserver(Observer* observer) {
   CHECK(observer);
