@@ -50,6 +50,8 @@ void NativeWebBrowserView::WebContentsDestroyed() {
 }
 
 void NativeWebBrowserView::SetWindowForChildren(NativeWindow* window) {
+  NativeView::SetWindowForChildren(window);
+
   for (Observer& observer : observers_)
     observer.OnSettingOwnerWindow(window);
 }

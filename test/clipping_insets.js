@@ -1,10 +1,10 @@
-const { app, BaseView, BaseWindow, BrowserWindow, ContainerView, WebBrowserView } = require('electron')
+const { app, BaseView, BaseWindow, BrowserWindow, WebBrowserView } = require('electron')
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1400, height: 1200 })
   // win.loadURL("https://bitbucket.org");
 
-  const webContentView = new ContainerView()
+  const webContentView = new BaseView()
   webContentView.setBackgroundColor("#1F2937")
   webContentView.setBounds({x: 50, y: 50, width: 350, height: 350})
   win.addChildView(webContentView)
@@ -18,7 +18,7 @@ app.whenReady().then(() => {
   webBrowserView.setBounds({x: 0, y: 0, width: 300, height: 300})
   webContentView.addChildView(webBrowserView)
 
-  const webContentView2 = new ContainerView()
+  const webContentView2 = new BaseView()
   webContentView2.setBackgroundColor("#1F2937")
   webContentView2.setBounds({x: 500, y: 50, width: 350, height: 350})
   win.addChildView(webContentView2)
