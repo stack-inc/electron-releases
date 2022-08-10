@@ -27,12 +27,13 @@ void NativeWebBrowserView::RenderViewReady() {
 }
 
 void NativeWebBrowserView::UpdateClickThrough() {
-  NativeView::UpdateClickThrough();
+  bool click_through = IsClickThrough();
+  if (GetNative())
+    GetNative()->SetCanProcessEventsWithinSubtree(!click_through);
 
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return;
-  iwc_view->SetClickThrough(IsClickThrough());
+  if (iwc_view)
+    iwc_view->SetClickThrough(click_through);
 }
 
 }  // namespace electron
