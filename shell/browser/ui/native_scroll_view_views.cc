@@ -1,9 +1,13 @@
 #include "shell/browser/ui/native_scroll_view.h"
 
 #include "base/cxx17_backports.h"
+#include "cc/layers/layer.h"
 #include "ui/base/ui_base_features.h"
+#include "ui/compositor/compositor.h"
+#include "ui/compositor/layer.h"
 #include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/scroll_view.h"
+#include "ui/views/widget/widget.h"
 
 #include "electron/shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h"
 #include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_scroll_bar_views.h"
@@ -42,12 +46,82 @@ void UpdateScrollBars(views::ScrollView* scroll_view, bool is_smooth_scroll) {
 
 }  // namespace
 
+NativeScrollView::CompositorObserver::CompositorObserver(
+    NativeScrollView* native_scroll_view)
+    : native_scroll_view_(native_scroll_view),
+      is_inside_set_scroll_position_(false) {
+  DCHECK(native_scroll_view_);
+
+  if (!native_scroll_view_->GetNative())
+    return;
+
+  if (!native_scroll_view_->GetNative()->GetWidget())
+    return;
+
+  if (!native_scroll_view_->GetNative()->GetWidget()->GetCompositor())
+    return;
+
+  native_scroll_view_->GetNative()->GetWidget()->GetCompositor()->AddObserver(
+      this);
+}
+
+NativeScrollView::CompositorObserver::~CompositorObserver() {
+  if (!native_scroll_view_->GetNative())
+    return;
+
+  if (!native_scroll_view_->GetNative()->GetWidget())
+    return;
+
+  if (!native_scroll_view_->GetNative()->GetWidget()->GetCompositor())
+    return;
+
+  native_scroll_view_->GetNative()
+      ->GetWidget()
+      ->GetCompositor()
+      ->RemoveObserver(this);
+}
+
+void NativeScrollView::CompositorObserver::SetScrollPosition(gfx::Point point) {
+  point_ = std::make_unique<gfx::Point>(point);
+
+  views::ScrollView* scroll =
+      static_cast<views::ScrollView*>(native_scroll_view_->GetNative());
+  if (!scroll)
+    return;
+
+  views::View* contents_view = scroll->contents();
+  if (!contents_view)
+    return;
+
+  ui::Layer* contents_layer = contents_view->layer();
+  if (!contents_layer)
+    return;
+
+  cc::Layer* contents_cc_layer = contents_layer->cc_layer_for_testing();
+  if (!contents_cc_layer)
+    return;
+
+  contents_cc_layer->SetNeedsCommit();
+}
+
+void NativeScrollView::CompositorObserver::OnCompositingDidCommit(
+    ui::Compositor* compositor) {
+  if (!point_)
+    return;
+
+  is_inside_set_scroll_position_ = true;
+  native_scroll_view_->SetScrollPosition(*point_);
+  is_inside_set_scroll_position_ = false;
+  point_.reset();
+}
+
 void NativeScrollView::InitScrollView(
     absl::optional<ScrollBarMode> horizontal_mode,
     absl::optional<ScrollBarMode> vertical_mode) {
   views::ScrollView* scroll_view = nullptr;
   if (base::FeatureList::IsEnabled(::features::kUiCompositorScrollWithLayers)) {
     scroll_view = new ScrollViewScrollWithLayers();
+    set_scroll_position_after_commit_ = true;
   } else {
     scroll_view = new views::ScrollView();
   }
@@ -98,15 +172,27 @@ void NativeScrollView::SetContentSize(const gfx::Size& size) {
 void NativeScrollView::SetScrollPosition(gfx::Point point) {
   if (!GetNative() || !content_view_.get())
     return;
+
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   gfx::Size content_size = scroll->contents()->bounds().size();
   gfx::Rect visible_rect = scroll->GetVisibleRect();
   int max_x_position = std::max(0, content_size.width() - visible_rect.width());
   int max_y_position =
       std::max(0, content_size.height() - visible_rect.height());
-  gfx::Rect new_visible_rect(base::clamp(point.x(), 0, max_x_position),
-                             base::clamp(point.y(), 0, max_y_position),
-                             visible_rect.width(), visible_rect.height());
+  point.set_x(base::clamp(point.x(), 0, max_x_position));
+  point.set_y(base::clamp(point.y(), 0, max_y_position));
+
+  if (set_scroll_position_after_commit_) {
+    if (!compositor_observer_) {
+      compositor_observer_ =
+          std::make_unique<NativeScrollView::CompositorObserver>(this);
+    }
+
+    if (!compositor_observer_->is_inside_set_scroll_position()) {
+      compositor_observer_->SetScrollPosition(point);
+      return;
+    }
+  }
 
   // If a scrollBar is disabled, then we need to enable it when performing
   // ScrollView::ScrollToOffset, otherwise updating scrollBar positions is not
@@ -120,7 +206,9 @@ void NativeScrollView::SetScrollPosition(gfx::Point point) {
     scroll->SetVerticalScrollBarMode(
         views::ScrollView::ScrollBarMode::kHiddenButEnabled);
 
-  content_view_->GetNative()->ScrollRectToVisible(new_visible_rect);
+  content_view_->GetNative()->ScrollRectToVisible(gfx::Rect(
+      point.x(), point.y(), visible_rect.width(), visible_rect.height()));
+  content_view_->GetNative()->InvalidateLayout();
 
   if (horiz_mode == views::ScrollView::ScrollBarMode::kDisabled)
     scroll->SetHorizontalScrollBarMode(horiz_mode);
@@ -131,6 +219,12 @@ void NativeScrollView::SetScrollPosition(gfx::Point point) {
 gfx::Point NativeScrollView::GetScrollPosition() const {
   if (!GetNative())
     return gfx::Point();
+
+  if (set_scroll_position_after_commit_ && compositor_observer_ &&
+      compositor_observer_->point()) {
+    return *compositor_observer_->point();
+  }
+
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   return scroll->GetVisibleRect().origin();
 }
