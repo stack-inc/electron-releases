@@ -39,11 +39,11 @@ function setScrollPosition(scroll) {
   new_pos_y = Math.floor(Math.random() * max_pos.y+100); 
   scroll.setScrollPosition({x: new_pos_x, y:new_pos_y});
   pos = scroll.getScrollPosition();
-  console.log("position after scrolling: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
+  console.log("New position: (" + new_pos_x + ", " + new_pos_y + "); position after scrolling: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
   expected_pos_x = (new_pos_x > max_pos.x) ? max_pos.x : new_pos_x;
   expected_pos_y = (new_pos_y > max_pos.y) ? max_pos.y : new_pos_y;
   if (pos.x != expected_pos_x || pos.y != expected_pos_y)
-    console.log("error!");
+    console.log("error! expected: (" + expected_pos_x + ", " + expected_pos_y + ")");
   pos_counter++;
   if (pos_counter < 1000)
     setTimeout(setScrollPosition, 50, scroll)
