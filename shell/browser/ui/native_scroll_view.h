@@ -6,6 +6,7 @@
 
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
 #include "base/callback_list.h"
+#include "ui/compositor/compositor_observer.h"
 #endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
 
 #include "shell/browser/ui/native_view.h"
@@ -95,6 +96,29 @@ class NativeScrollView : public NativeView {
 
  private:
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  class CompositorObserver : public ui::CompositorObserver {
+   public:
+    CompositorObserver(NativeScrollView* native_scroll_view);
+    ~CompositorObserver() override;
+
+    void SetScrollPosition(gfx::Point point);
+
+    void OnCompositingDidCommit(ui::Compositor* compositor) override;
+
+    bool is_inside_set_scroll_position() const {
+      return is_inside_set_scroll_position_;
+    }
+
+    gfx::Point* point() { return point_.get(); }
+
+   private:
+    NativeScrollView* native_scroll_view_;
+    std::unique_ptr<gfx::Point> point_;
+    bool is_inside_set_scroll_position_;
+  };
+
+  std::unique_ptr<CompositorObserver> compositor_observer_;
+  bool set_scroll_position_after_commit_ = false;
   bool smooth_scroll_ = false;
   bool scroll_events_ = false;
   base::CallbackListSubscription on_contents_scrolled_subscription_;
