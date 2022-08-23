@@ -177,8 +177,19 @@ std::string ScrollView::GetVerticalScrollElasticity() const {
   return ConvertFromScrollElasticity(scroll_->GetVerticalScrollElasticity());
 }
 
-void ScrollView::SetScrollPosition(gfx::Point point) {
-  scroll_->SetScrollPosition(point);
+v8::Local<v8::Promise> ScrollView::SetScrollPosition(gfx::Point point) {
+  gin_helper::Promise<void> promise(isolate());
+  auto handle = promise.GetHandle();
+  scroll_->SetScrollPosition(point,
+      base::BindOnce([](gin_helper::Promise<void> promise, std::string error) {
+        if (error.empty()) {
+          promise.Resolve();
+        } else {
+          promise.RejectWithErrorMessage(error);
+        }
+      },
+      std::move(promise)));
+  return handle;
 }
 
 gfx::Point ScrollView::GetScrollPosition() const {

@@ -275,7 +275,7 @@ Returns `string` - The scroll view’s vertical scrolling elasticity mode.
 
 * `point` [Point](structures/point.md) - The point in the `contentView` to scroll to.
 
-Scroll to the horizontal (`point.x`) and vertical (`point.y`) position.
+Returns `Promise<void>` - Promis is resolved when scroll position is acual set. Scroll to the horizontal (`point.x`) and vertical (`point.y`) position.
 
 #### `view.getScrollPosition()` _Experimental_
 

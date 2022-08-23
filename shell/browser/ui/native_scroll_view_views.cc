@@ -81,11 +81,14 @@ NativeScrollView::CompositorObserver::~CompositorObserver() {
       ->RemoveObserver(this);
 }
 
-void NativeScrollView::CompositorObserver::SetScrollPosition(gfx::Point point) {
+void NativeScrollView::CompositorObserver::SetScrollPosition(gfx::Point point,
+    base::OnceCallback<void(std::string)> callback) {
   point_ = std::make_unique<gfx::Point>(point);
+  completion_callback_ = std::move(callback);
 
   views::ScrollView* scroll =
       static_cast<views::ScrollView*>(native_scroll_view_->GetNative());
+
   if (!scroll)
     return;
 
@@ -110,7 +113,8 @@ void NativeScrollView::CompositorObserver::OnCompositingDidCommit(
     return;
 
   is_inside_set_scroll_position_ = true;
-  native_scroll_view_->SetScrollPosition(*point_);
+  native_scroll_view_->SetScrollPosition(*point_,
+      std::move(completion_callback_));
   is_inside_set_scroll_position_ = false;
   point_.reset();
 }
@@ -169,9 +173,12 @@ void NativeScrollView::SetContentSize(const gfx::Size& size) {
   content_view_->GetNative()->SetSize(size);
 }
 
-void NativeScrollView::SetScrollPosition(gfx::Point point) {
-  if (!GetNative() || !content_view_.get())
+void NativeScrollView::SetScrollPosition(gfx::Point point,
+    base::OnceCallback<void(std::string)> callback) {
+  if (!GetNative() || !content_view_.get()) {
+    std::move(callback).Run(std::string("Error"));
     return;
+  }
 
   auto* scroll = static_cast<views::ScrollView*>(GetNative());
   gfx::Size content_size = scroll->contents()->bounds().size();
@@ -189,7 +196,7 @@ void NativeScrollView::SetScrollPosition(gfx::Point point) {
     }
 
     if (!compositor_observer_->is_inside_set_scroll_position()) {
-      compositor_observer_->SetScrollPosition(point);
+      compositor_observer_->SetScrollPosition(point, std::move(callback));
       return;
     }
   }
@@ -214,6 +221,8 @@ void NativeScrollView::SetScrollPosition(gfx::Point point) {
     scroll->SetHorizontalScrollBarMode(horiz_mode);
   if (vert_mode == views::ScrollView::ScrollBarMode::kDisabled)
     scroll->SetVerticalScrollBarMode(vert_mode);
+
+  std::move(callback).Run(std::string());
 }
 
 gfx::Point NativeScrollView::GetScrollPosition() const {
