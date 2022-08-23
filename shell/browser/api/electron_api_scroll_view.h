@@ -58,7 +58,7 @@ class ScrollView : public BaseView {
   std::string GetHorizontalScrollElasticity() const;
   void SetVerticalScrollElasticity(std::string elasticity);
   std::string GetVerticalScrollElasticity() const;
-  void SetScrollPosition(gfx::Point point);
+  v8::Local<v8::Promise> SetScrollPosition(gfx::Point point);
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
 #if BUILDFLAG(IS_MAC)

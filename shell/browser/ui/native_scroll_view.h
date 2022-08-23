@@ -40,7 +40,8 @@ class NativeScrollView : public NativeView {
   void SetContentSize(const gfx::Size& size);
   gfx::Size GetContentSize() const;
 
-  void SetScrollPosition(gfx::Point point);
+  void SetScrollPosition(gfx::Point point,
+      base::OnceCallback<void(std::string)> callback);
   gfx::Point GetScrollPosition() const;
   gfx::Point GetMaximumScrollPosition() const;
 
@@ -101,7 +102,8 @@ class NativeScrollView : public NativeView {
     CompositorObserver(NativeScrollView* native_scroll_view);
     ~CompositorObserver() override;
 
-    void SetScrollPosition(gfx::Point point);
+    void SetScrollPosition(gfx::Point point,
+        base::OnceCallback<void(std::string)> callback);
 
     void OnCompositingDidCommit(ui::Compositor* compositor) override;
 
@@ -114,6 +116,7 @@ class NativeScrollView : public NativeView {
    private:
     NativeScrollView* native_scroll_view_;
     std::unique_ptr<gfx::Point> point_;
+    base::OnceCallback<void(std::string)> completion_callback_;
     bool is_inside_set_scroll_position_;
   };
 
