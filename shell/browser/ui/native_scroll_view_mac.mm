@@ -332,12 +332,15 @@ void NativeScrollView::SetContentSize(const gfx::Size& size) {
   [scroll.documentView setFrameSize:content_size];
 }
 
-void NativeScrollView::SetScrollPosition(gfx::Point point) {
+void NativeScrollView::SetScrollPosition(gfx::Point point,
+    base::OnceCallback<void(std::string)> callback) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNative());
   int vertical = point.y();
   if (![scroll.documentView isFlipped])
     vertical = NSHeight(scroll.documentView.bounds) - vertical;
   [scroll.documentView scrollPoint:NSMakePoint(point.x(), vertical)];
+
+  std::move(callback).Run(std::string());
 }
 
 gfx::Point NativeScrollView::GetScrollPosition() const {
