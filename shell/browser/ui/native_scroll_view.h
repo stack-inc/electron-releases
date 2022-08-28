@@ -1,6 +1,7 @@
 #ifndef SHELL_BROWSER_UI_NATIVE_SCROLL_VIEW_H_
 #define SHELL_BROWSER_UI_NATIVE_SCROLL_VIEW_H_
 
+#include "base/callback.h"
 #include "build/build_config.h"
 #include "build/buildflag.h"
 

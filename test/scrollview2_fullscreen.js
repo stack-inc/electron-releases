@@ -132,19 +132,20 @@ function createWindow() {
     if (url.includes('youtube.com/watch')) {
       setTimeout(async () => {
         try {
-          scroll.setScrollPosition({ y: 0, x: i * (APP_WIDTH + GAP) + GAP });
-          const pos = scroll.getScrollPosition();
-          const max_pos = scroll.getMaximumScrollPosition();
-          console.log("scroll position before entering full screen: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
-          setTimeout(() => {
-            win.setFullScreen(true);
-            webBrowserView.webContents.emit('enter-html-full-screen');
-
+          scroll.setScrollPosition({ y: 0, x: i * (APP_WIDTH + GAP) + GAP }).then(() => {
+            const pos = scroll.getScrollPosition();
+            const max_pos = scroll.getMaximumScrollPosition();
+            console.log("scroll position before entering full screen: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
             setTimeout(() => {
-              win.setFullScreen(false);
-              win.emit('leave-html-full-screen');
-            }, 2000);
-          }, 1000);
+              win.setFullScreen(true);
+              webBrowserView.webContents.emit('enter-html-full-screen');
+
+              setTimeout(() => {
+                win.setFullScreen(false);
+                win.emit('leave-html-full-screen');
+              }, 2000);
+            }, 1000);
+          });
         } catch (error) {
           console.error(error);
         }
