@@ -46,6 +46,7 @@ class NativeWebBrowserView : public NativeView,
 #endif
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   void UpdateClickThrough() override;
+  void SetRoundedCorners(const RoundedCornersOptions& options) override;
 #endif
 
  protected:
