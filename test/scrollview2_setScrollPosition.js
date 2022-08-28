@@ -29,10 +29,11 @@ function setScrollPosition(scroll) {
   pos = scroll.getScrollPosition();
   max_pos = scroll.getMaximumScrollPosition();
   console.log("position before scrolling: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
-  scroll.setScrollPosition({x: 3000, y:0});
-  pos = scroll.getScrollPosition();
-  max_pos = scroll.getMaximumScrollPosition();
-  console.log("position after scrolling: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
+  scroll.setScrollPosition({x: 3000, y:0}).then(() => {
+    pos = scroll.getScrollPosition();
+    max_pos = scroll.getMaximumScrollPosition();
+    console.log("position after scrolling: (" + pos.x + ", " + pos.y + "); maximum position: (" + max_pos.x + ", " + max_pos.y + ")");
+  });
 }
 
 function createWindow () {
