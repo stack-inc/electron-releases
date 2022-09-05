@@ -36,6 +36,7 @@ class InspectableWebContentsViewMac : public InspectableWebContentsView {
   void SetTitle(const std::u16string& title) override;
   void ShowThumbnail(gfx::Image thumbnail) override;
   void HideThumbnail() override;
+  gfx::Point GetMouseLocation() override;
 
  private:
   base::scoped_nsobject<ElectronInspectableWebContentsView> view_;

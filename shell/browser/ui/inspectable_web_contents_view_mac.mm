@@ -15,6 +15,7 @@
 #include "shell/browser/ui/drag_util.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_view_delegate.h"
+#include "ui/gfx/geometry/point.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/image/image.h"
 
@@ -274,6 +275,15 @@ void InspectableWebContentsViewMac::ShowThumbnail(gfx::Image thumbnail) {
 
 void InspectableWebContentsViewMac::HideThumbnail() {
   [view_ hideThumbnail];
+}
+
+gfx::Point InspectableWebContentsViewMac::GetMouseLocation() {
+  auto* web_contents = inspectable_web_contents()->GetWebContents();
+  NSView* web_view = web_contents->GetNativeView().GetNativeNSView();
+  NSPoint position = [web_view
+      convertPoint:[[web_view window] mouseLocationOutsideOfEventStream]
+          fromView:nil];
+  return gfx::Point(position.x, position.y);
 }
 
 }  // namespace electron
