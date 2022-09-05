@@ -118,3 +118,4 @@ chore_allow_chromium_to_handle_synthetic_mouse_events_for_touch.patch
 fix_debug_configuration.patch
 enable_ui_compositor_scroll_with_layers_and_optimization.patch
 add_cubic_bezier.patch
+fix_gesture_scrolling_and_optimization.patch
