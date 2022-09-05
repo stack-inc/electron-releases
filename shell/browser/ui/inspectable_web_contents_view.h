@@ -15,7 +15,8 @@ class DevToolsContentsResizingStrategy;
 
 namespace gfx {
 class Image;
-}
+class Point;
+}  // namespace gfx
 
 #if defined(TOOLKIT_VIEWS)
 namespace gfx {
@@ -80,6 +81,8 @@ class InspectableWebContentsView {
   // Called when the window needs to update its draggable region.
   virtual void UpdateDraggableRegions(
       const std::vector<mojom::DraggableRegionPtr>& regions) = 0;
+
+  virtual gfx::Point GetMouseLocation() = 0;
 
  protected:
   // Owns us.

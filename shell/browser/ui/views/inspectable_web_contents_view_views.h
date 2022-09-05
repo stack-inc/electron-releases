@@ -49,6 +49,7 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
   void HideThumbnail() override;
   void UpdateDraggableRegions(
       const std::vector<mojom::DraggableRegionPtr>& regions) override;
+  gfx::Point GetMouseLocation() override;
 
   // views::View:
   void Layout() override;
