@@ -14,6 +14,7 @@
 #include "shell/browser/ui/inspectable_web_contents_delegate.h"
 #include "shell/browser/ui/inspectable_web_contents_view_delegate.h"
 #include "ui/base/models/image_model.h"
+#include "ui/display/screen.h"
 #include "ui/gfx/image/image.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/webview/webview.h"
@@ -325,6 +326,12 @@ void InspectableWebContentsViewViews::UpdateDraggableRegions(
     return;
   draggable_regions_ = mojo::Clone(regions);
   draggable_region_ = DraggableRegionsToSkRegion(draggable_regions_);
+}
+
+gfx::Point InspectableWebContentsViewViews::GetMouseLocation() {
+  gfx::Point position = display::Screen::GetScreen()->GetCursorScreenPoint();
+  View::ConvertPointFromScreen(contents_web_view_, &position);
+  return position;
 }
 
 void InspectableWebContentsViewViews::Layout() {
