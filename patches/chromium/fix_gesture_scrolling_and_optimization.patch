@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: olek.white.green@gmail.com
+Date: Fri, 5 Sep 2022 10:31:16 -0500
+Subject: Fix gesture scrolling and optimization part 1
+
+
+diff --git a/content/browser/web_contents/web_contents_view_aura.cc b/content/browser/web_contents/web_contents_view_aura.cc
+index 351bee9cfcc31..b6be11d6cfbb2 100644
+--- a/content/browser/web_contents/web_contents_view_aura.cc
++++ b/content/browser/web_contents/web_contents_view_aura.cc
+@@ -1271,7 +1271,7 @@ gfx::Size WebContentsViewAura::GetMaximumSize() const {
+ void WebContentsViewAura::OnBoundsChanged(const gfx::Rect& old_bounds,
+                                           const gfx::Rect& new_bounds) {
+   RenderWidgetHostView* rwhv = web_contents_->GetRenderWidgetHostView();
+-  if (rwhv)
++  if (rwhv && (old_bounds.size() != new_bounds.size()))
+     rwhv->SetSize(new_bounds.size());
+ 
+   // Constrained web dialogs, need to be kept centered over our content area.
