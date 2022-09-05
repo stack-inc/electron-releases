@@ -633,6 +633,7 @@ Returns:
 
 * `event` Event
 * `url` string
+* `location` [Point](structures/point.md) - coordinates of the mouse pointer.
 
 Emitted when mouse moves over a link or the keyboard moves the focus to a link.
 
