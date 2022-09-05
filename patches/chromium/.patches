@@ -129,3 +129,4 @@ cherry-pick-43637378b14e.patch
 fix_debug_configuration.patch
 enable_ui_compositor_scroll_with_layers_and_optimization.patch
 add_cubic_bezier.patch
+fix_gesture_scrolling_and_optimization.patch
