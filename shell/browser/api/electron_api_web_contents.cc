@@ -1307,7 +1307,8 @@ void WebContents::ActivateContents(content::WebContents* source) {
 
 void WebContents::UpdateTargetURL(content::WebContents* source,
                                   const GURL& url) {
-  Emit("update-target-url", url);
+  Emit("update-target-url", url,
+       inspectable_web_contents_->GetView()->GetMouseLocation());
 }
 
 bool WebContents::HandleKeyboardEvent(

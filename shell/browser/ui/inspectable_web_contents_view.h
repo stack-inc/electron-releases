@@ -16,7 +16,8 @@ class DevToolsContentsResizingStrategy;
 
 namespace gfx {
 class Image;
-}
+class Point;
+}  // namespace gfx
 
 #if defined(TOOLKIT_VIEWS)
 namespace gfx {
@@ -73,6 +74,8 @@ class InspectableWebContentsView {
   virtual void SetTitle(const std::u16string& title) = 0;
   virtual void ShowThumbnail(gfx::Image thumbnail) = 0;
   virtual void HideThumbnail() = 0;
+
+  virtual gfx::Point GetMouseLocation() = 0;
 
  protected:
   // Owns us.
