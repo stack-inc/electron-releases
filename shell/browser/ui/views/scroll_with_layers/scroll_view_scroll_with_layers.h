@@ -5,13 +5,13 @@
 #ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_
 #define ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_
 
-#include "ui/views/controls/scroll_view.h"
-
 #include "base/timer/timer.h"
+
+#include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_scroll_view.h"
 
 namespace electron {
 
-class ScrollViewScrollWithLayers : public views::ScrollView {
+class ScrollViewScrollWithLayers : public StackScrollView {
  public:
   ScrollViewScrollWithLayers();
   ~ScrollViewScrollWithLayers() override;
