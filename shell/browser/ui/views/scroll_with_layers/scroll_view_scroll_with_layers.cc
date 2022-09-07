@@ -13,7 +13,7 @@
 namespace electron {
 
 ScrollViewScrollWithLayers::ScrollViewScrollWithLayers()
-    : ScrollView(views::ScrollView::ScrollWithLayers::kEnabled) {
+    : StackScrollView(views::ScrollView::ScrollWithLayers::kEnabled) {
   on_contents_layer_scrolled_subscription_ =
       this->AddContentsLayerScrolledCallback(
           base::BindRepeating(&ScrollViewScrollWithLayers::ContentsLayerScrolled,
