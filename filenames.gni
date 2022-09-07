@@ -254,6 +254,8 @@ filenames = {
     "shell/browser/ui/views/stack_smooth_scroll/stack_smooth_scroll_animator.h",
     "shell/browser/ui/views/stack_smooth_scroll/stack_scroll_bar_views.cc",
     "shell/browser/ui/views/stack_smooth_scroll/stack_scroll_bar_views.h",
+    "shell/browser/ui/views/stack_smooth_scroll/stack_scroll_view.cc",
+    "shell/browser/ui/views/stack_smooth_scroll/stack_scroll_view.h",
     "shell/browser/ui/views/submenu_button.cc",
     "shell/browser/ui/views/submenu_button.h",
   ]

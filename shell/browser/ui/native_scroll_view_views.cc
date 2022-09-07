@@ -11,6 +11,7 @@
 
 #include "electron/shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h"
 #include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_scroll_bar_views.h"
+#include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_scroll_view.h"
 
 namespace electron {
 
@@ -127,7 +128,7 @@ void NativeScrollView::InitScrollView(
     scroll_view = new ScrollViewScrollWithLayers();
     set_scroll_position_after_commit_ = true;
   } else {
-    scroll_view = new views::ScrollView();
+    scroll_view = new StackScrollView();
   }
 
   scroll_view->set_owned_by_client();
