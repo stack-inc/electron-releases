@@ -12,6 +12,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/values.h"
 #include "content/public/browser/web_contents_user_data.h"
+#include "shell/browser/api/electron_api_base_view.h"
 #include "shell/browser/browser.h"
 #include "shell/browser/native_window_features.h"
 #include "shell/browser/window_list.h"
@@ -129,8 +130,6 @@ NativeWindow::NativeWindow(const gin_helper::Dictionary& options,
 }
 
 NativeWindow::~NativeWindow() {
-  if (content_base_view_.get())
-    content_base_view_->BecomeContentView(nullptr);
   // It's possible that the windows gets destroyed before it's closed, in that
   // case we need to ensure the Widget delegate gets destroyed and
   // OnWindowClosed message is still notified.
@@ -259,18 +258,15 @@ void NativeWindow::InitFromOptions(const gin_helper::Dictionary& options) {
     Show();
 }
 
-void NativeWindow::SetContentView(scoped_refptr<NativeView> view) {
+void NativeWindow::SetContentView(api::BaseView* view) {
   if (!view)
     return;
-  if (content_base_view_)
-    content_base_view_->BecomeContentView(nullptr);
-  SetContentViewImpl(view.get());
-  content_base_view_ = std::move(view);
-  content_base_view_->BecomeContentView(this);
+  SetContentViewImpl(view);
+  content_base_view_ = view;
 }
 
-NativeView* NativeWindow::GetContentView() const {
-  return content_base_view_.get();
+api::BaseView* NativeWindow::GetContentView() const {
+  return content_base_view_;
 }
 
 bool NativeWindow::IsClosed() const {
@@ -709,17 +705,6 @@ void NativeWindow::NotifyWindowMessage(UINT message,
     observer.OnWindowMessage(message, w_param, l_param);
 }
 #endif
-
-bool NativeWindow::DetachChildView(NativeView* view) {
-  if (view == content_base_view_.get())
-    return false;
-
-  if (RemoveChildView(view)) {
-    for (NativeWindowObserver& observer : observers_)
-      observer.OnChildViewDetached(view);
-  }
-  return true;
-}
 
 views::Widget* NativeWindow::GetWidget() {
   return widget();
