@@ -249,6 +249,11 @@ bool ElectronMainDelegate::BasicStartupComplete(int* exit_code) {
   // prevent output in the same line as the prompt.
   if (IsBrowserProcess(command_line))
     std::wcout << std::endl;
+
+  // Stack: Disable legacy window (which is used for accessability) in oreder to
+  // fix performance. Fix legacy window when we will want to support
+  // accessability.
+  command_line->AppendSwitch(::switches::kDisableLegacyIntermediateWindow);
 #endif  // !BUILDFLAG(IS_WIN)
 
   auto env = base::Environment::Create();
