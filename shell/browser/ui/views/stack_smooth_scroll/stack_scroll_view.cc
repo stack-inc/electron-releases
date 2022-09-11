@@ -27,4 +27,19 @@ void StackScrollView::Layout() {
   ScrollView::Layout();
 }
 
+bool StackScrollView::OnMouseWheel(const ui::MouseWheelEvent& e) {
+  LOG(ERROR) << this << " : -------------------> StackScrollView::OnMouseWheel";
+  return views::ScrollView::OnMouseWheel(e);
+}
+
+void StackScrollView::OnScrollEvent(ui::ScrollEvent* event) {
+  LOG(ERROR) << this << " : ------------------> StackScrollView::OnScrollEvent";
+  views::ScrollView::OnScrollEvent(event);
+}
+
+void StackScrollView::OnGestureEvent(ui::GestureEvent* event) {
+  LOG(ERROR) << this << " : -----------------> StackScrollView::OnGestureEvent";
+  return views::ScrollView::OnGestureEvent(event);
+}
+
 }  // namespace electron
