@@ -47,7 +47,7 @@ app.whenReady().then(() => {
   contentView.setBounds({x: 0, y: 0, width: 1378, height: 600});
 
   // Scroll
-  const scroll = new ScrollView({ smoothScroll: true });
+  const scroll = new ScrollView({ smoothScroll: true, blockScrollViewWhenFocus: true });
   scroll.setHorizontalScrollBarMode("enabled");
   scroll.setVerticalScrollBarMode("disabled");
   contentView.addChildView(scroll);
@@ -77,6 +77,7 @@ app.whenReady().then(() => {
   * `horizontalScrollBarMode` string (optional) - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
   * `verticalScrollBarMode` string (optional) - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
   * `smoothScroll` boolean (optional) - When is `true` enables smooth scroll in ScrollView. Default is `false`.
+  * `blockScrollViewWhenFocus` boolean (optional) - When is `true` blocks scrolling the view to visible when the view is focussed (applying it to all subviews). Default is `false`.
 
 Creates the new scroll view.
 

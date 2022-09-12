@@ -8,6 +8,7 @@
 #include "ui/gfx/geometry/rounded_corners_f.h"
 #include "ui/views/background.h"
 #include "ui/views/view.h"
+#include "ui/views/view_class_properties.h"
 
 namespace electron {
 
@@ -64,6 +65,7 @@ void NativeView::OnViewHierarchyChanged(
     const views::ViewHierarchyChangedDetails& details) {
   SetRoundedCorners(GetRoundedCorners());
   UpdateClickThrough();
+  UpdateBlockScrollViewWhenFocus(IsBlockScrollViewWhenFocus());
 }
 
 void NativeView::SetBounds(const gfx::Rect& bounds,
@@ -232,6 +234,29 @@ views::BoundsAnimator* NativeView::GetOrCreateBoundsAnimator() {
   if (!bounds_animator_.get() && view_->parent())
     bounds_animator_ = std::make_unique<views::BoundsAnimator>(view_->parent());
   return bounds_animator_.get();
+}
+
+void NativeView::SetBlockScrollViewWhenFocus(bool block) {
+  block_scroll_view_when_focus = block;
+  UpdateBlockScrollViewWhenFocus(IsBlockScrollViewWhenFocus());
+}
+
+bool NativeView::IsBlockScrollViewWhenFocus() const {
+  if (block_scroll_view_when_focus)
+    return true;
+  else if (parent_)
+    return parent_->IsBlockScrollViewWhenFocus();
+  return false;
+}
+
+void NativeView::UpdateBlockScrollViewWhenFocus(bool block) {
+  if (!view_)
+    return;
+
+  view_->SetProperty(views::kViewBlockScrollViewWhenFocus, block);
+
+  for (auto it = children_.begin(); it != children_.end(); it++)
+    (*it)->UpdateBlockScrollViewWhenFocus(block);
 }
 
 void NativeView::AddChildViewImpl(NativeView* view) {

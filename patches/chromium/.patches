@@ -130,3 +130,4 @@ fix_debug_configuration.patch
 enable_ui_compositor_scroll_with_layers_and_optimization.patch
 add_cubic_bezier.patch
 fix_gesture_scrolling_and_optimization.patch
+added_block_scroll_view_when_focus.patch
