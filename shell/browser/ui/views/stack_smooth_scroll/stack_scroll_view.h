@@ -24,9 +24,6 @@ class StackScrollView : public views::ScrollView {
 
   // View overrides:
   void Layout() override;
-  bool OnMouseWheel(const ui::MouseWheelEvent& e) override;
-  void OnScrollEvent(ui::ScrollEvent* event) override;
-  void OnGestureEvent(ui::GestureEvent* event) override;
 };
 
 }  // namespace electron
