@@ -1,5 +1,6 @@
 #include "shell/browser/ui/native_view.h"
 
+#include <queue>
 #include <utility>
 
 #include "base/memory/ptr_util.h"
@@ -65,7 +66,7 @@ void NativeView::OnViewHierarchyChanged(
     const views::ViewHierarchyChangedDetails& details) {
   SetRoundedCorners(GetRoundedCorners());
   UpdateClickThrough();
-  UpdateBlockScrollViewWhenFocus(IsBlockScrollViewWhenFocus());
+  UpdateBlockScrollViewWhenFocus();
 }
 
 void NativeView::SetBounds(const gfx::Rect& bounds,
@@ -238,7 +239,7 @@ views::BoundsAnimator* NativeView::GetOrCreateBoundsAnimator() {
 
 void NativeView::SetBlockScrollViewWhenFocus(bool block) {
   block_scroll_view_when_focus = block;
-  UpdateBlockScrollViewWhenFocus(IsBlockScrollViewWhenFocus());
+  UpdateBlockScrollViewWhenFocus();
 }
 
 bool NativeView::IsBlockScrollViewWhenFocus() const {
@@ -249,14 +250,28 @@ bool NativeView::IsBlockScrollViewWhenFocus() const {
   return false;
 }
 
-void NativeView::UpdateBlockScrollViewWhenFocus(bool block) {
+void NativeView::UpdateBlockScrollViewWhenFocus() {
   if (!view_)
     return;
 
-  view_->SetProperty(views::kViewBlockScrollViewWhenFocus, block);
+  bool block = IsBlockScrollViewWhenFocus();
 
-  for (auto it = children_.begin(); it != children_.end(); it++)
-    (*it)->UpdateBlockScrollViewWhenFocus(block);
+  if (!children_.empty()) {
+    view_->SetProperty(views::kViewBlockScrollViewWhenFocus, block);
+    for (auto it = children_.begin(); it != children_.end(); it++)
+      (*it)->UpdateBlockScrollViewWhenFocus();
+    return;
+  }
+
+  std::queue<views::View*> q;
+  q.push(view_);
+  while (!q.empty()) {
+    auto* view = q.front();
+    q.pop();
+    view->SetProperty(views::kViewBlockScrollViewWhenFocus, block);
+    for (auto* child : view->children())
+      q.push(child);
+  }
 }
 
 void NativeView::AddChildViewImpl(NativeView* view) {
