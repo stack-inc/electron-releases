@@ -290,6 +290,9 @@ gin_helper::WrappableBase* ScrollView::New(gin_helper::ErrorThrower thrower,
   bool smooth_scroll = false;
   if (options.Get("smoothScroll", &smooth_scroll))
     native_scroll->SetSmoothScroll(smooth_scroll);
+  bool block_scroll_view_when_focus = false;
+  if (options.Get("blockScrollViewWhenFocus", &block_scroll_view_when_focus))
+    native_scroll->SetBlockScrollViewWhenFocus(block_scroll_view_when_focus);
 #endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
 
   return new ScrollView(args, native_scroll);

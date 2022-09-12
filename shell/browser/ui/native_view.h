@@ -268,6 +268,9 @@ class NativeView : public base::RefCounted<NativeView>,
 #if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
   virtual void UpdateClickThrough();
   views::BoundsAnimator* GetOrCreateBoundsAnimator();
+  void SetBlockScrollViewWhenFocus(bool block);
+  bool IsBlockScrollViewWhenFocus() const;
+  void UpdateBlockScrollViewWhenFocus(bool block);
 #endif
 
   virtual void DetachChildView(NativeView* view);
@@ -359,6 +362,7 @@ class NativeView : public base::RefCounted<NativeView>,
   bool delete_view_ = true;
   gfx::Rect bounds_;
   std::unique_ptr<views::BoundsAnimator> bounds_animator_;
+  bool block_scroll_view_when_focus = false;
 #endif
 };
 

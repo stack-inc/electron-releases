@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin <martin@getstack.app>
+Date: Fri, 5 Sep 2022 10:31:16 -0500
+Subject: Added kViewBlockScrollViewWhenFocus property
+
+
+diff --git a/ui/views/view.cc b/ui/views/view.cc
+index fdabbc4922398..1cfc33d21b4f9 100644
+--- a/ui/views/view.cc
++++ b/ui/views/view.cc
+@@ -2336,6 +2336,7 @@ void View::Focus() {
+     }
+   }
+ 
++  if (!GetProperty(kViewBlockScrollViewWhenFocus)) {
+   // If this is the contents root of a |ScrollView|, focus should bring the
+   // |ScrollView| to visible rather than resetting its content scroll position.
+   ScrollView* const scroll_view = ScrollView::GetScrollViewForContents(this);
+@@ -2344,6 +2345,7 @@ void View::Focus() {
+   } else {
+     ScrollViewToVisible();
+   }
++  }
+ 
+   for (ViewObserver& observer : observers_)
+     observer.OnViewFocused(this);
+diff --git a/ui/views/view_class_properties.cc b/ui/views/view_class_properties.cc
+index e3db8d4d89418..025d8bb9c15f6 100644
+--- a/ui/views/view_class_properties.cc
++++ b/ui/views/view_class_properties.cc
+@@ -51,5 +51,6 @@ DEFINE_UI_CLASS_PROPERTY_KEY(bool, kViewIgnoredByLayoutKey, false)
+ DEFINE_UI_CLASS_PROPERTY_KEY(ui::ElementIdentifier,
+                              kElementIdentifierKey,
+                              ui::ElementIdentifier())
++DEFINE_UI_CLASS_PROPERTY_KEY(bool, kViewBlockScrollViewWhenFocus, true)
+ 
+ }  // namespace views
+diff --git a/ui/views/view_class_properties.h b/ui/views/view_class_properties.h
+index 29ea7073fa21c..f289c2449f9dd 100644
+--- a/ui/views/view_class_properties.h
++++ b/ui/views/view_class_properties.h
+@@ -82,6 +82,9 @@ VIEWS_EXPORT extern const ui::ClassProperty<bool>* const
+ VIEWS_EXPORT extern const ui::ClassProperty<ui::ElementIdentifier>* const
+     kElementIdentifierKey;
+ 
++VIEWS_EXPORT extern const ui::ClassProperty<bool>* const
++    kViewBlockScrollViewWhenFocus;
++
+ }  // namespace views
+ 
+ // Declaring the template specialization here to make sure that the
