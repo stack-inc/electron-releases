@@ -270,7 +270,7 @@ class NativeView : public base::RefCounted<NativeView>,
   views::BoundsAnimator* GetOrCreateBoundsAnimator();
   void SetBlockScrollViewWhenFocus(bool block);
   bool IsBlockScrollViewWhenFocus() const;
-  void UpdateBlockScrollViewWhenFocus(bool block);
+  void UpdateBlockScrollViewWhenFocus();
 #endif
 
   virtual void DetachChildView(NativeView* view);
