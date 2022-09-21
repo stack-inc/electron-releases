@@ -4,6 +4,7 @@
 
 #include "base/mac/mac_util.h"
 #include "base/mac/scoped_cftyperef.h"
+#include "shell/browser/api/electron_api_base_view.h"
 #include "shell/browser/native_window_mac.h"
 #include "shell/browser/ui/cocoa/electron_ns_window.h"
 #include "skia/ext/skia_utils_mac.h"
@@ -275,7 +276,7 @@ bool NativeViewInjected(NSView* self, SEL _cmd) {
   return true;
 }
 
-NativeView* GetShell(NSView* self, SEL _cmd) {
+api::BaseView* GetShell(NSView* self, SEL _cmd) {
   return [self nativeViewPrivate]->shell;
 }
 

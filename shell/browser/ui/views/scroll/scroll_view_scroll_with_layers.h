@@ -2,16 +2,15 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_
-#define ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_
+#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_
+#define ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_
 
 #include "base/timer/timer.h"
-
-#include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_scroll_view.h"
+#include "shell/browser/ui/views/scroll/scroll_view.h"
 
 namespace electron {
 
-class ScrollViewScrollWithLayers : public StackScrollView {
+class ScrollViewScrollWithLayers : public ScrollView {
  public:
   ScrollViewScrollWithLayers();
   ~ScrollViewScrollWithLayers() override;
@@ -19,8 +18,8 @@ class ScrollViewScrollWithLayers : public StackScrollView {
   ScrollViewScrollWithLayers(const ScrollViewScrollWithLayers&) = delete;
   ScrollViewScrollWithLayers(ScrollViewScrollWithLayers&&) = delete;
 
-  ScrollViewScrollWithLayers& operator=(
-      const ScrollViewScrollWithLayers&) = delete;
+  ScrollViewScrollWithLayers& operator=(const ScrollViewScrollWithLayers&) =
+      delete;
   ScrollViewScrollWithLayers& operator=(ScrollViewScrollWithLayers&&) = delete;
 
  private:
@@ -37,4 +36,4 @@ class ScrollViewScrollWithLayers : public StackScrollView {
 
 }  // namespace electron
 
-#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_
+#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_SCROLL_VIEW_SCROLL_WITH_LAYERS_H_

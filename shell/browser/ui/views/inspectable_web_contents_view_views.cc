@@ -14,7 +14,12 @@
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_delegate.h"
 #include "shell/browser/ui/inspectable_web_contents_view_delegate.h"
+#include "shell/browser/ui/views/scroll/native_view_host_scroll_with_layers.h"
+#include "shell/browser/ui/views/scroll/web_view_scroll_with_layers.h"
+#include "shell/browser/web_contents_preferences.h"
+#include "ui/aura/window.h"
 #include "ui/base/models/image_model.h"
+#include "ui/base/ui_base_features.h"
 #include "ui/display/screen.h"
 #include "ui/gfx/image/image.h"
 #include "ui/views/controls/label.h"
@@ -22,15 +27,6 @@
 #include "ui/views/widget/widget.h"
 #include "ui/views/widget/widget_delegate.h"
 #include "ui/views/window/client_view.h"
-
-/***** stack *****/
-#include "ui/aura/window.h"
-#include "ui/base/ui_base_features.h"
-
-#include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
-#include "electron/shell/browser/ui/views/scroll_with_layers/web_view_scroll_with_layers.h"
-#include "electron/shell/browser/web_contents_preferences.h"
-/*****************/
 
 namespace electron {
 
@@ -95,7 +91,6 @@ InspectableWebContentsViewViews::InspectableWebContentsViewViews(
     : InspectableWebContentsView(inspectable_web_contents),
       //! devtools_web_view_(new views::WebView(nullptr)),
       title_(u"Developer Tools") {
-  /***** stack *****/
   WebContentsPreferences* web_contents_preferences =
       WebContentsPreferences::From(inspectable_web_contents_->GetWebContents());
   const bool scroll_with_layers_enabled =
@@ -108,12 +103,10 @@ InspectableWebContentsViewViews::InspectableWebContentsViewViews(
   } else {
     devtools_web_view_ = new views::WebView(nullptr);
   }
-  /*****************/
 
   if (!inspectable_web_contents_->IsGuest() &&
       inspectable_web_contents_->GetWebContents()->GetNativeView()) {
     //! auto* contents_web_view = new views::WebView(nullptr);
-    /***** stack *****/
     views::WebView* contents_web_view = nullptr;
     if (scroll_with_layers_enabled && web_contents_preferences &&
         web_contents_preferences->OptimizeForScroll()) {
@@ -122,7 +115,6 @@ InspectableWebContentsViewViews::InspectableWebContentsViewViews(
     } else {
       contents_web_view = new views::WebView(nullptr);
     }
-    /*****************/
 
     contents_web_view->SetWebContents(
         inspectable_web_contents_->GetWebContents());
@@ -344,7 +336,6 @@ void InspectableWebContentsViewViews::Layout() {
     GetDelegate()->DevToolsResized();
 }
 
-/***** stack *****/
 void InspectableWebContentsViewViews::OnPaintBackground(gfx::Canvas* canvas) {
   if (stop_paint_background_)
     return;
@@ -359,6 +350,5 @@ void InspectableWebContentsViewViews::SetStopPaintBackground(
 
   stop_paint_background_ = stop_paint_background;
 }
-/*****************/
 
 }  // namespace electron

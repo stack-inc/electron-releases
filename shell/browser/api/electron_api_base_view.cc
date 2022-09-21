@@ -1,9 +1,19 @@
+// Copyright (c) 2022 GitHub, Inc.
+// Use of this source code is governed by the MIT license that can be
+// found in the LICENSE file.
+
 #include "shell/browser/api/electron_api_base_view.h"
 
+#include <algorithm>
+#include <limits>
+#include <string>
+#include <utility>
+
+#include "base/strings/string_number_conversions.h"
+#include "base/strings/string_util.h"
 #include "gin/handle.h"
+#include "shell/browser/api/electron_api_base_window.h"
 #include "shell/browser/browser.h"
-#include "shell/browser/native_window.h"
-#include "shell/common/color_util.h"
 #include "shell/common/gin_converters/gfx_converter.h"
 #include "shell/common/gin_converters/value_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
@@ -16,16 +26,86 @@
 
 namespace gin {
 
+namespace {
+
+bool ParseAnchorPercentage(std::string anchor_str, int* percentage) {
+  if (anchor_str.empty())
+    return false;
+  if (!base::StringToInt(anchor_str, percentage))
+    return false;
+  if (*percentage > 100)
+    *percentage = 100;
+  else if (*percentage < 0)
+    *percentage = 0;
+  return true;
+}
+
+void ConvertAnimationOptions(
+    const gin_helper::Dictionary& params,
+    electron::api::BaseView::AnimationOptions* options) {
+  float duration = 1.0;
+  if (params.Get("duration", &duration)) {
+    options->duration = duration;
+    options->animation = true;
+  }
+
+  std::string tfunction_name;
+  if (params.Get("timingFunction", &tfunction_name)) {
+    tfunction_name = base::ToLowerASCII(tfunction_name);
+    base::TrimWhitespaceASCII(tfunction_name, base::TRIM_ALL, &tfunction_name);
+    if (tfunction_name == "linear")
+      options->timing_function =
+          electron::api::BaseView::TimingFunction::kLinear;
+    else if (tfunction_name == "easein")
+      options->timing_function =
+          electron::api::BaseView::TimingFunction::kEaseIn;
+    else if (tfunction_name == "easeout")
+      options->timing_function =
+          electron::api::BaseView::TimingFunction::kEaseOut;
+    else if (tfunction_name == "easeineaseout")
+      options->timing_function =
+          electron::api::BaseView::TimingFunction::kEaseInEaseOut;
+    else if (tfunction_name == "default")
+      options->timing_function =
+          electron::api::BaseView::TimingFunction::kDefault;
+    options->animation = true;
+  }
+
+  float cx1 = 0.0, cy1 = 0.0, cx2 = 1.0, cy2 = 1.0;
+  gin_helper::Dictionary timing_control_points;
+  if (params.Get("timingControlPoints", &timing_control_points)) {
+    if (timing_control_points.Get("x1", &cx1)) {
+      options->cx1 = cx1;
+      options->use_control_points = true;
+    }
+    if (timing_control_points.Get("y1", &cy1)) {
+      options->cy1 = cy1;
+      options->use_control_points = true;
+    }
+    if (timing_control_points.Get("x2", &cx2)) {
+      options->cx2 = cx2;
+      options->use_control_points = true;
+    }
+    if (timing_control_points.Get("y2", &cy2)) {
+      options->cy2 = cy2;
+      options->use_control_points = true;
+    }
+    options->animation = true;
+  }
+}
+
+}  // namespace
+
 template <>
-struct Converter<electron::NativeView::RoundedCornersOptions> {
+struct Converter<electron::api::BaseView::RoundedCornersOptions> {
   static bool FromV8(v8::Isolate* isolate,
                      v8::Local<v8::Value> val,
-                     electron::NativeView::RoundedCornersOptions* options) {
+                     electron::api::BaseView::RoundedCornersOptions* options) {
     gin_helper::Dictionary params;
     if (!ConvertFromV8(isolate, val, &params))
       return false;
 
-    *options = electron::NativeView::RoundedCornersOptions();
+    *options = electron::api::BaseView::RoundedCornersOptions();
 
     float radius;
     if (params.Get("radius", &radius))
@@ -48,15 +128,15 @@ struct Converter<electron::NativeView::RoundedCornersOptions> {
 };
 
 template <>
-struct Converter<electron::NativeView::ClippingInsetOptions> {
+struct Converter<electron::api::BaseView::ClippingInsetOptions> {
   static bool FromV8(v8::Isolate* isolate,
                      v8::Local<v8::Value> val,
-                     electron::NativeView::ClippingInsetOptions* options) {
+                     electron::api::BaseView::ClippingInsetOptions* options) {
     gin_helper::Dictionary params;
     if (!ConvertFromV8(isolate, val, &params))
       return false;
 
-    *options = electron::NativeView::ClippingInsetOptions();
+    *options = electron::api::BaseView::ClippingInsetOptions();
 
     int top = 0;
     if (params.Get("top", &top) && top)
@@ -75,155 +155,263 @@ struct Converter<electron::NativeView::ClippingInsetOptions> {
   }
 };
 
+bool Converter<electron::api::BaseView::AnimationOptions>::FromV8(
+    v8::Isolate* isolate,
+    v8::Local<v8::Value> val,
+    electron::api::BaseView::AnimationOptions* options) {
+  gin_helper::Dictionary params;
+  if (!ConvertFromV8(isolate, val, &params))
+    return false;
+
+  *options = electron::api::BaseView::AnimationOptions();
+
+  ConvertAnimationOptions(params, options);
+
+  return true;
+}
+
+bool Converter<electron::api::BaseView::BoundsAnimationOptions>::FromV8(
+    v8::Isolate* isolate,
+    v8::Local<v8::Value> val,
+    electron::api::BaseView::BoundsAnimationOptions* options) {
+  gin_helper::Dictionary params;
+  if (!ConvertFromV8(isolate, val, &params))
+    return false;
+
+  *options = electron::api::BaseView::BoundsAnimationOptions();
+
+  ConvertAnimationOptions(params, options);
+
+  gfx::Rect from_bounds;
+  if (params.Get("fromBounds", &from_bounds)) {
+    options->from_bounds = from_bounds;
+    options->use_from_bounds = true;
+  }
+
+  return true;
+}
+
+bool Converter<electron::api::BaseView::ScaleAnimationOptions>::FromV8(
+    v8::Isolate* isolate,
+    v8::Local<v8::Value> val,
+    electron::api::BaseView::ScaleAnimationOptions* options) {
+  gin_helper::Dictionary params;
+  if (!ConvertFromV8(isolate, val, &params))
+    return false;
+
+  *options = electron::api::BaseView::ScaleAnimationOptions();
+
+  gin_helper::Dictionary animation_params;
+  if (params.Get("animation", &animation_params))
+    ConvertAnimationOptions(animation_params, options);
+
+  float scale_x = 1.0, scale_y = 1.0;
+  if (params.Get("scaleX", &scale_x))
+    options->scale_x = scale_x;
+  if (params.Get("scaleY", &scale_y))
+    options->scale_y = scale_y;
+  bool adjust_frame = true;
+  if (params.Get("adjustFrame", &adjust_frame))
+    options->adjust_frame = adjust_frame;
+
+  int percentage;
+  std::string anchor_x;
+  if (params.Get("anchorX", &anchor_x)) {
+    anchor_x = base::ToLowerASCII(anchor_x);
+    base::TrimWhitespaceASCII(anchor_x, base::TRIM_ALL, &anchor_x);
+    if (anchor_x == "left") {
+      options->anchor_x_pos = electron::api::BaseView::AnchorXPos::kLeft;
+    } else if (anchor_x == "center") {
+      options->anchor_x_pos = electron::api::BaseView::AnchorXPos::kCenter;
+    } else if (anchor_x == "right") {
+      options->anchor_x_pos = electron::api::BaseView::AnchorXPos::kRight;
+    } else if (ParseAnchorPercentage(anchor_x, &percentage)) {
+      options->anchor_x_percentage = static_cast<float>(percentage);
+      options->anchor_x_pos = electron::api::BaseView::AnchorXPos::kPercentage;
+    }
+  }
+
+  std::string anchor_y;
+  if (params.Get("anchorY", &anchor_y)) {
+    anchor_y = base::ToLowerASCII(anchor_y);
+    base::TrimWhitespaceASCII(anchor_y, base::TRIM_ALL, &anchor_y);
+    if (anchor_y == "top") {
+      options->anchor_y_pos = electron::api::BaseView::AnchorYPos::kTop;
+    } else if (anchor_y == "center") {
+      options->anchor_y_pos = electron::api::BaseView::AnchorYPos::kCenter;
+    } else if (anchor_y == "bottom") {
+      options->anchor_y_pos = electron::api::BaseView::AnchorYPos::kBottom;
+    } else if (ParseAnchorPercentage(anchor_y, &percentage)) {
+      options->anchor_y_percentage = static_cast<float>(percentage);
+      options->anchor_y_pos = electron::api::BaseView::AnchorYPos::kPercentage;
+    }
+  }
+
+  return true;
+}
+
 }  // namespace gin
 
 namespace electron {
 
 namespace api {
 
-namespace {
+BaseView::BaseView() = default;
 
-#if BUILDFLAG(IS_MAC)
-VisualEffectMaterial ConvertToVisualEffectMaterial(std::string material) {
-  if (material == "appearanceBased")
-    return VisualEffectMaterial::kAppearanceBased;
-  else if (material == "light")
-    return VisualEffectMaterial::kLight;
-  else if (material == "dark")
-    return VisualEffectMaterial::kDark;
-  else if (material == "titlebar")
-    return VisualEffectMaterial::kTitlebar;
-  return VisualEffectMaterial::kAppearanceBased;
-}
-
-std::string ConvertFromVisualEffectMaterial(VisualEffectMaterial material) {
-  if (material == VisualEffectMaterial::kAppearanceBased)
-    return "appearanceBased";
-  else if (material == VisualEffectMaterial::kLight)
-    return "light";
-  else if (material == VisualEffectMaterial::kDark)
-    return "dark";
-  else if (material == VisualEffectMaterial::kTitlebar)
-    return "titlebar";
-  return "appearanceBased";
-}
-
-VisualEffectBlendingMode ConvertToVisualEffectBlendingMode(std::string mode) {
-  if (mode == "behindWindow")
-    return VisualEffectBlendingMode::kBehindWindow;
-  else if (mode == "withinWindow")
-    return VisualEffectBlendingMode::kWithinWindow;
-  return VisualEffectBlendingMode::kBehindWindow;
-}
-
-std::string ConvertFromVisualEffectBlendingMode(VisualEffectBlendingMode mode) {
-  if (mode == VisualEffectBlendingMode::kBehindWindow)
-    return "behindWindow";
-  else if (mode == VisualEffectBlendingMode::kWithinWindow)
-    return "withinWindow";
-  return "behindWindow";
-}
-
-std::string ConvertFromEventType(EventType type) {
-  if (type == EventType::kLeftMouseDown)
-    return "left-mouse-down";
-  else if (type == EventType::kRightMouseDown)
-    return "right-mouse-down";
-  else if (type == EventType::kOtherMouseDown)
-    return "other-mouse-down";
-  else if (type == EventType::kLeftMouseUp)
-    return "left-mouse-up";
-  else if (type == EventType::kRightMouseUp)
-    return "right-mouse-up";
-  else if (type == EventType::kOtherMouseUp)
-    return "other-mouse-up";
-  else if (type == EventType::kMouseMove)
-    return "mouse-move";
-  else if (type == EventType::kMouseEnter)
-    return "mouse-enter";
-  else if (type == EventType::kMouseLeave)
-    return "mouse-leave";
-  return "unknown";
-}
-#endif  // BUILDFLAG(IS_MAC)
-
-}  // namespace
-
-BaseView::BaseView(v8::Isolate* isolate, NativeView* native_view)
-    : view_(native_view) {
-  view_->AddObserver(this);
-}
-
-BaseView::BaseView(gin::Arguments* args, NativeView* native_view)
-    : BaseView(args->isolate(), native_view) {
+BaseView::BaseView(gin::Arguments* args, bool vibrant, bool blurred)
+    : vibrant_(vibrant), blurred_(blurred) {
+  CreateView();
   InitWithArgs(args);
 }
 
 BaseView::~BaseView() {
+  DestroyView();
   // Remove global reference so the JS object can be garbage collected.
   self_ref_.Reset();
 }
 
 void BaseView::InitWith(v8::Isolate* isolate, v8::Local<v8::Object> wrapper) {
-  AttachAsUserData(view_.get());
   gin_helper::TrackableObject<BaseView>::InitWith(isolate, wrapper);
 
   // Reference this object in case it got garbage collected.
   self_ref_.Reset(isolate, wrapper);
 }
 
-void BaseView::OnChildViewDetached(NativeView* observed_view,
-                                   NativeView* view) {
-  auto* api_view = TrackableObject::FromWrappedClass(isolate(), view);
-  if (api_view)
-    ResetChildView(api_view);
+int32_t BaseView::GetID() const {
+  return weak_map_id();
 }
 
-#if BUILDFLAG(IS_MAC)
-bool BaseView::OnMouseDown(NativeView* observed_view,
-                           const NativeMouseEvent& event) {
-  return Emit("mouse-down", ConvertFromEventType(event.type), event.timestamp,
-              event.button, event.position_in_view, event.position_in_window);
+bool BaseView::EnsureDetachFromParent() {
+  if (GetParent()) {
+    GetParent()->RemoveChildView(gin::CreateHandle(isolate(), this));
+  } else if (GetWindow()) {
+    return GetWindow()->RemoveChildView(gin::CreateHandle(isolate(), this));
+  }
+  return true;
 }
 
-bool BaseView::OnMouseUp(NativeView* observed_view,
-                         const NativeMouseEvent& event) {
-  return Emit("mouse-up", ConvertFromEventType(event.type), event.timestamp,
-              event.button, event.position_in_view, event.position_in_window);
+void BaseView::SetZIndex(int z_index) {
+  z_index_ = z_index;
 }
 
-void BaseView::OnMouseMove(NativeView* observed_view,
-                           const NativeMouseEvent& event) {
-  Emit("mouse-move", ConvertFromEventType(event.type), event.timestamp,
-       event.button, event.position_in_view, event.position_in_window);
+int BaseView::GetZIndex() const {
+  return z_index_;
 }
 
-void BaseView::OnMouseEnter(NativeView* observed_view,
-                            const NativeMouseEvent& event) {
-  Emit("mouse-enter", ConvertFromEventType(event.type), event.timestamp,
-       event.button, event.position_in_view, event.position_in_window);
+void BaseView::AddChildView(gin::Handle<BaseView> base_view) {
+  if (!IsView())
+    return;
+
+  auto iter = children_.find(base_view->GetID());
+  if (iter == children_.end()) {
+    if (!base_view->EnsureDetachFromParent())
+      return;
+    if (base_view.get() == this || base_view->GetParent())
+      return;
+    AddChildViewImpl(base_view.get());
+    base_view->SetParent(this);
+    children_[base_view->GetID()].Reset(isolate(), base_view.ToV8());
+    api_children_.insert(api_children_.begin() + ChildCount(), base_view.get());
+    RearrangeChildViews();
+  }
 }
 
-void BaseView::OnMouseLeave(NativeView* observed_view,
-                            const NativeMouseEvent& event) {
-  Emit("mouse-leave", ConvertFromEventType(event.type), event.timestamp,
-       event.button, event.position_in_view, event.position_in_window);
+void BaseView::RemoveChildView(gin::Handle<BaseView> base_view) {
+  if (!IsView())
+    return;
+
+  auto iter = children_.find(base_view->GetID());
+  if (iter != children_.end()) {
+    RemoveChildViewImpl(base_view.get());
+    base_view->SetParent(nullptr);
+    iter->second.Reset();
+    children_.erase(iter);
+    const auto api_iter(
+        std::find(api_children_.begin(), api_children_.end(), base_view.get()));
+    if (api_iter != api_children_.end())
+      api_children_.erase(api_iter);
+  }
 }
 
-void BaseView::OnCaptureLost(NativeView* observed_view) {
-  Emit("capture-lost");
-}
-#endif  // BUILDFLAG(IS_MAC)
+std::vector<v8::Local<v8::Value>> BaseView::GetViews() const {
+  std::vector<v8::Local<v8::Value>> ret;
 
-void BaseView::OnSizeChanged(NativeView* observed_view,
-                             gfx::Size old_size,
-                             gfx::Size new_size) {
+  for (auto const& child_iter : children_) {
+    if (!child_iter.second.IsEmpty())
+      ret.push_back(v8::Local<v8::Value>::New(isolate(), child_iter.second));
+  }
+
+  return ret;
+}
+
+v8::Local<v8::Value> BaseView::GetParentView() const {
+  if (GetParent())
+    return GetParent()->GetWrapper();
+  return v8::Null(isolate());
+}
+
+v8::Local<v8::Value> BaseView::GetParentWindow() const {
+  if (!GetParent() && GetWindow()) {
+    return GetWindow()->GetWrapper();
+  }
+  return v8::Null(isolate());
+}
+
+void BaseView::SetBackgroundColorImpl(const SkColor& color) {}
+
+void BaseView::ResetChildViews() {
+  v8::HandleScope scope(isolate());
+
+  for (auto& item : children_) {
+    gin::Handle<BaseView> base_view;
+    if (gin::ConvertFromV8(isolate(),
+                           v8::Local<v8::Value>::New(isolate(), item.second),
+                           &base_view) &&
+        !base_view.IsEmpty()) {
+      // There's a chance that the BaseView may have been reparented - only
+      // reset if the owner view is *this* view.
+      auto* parent_view = base_view->GetParent();
+      if (parent_view && parent_view == this)
+        base_view->SetParent(nullptr);
+    }
+
+    item.second.Reset();
+  }
+
+  children_.clear();
+  api_children_.clear();
+}
+
+void BaseView::SetParent(BaseView* parent) {
+  if (parent) {
+    SetWindow(parent->window_);
+  } else {
+    SetWindow(nullptr);
+  }
+  parent_ = parent;
+}
+
+void BaseView::BecomeContentView(BaseWindow* window) {
+  SetWindow(window);
+  parent_ = nullptr;
+}
+
+void BaseView::SetWindow(BaseWindow* window) {
+  window_ = window;
+  SetWindowForChildren(window);
+}
+
+void BaseView::SetWindowForChildren(BaseWindow* window) {
+  for (BaseView* child : api_children_)
+    child->SetWindow(window);
+}
+
+void BaseView::NotifySizeChanged(gfx::Size old_size, gfx::Size new_size) {
   Emit("size-changed", old_size, new_size);
 }
 
-void BaseView::OnViewIsDeleting(NativeView* observed_view) {
+void BaseView::NotifyViewIsDeleting() {
   RemoveFromWeakMap();
-  view_->RemoveObserver(this);
 
   // We can not call Destroy here because we need to call Emit first, but we
   // also do not want any method to be used, so just mark as destroyed here.
@@ -234,299 +422,6 @@ void BaseView::OnViewIsDeleting(NativeView* observed_view) {
 
   // Destroy the native class when window is closed.
   base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, GetDestroyClosure());
-}
-
-void BaseView::SetZIndex(int z_index) {
-  view_->SetZIndex(z_index);
-}
-
-int BaseView::GetZIndex() const {
-  return view_->GetZIndex();
-}
-
-void BaseView::SetClickThrough(bool clickThrough) {
-  view_->SetClickThrough(clickThrough);
-}
-
-bool BaseView::IsClickThrough() const {
-  return view_->IsClickThrough();
-}
-
-void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
-  BoundsAnimationOptions options;
-  args->GetNext(&options);
-  view_->SetBounds(bounds, options);
-}
-
-gfx::Rect BaseView::GetBounds() const {
-  return view_->GetBounds();
-}
-
-gfx::Point BaseView::OffsetFromView(gin::Handle<BaseView> from) const {
-  return view_->OffsetFromView(from->view());
-}
-
-gfx::Point BaseView::OffsetFromWindow() const {
-  return view_->OffsetFromWindow();
-}
-
-void BaseView::SetVisible(bool visible) {
-  view_->SetVisible(visible);
-}
-
-bool BaseView::IsVisible() const {
-  return view_->IsVisible();
-}
-
-bool BaseView::IsTreeVisible() const {
-  return view_->IsTreeVisible();
-}
-
-void BaseView::Focus() {
-  view_->Focus();
-}
-
-bool BaseView::HasFocus() const {
-  return view_->HasFocus();
-}
-
-void BaseView::SetFocusable(bool focusable) {
-  view_->SetFocusable(focusable);
-}
-
-bool BaseView::IsFocusable() const {
-  return view_->IsFocusable();
-}
-
-void BaseView::SetBackgroundColor(const std::string& color_name) {
-  const SkColor color = ParseCSSColor(color_name);
-  view_->SetBackgroundColor(color);
-  SetBackgroundColorImpl(color);
-}
-
-#if BUILDFLAG(IS_MAC)
-void BaseView::SetVisualEffectMaterial(std::string material) {
-  view_->SetVisualEffectMaterial(ConvertToVisualEffectMaterial(material));
-}
-
-std::string BaseView::GetVisualEffectMaterial() const {
-  return ConvertFromVisualEffectMaterial(view_->GetVisualEffectMaterial());
-}
-
-void BaseView::SetVisualEffectBlendingMode(std::string mode) {
-  view_->SetVisualEffectBlendingMode(ConvertToVisualEffectBlendingMode(mode));
-}
-
-std::string BaseView::GetVisualEffectBlendingMode() const {
-  return ConvertFromVisualEffectBlendingMode(
-      view_->GetVisualEffectBlendingMode());
-}
-
-void BaseView::SetBlurTintColorWithSRGB(float r, float g, float b, float a) {
-  view_->SetBlurTintColorWithSRGB(r, g, b, a);
-}
-
-void BaseView::SetBlurTintColorWithCalibratedWhite(float white,
-                                                   float alphaval) {
-  view_->SetBlurTintColorWithCalibratedWhite(white, alphaval);
-}
-
-void BaseView::SetBlurTintColorWithGenericGamma22White(float white,
-                                                       float alphaval) {
-  view_->SetBlurTintColorWithGenericGamma22White(white, alphaval);
-}
-
-void BaseView::SetBlurRadius(float radius) {
-  view_->SetBlurRadius(radius);
-}
-
-float BaseView::GetBlurRadius() {
-  return view_->GetBlurRadius();
-}
-
-void BaseView::SetBlurSaturationFactor(float factor) {
-  view_->SetBlurSaturationFactor(factor);
-}
-
-float BaseView::GetBlurSaturationFactor() {
-  return view_->GetBlurSaturationFactor();
-}
-
-void BaseView::SetCapture() {
-  view_->SetCapture();
-}
-
-void BaseView::ReleaseCapture() {
-  view_->ReleaseCapture();
-}
-
-bool BaseView::HasCapture() const {
-  return view_->HasCapture();
-}
-
-void BaseView::EnableMouseEvents() {
-  view_->EnableMouseEvents();
-}
-
-void BaseView::SetMouseTrackingEnabled(bool enable) {
-  view_->SetMouseTrackingEnabled(enable);
-}
-
-bool BaseView::IsMouseTrackingEnabled() {
-  return view_->IsMouseTrackingEnabled();
-}
-#endif
-
-void BaseView::SetRoundedCorners(
-    const NativeView::RoundedCornersOptions& options) {
-  return view_->SetRoundedCorners(options);
-}
-
-void BaseView::SetClippingInsets(
-    const NativeView::ClippingInsetOptions& options) {
-  return view_->SetClippingInsets(options);
-}
-
-void BaseView::ResetScaling() {
-  view_->ResetScaling();
-}
-
-void BaseView::SetScale(const ScaleAnimationOptions& options) {
-  view_->SetScale(options);
-}
-
-float BaseView::GetScaleX() {
-  return view_->GetScaleX();
-}
-
-float BaseView::GetScaleY() {
-  return view_->GetScaleY();
-}
-
-void BaseView::SetOpacity(const double opacity, gin::Arguments* args) {
-  AnimationOptions options;
-  args->GetNext(&options);
-  view_->SetOpacity(opacity, options);
-}
-
-double BaseView::GetOpacity() {
-  return view_->GetOpacity();
-}
-
-int32_t BaseView::GetID() const {
-  return weak_map_id();
-}
-
-void BaseView::AddChildView(v8::Local<v8::Value> value) {
-  if (!view_)
-    return;
-
-  gin::Handle<BaseView> base_view;
-  if (value->IsObject() && gin::ConvertFromV8(isolate(), value, &base_view)) {
-    auto get_that_view = base_views_.find(base_view->GetID());
-    if (get_that_view == base_views_.end()) {
-      if (!base_view->EnsureDetachFromParent())
-        return;
-      view_->AddChildView(base_view->view());
-      base_views_[base_view->GetID()].Reset(isolate(), value);
-    }
-  }
-}
-
-void BaseView::RemoveChildView(v8::Local<v8::Value> value) {
-  if (!view_)
-    return;
-
-  gin::Handle<BaseView> base_view;
-  if (value->IsObject() && gin::ConvertFromV8(isolate(), value, &base_view)) {
-    auto get_that_view = base_views_.find(base_view->GetID());
-    if (get_that_view != base_views_.end()) {
-      view_->RemoveChildView(base_view->view());
-      (*get_that_view).second.Reset(isolate(), value);
-      base_views_.erase(get_that_view);
-    }
-  }
-}
-
-void BaseView::RearrangeChildViews() {
-  view_->RearrangeChildViews();
-}
-
-std::vector<v8::Local<v8::Value>> BaseView::GetViews() const {
-  std::vector<v8::Local<v8::Value>> ret;
-
-  for (auto const& views_iter : base_views_) {
-    if (!views_iter.second.IsEmpty())
-      ret.push_back(v8::Local<v8::Value>::New(isolate(), views_iter.second));
-  }
-
-  return ret;
-}
-
-v8::Local<v8::Value> BaseView::GetParentView() const {
-  NativeView* parent_view = view_->GetParent();
-  if (parent_view) {
-    auto* existing_view =
-        TrackableObject::FromWrappedClass(isolate(), parent_view);
-    if (existing_view)
-      return existing_view->GetWrapper();
-  }
-  return v8::Null(isolate());
-}
-
-v8::Local<v8::Value> BaseView::GetParentWindow() const {
-  NativeWindow* parent_window = view_->GetWindow();
-  if (!view_->GetParent() && parent_window) {
-    auto* existing_window =
-        TrackableObject::FromWrappedClass(isolate(), parent_window);
-    if (existing_window)
-      return existing_window->GetWrapper();
-  }
-  return v8::Null(isolate());
-}
-
-bool BaseView::EnsureDetachFromParent() {
-  auto* owner_view = view()->GetParent();
-  if (owner_view) {
-    owner_view->DetachChildView(view());
-  } else {
-    auto* owner_window = view()->GetWindow();
-    if (owner_window)
-      return owner_window->DetachChildView(view());
-  }
-  return true;
-}
-
-void BaseView::SetBackgroundColorImpl(const SkColor& color) {}
-
-void BaseView::ResetChildView(BaseView* view) {
-  auto get_that_view = base_views_.find(view->GetID());
-  if (get_that_view != base_views_.end()) {
-    (*get_that_view).second.Reset();
-    base_views_.erase(get_that_view);
-  }
-}
-
-void BaseView::ResetChildViews() {
-  v8::HandleScope scope(isolate());
-
-  for (auto& item : base_views_) {
-    gin::Handle<BaseView> base_view;
-    if (gin::ConvertFromV8(isolate(),
-                           v8::Local<v8::Value>::New(isolate(), item.second),
-                           &base_view) &&
-        !base_view.IsEmpty()) {
-      // There's a chance that the BaseView may have been reparented - only
-      // reset if the owner view is *this* view.
-      auto* parent_view = base_view->view()->GetParent();
-      if (parent_view && parent_view == view_)
-        base_view->view()->SetParent(nullptr);
-    }
-
-    item.second.Reset();
-  }
-
-  base_views_.clear();
 }
 
 // static
@@ -544,7 +439,7 @@ gin_helper::WrappableBase* BaseView::New(gin_helper::ErrorThrower thrower,
   bool blurred = false;
   options.Get("blurred", &blurred);
 
-  return new BaseView(args, new NativeView(vibrant, blurred));
+  return new BaseView(args, vibrant, blurred);
 }
 
 // static

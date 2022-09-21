@@ -49,11 +49,9 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
 
   // views::View:
   void Layout() override;
-  /***** stack *****/
   void OnPaintBackground(gfx::Canvas* canvas) override;
 
   void SetStopPaintBackground(bool stop_paint_background);
-  /*****************/
 
   const std::u16string& GetTitle() const { return title_; }
 
@@ -69,9 +67,7 @@ class InspectableWebContentsViewViews : public InspectableWebContentsView,
   views::WidgetDelegate* devtools_window_delegate_ = nullptr;
   std::u16string title_;
 
-  /***** stack *****/
   bool stop_paint_background_ = false;
-  /*****************/
 };
 
 }  // namespace electron
