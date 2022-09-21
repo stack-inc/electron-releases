@@ -19,7 +19,6 @@
 #include "extensions/browser/app_window/size_constraints.h"
 #include "shell/browser/native_window_observer.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
-#include "shell/browser/ui/native_view.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "ui/views/widget/widget_delegate.h"
 
@@ -50,9 +49,10 @@ class ElectronMenuModel;
 class NativeBrowserView;
 
 namespace api {
+class BaseView;
 class BrowserView;
 class WebBrowserView;
-}
+}  // namespace api
 
 #if BUILDFLAG(IS_MAC)
 typedef NSView* NativeWindowHandle;
@@ -76,11 +76,11 @@ class NativeWindow : public base::SupportsUserData,
 
   void InitFromOptions(const gin_helper::Dictionary& options);
 
-  void SetContentView(scoped_refptr<NativeView> view);
-  NativeView* GetContentView() const;
+  void SetContentView(api::BaseView* view);
+  api::BaseView* GetContentView() const;
 
   virtual void SetContentView(views::View* view) = 0;
-  virtual void SetContentViewImpl(NativeView* view) = 0;
+  virtual void SetContentViewImpl(api::BaseView* view) = 0;
 
   virtual void Close() = 0;
   virtual void CloseImmediately() = 0;
@@ -188,9 +188,9 @@ class NativeWindow : public base::SupportsUserData,
   virtual void AddBrowserView(NativeBrowserView* browser_view) = 0;
   virtual void RemoveBrowserView(NativeBrowserView* browser_view) = 0;
   virtual void SetTopBrowserView(NativeBrowserView* browser_view) = 0;
-  virtual void AddChildView(NativeView* view) = 0;
-  virtual bool RemoveChildView(NativeView* view) = 0;
-  virtual void SetTopChildView(NativeView* view) = 0;
+  virtual void AddChildView(api::BaseView* view) = 0;
+  virtual void RemoveChildView(api::BaseView* view) = 0;
+  virtual void SetTopChildView(api::BaseView* view) = 0;
   virtual content::DesktopMediaID GetDesktopMediaID() const = 0;
   virtual gfx::NativeView GetNativeView() const = 0;
   virtual gfx::NativeWindow GetNativeWindow() const = 0;
@@ -325,8 +325,6 @@ class NativeWindow : public base::SupportsUserData,
   void NotifyWindowMessage(UINT message, WPARAM w_param, LPARAM l_param);
 #endif
 
-  bool DetachChildView(NativeView* view);
-
   void AddObserver(NativeWindowObserver* obs) { observers_.AddObserver(obs); }
   void RemoveObserver(NativeWindowObserver* obs) {
     observers_.RemoveObserver(obs);
@@ -442,7 +440,7 @@ class NativeWindow : public base::SupportsUserData,
   // The content view, weak ref.
   views::View* content_view_ = nullptr;
 
-  scoped_refptr<NativeView> content_base_view_;
+  api::BaseView* content_base_view_ = nullptr;
 
   // Whether window has standard frame.
   bool has_frame_ = true;

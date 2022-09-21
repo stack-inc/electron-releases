@@ -14,7 +14,6 @@
 #include "shell/browser/api/electron_api_web_contents_view.h"
 #include "shell/browser/browser.h"
 #include "shell/browser/native_browser_view.h"
-#include "shell/browser/ui/native_view.h"
 #include "shell/browser/web_contents_preferences.h"
 #include "shell/browser/window_list.h"
 #include "shell/common/color_util.h"
@@ -384,23 +383,24 @@ void BrowserWindow::ResetBrowserViews() {
 #endif
 }
 
-void BrowserWindow::AddChildView(v8::Local<v8::Value> value) {
-  BaseWindow::AddChildView(value);
+void BrowserWindow::AddChildView(gin::Handle<BaseView> base_view) {
+  BaseWindow::AddChildView(base_view);
 #if BUILDFLAG(IS_MAC)
   UpdateDraggableRegions(draggable_regions_);
 #endif
 }
 
-void BrowserWindow::RemoveChildView(v8::Local<v8::Value> value) {
-  BaseWindow::RemoveChildView(value);
+bool BrowserWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
+  bool result = BaseWindow::RemoveChildView(base_view);
 #if BUILDFLAG(IS_MAC)
   UpdateDraggableRegions(draggable_regions_);
 #endif
+  return result;
 }
 
-void BrowserWindow::SetTopChildView(v8::Local<v8::Value> value,
+void BrowserWindow::SetTopChildView(gin::Handle<BaseView> base_view,
                                     gin_helper::Arguments* args) {
-  BaseWindow::SetTopChildView(value, args);
+  BaseWindow::SetTopChildView(base_view, args);
 #if BUILDFLAG(IS_MAC)
   UpdateDraggableRegions(draggable_regions_);
 #endif

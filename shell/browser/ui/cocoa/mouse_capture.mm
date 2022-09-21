@@ -1,11 +1,11 @@
 #include "shell/browser/ui/cocoa/mouse_capture.h"
 
+#include "shell/browser/api/electron_api_base_view.h"
 #include "shell/browser/ui/cocoa/events_handler.h"
-#include "shell/browser/ui/native_view.h"
 
 namespace electron {
 
-MouseCapture::MouseCapture(NativeView* view) : view_(view) {
+MouseCapture::MouseCapture(api::BaseView* view) : view_(view) {
   NSEventMask event_mask = NSEventMaskLeftMouseDown | NSEventMaskLeftMouseUp |
                            NSEventMaskRightMouseDown | NSEventMaskRightMouseUp |
                            NSEventMaskMouseMoved | NSEventMaskLeftMouseDragged |

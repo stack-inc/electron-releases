@@ -1,5 +1,10 @@
-#include "shell/browser/ui/native_web_browser_view.h"
+// Copyright (c) 2022 GitHub, Inc.
+// Use of this source code is governed by the MIT license that can be
+// found in the LICENSE file.
 
+#include "shell/browser/api/electron_api_web_browser_view.h"
+
+#include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
 #include "ui/compositor/layer.h"
 #include "ui/gfx/geometry/rounded_corners_f.h"
@@ -7,8 +12,12 @@
 
 namespace electron {
 
-void NativeWebBrowserView::InitWebBrowserView() {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
+namespace api {
+
+void WebBrowserView::CreateWebBrowserView(
+    InspectableWebContents* inspectable_web_contents) {
+  InspectableWebContentsView* iwc_view =
+      inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;
   views::View* view = nullptr;
   if (iwc_view) {
     view = iwc_view->GetView();
@@ -18,29 +27,18 @@ void NativeWebBrowserView::InitWebBrowserView() {
     view = new views::View();
   }
 
-  view->set_owned_by_client();
   SetNativeView(view);
 }
 
-void NativeWebBrowserView::RenderViewReady() {
+void WebBrowserView::RenderViewReady() {
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (iwc_view)
     iwc_view->GetView()->Layout();
 }
 
-void NativeWebBrowserView::UpdateClickThrough() {
-  bool click_through = IsClickThrough();
-  if (GetNative())
-    GetNative()->SetCanProcessEventsWithinSubtree(!click_through);
+void WebBrowserView::SetRoundedCorners(const RoundedCornersOptions& options) {
+  BaseView::SetRoundedCorners(options);
 
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (iwc_view)
-    iwc_view->SetClickThrough(click_through);
-}
-
-void NativeWebBrowserView::SetRoundedCorners(
-    const RoundedCornersOptions& options) {
-  NativeView::SetRoundedCorners(options);
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
     return;
@@ -57,5 +55,16 @@ void NativeWebBrowserView::SetRoundedCorners(
   iwc_view->SetCornerRadii(corner_radii);
 }
 
+void WebBrowserView::UpdateClickThrough() {
+  bool click_through = IsClickThrough();
+  if (GetView())
+    GetView()->SetCanProcessEventsWithinSubtree(!click_through);
+
+  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
+  if (iwc_view)
+    iwc_view->SetClickThrough(click_through);
+}
+
+}  // namespace api
 
 }  // namespace electron

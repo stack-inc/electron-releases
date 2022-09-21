@@ -2,8 +2,8 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_NATIVE_VIEW_HOST_SCROLL_WITH_LAYERS_H_
-#define ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_NATIVE_VIEW_HOST_SCROLL_WITH_LAYERS_H_
+#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_NATIVE_VIEW_HOST_SCROLL_WITH_LAYERS_H_
+#define ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_NATIVE_VIEW_HOST_SCROLL_WITH_LAYERS_H_
 
 #include "ui/views/controls/native/native_view_host.h"
 
@@ -16,14 +16,14 @@ class NativeViewHostScrollWithLayers : public views::NativeViewHost {
   NativeViewHostScrollWithLayers();
   ~NativeViewHostScrollWithLayers() override;
 
-  NativeViewHostScrollWithLayers(
-      const NativeViewHostScrollWithLayers&) = delete;
+  NativeViewHostScrollWithLayers(const NativeViewHostScrollWithLayers&) =
+      delete;
   NativeViewHostScrollWithLayers(NativeViewHostScrollWithLayers&&) = delete;
 
   NativeViewHostScrollWithLayers& operator=(
       const NativeViewHostScrollWithLayers&) = delete;
-  NativeViewHostScrollWithLayers& operator=(
-      NativeViewHostScrollWithLayers&&) = delete;
+  NativeViewHostScrollWithLayers& operator=(NativeViewHostScrollWithLayers&&) =
+      delete;
 
   void Layout() override;
 
@@ -39,4 +39,4 @@ class NativeViewHostScrollWithLayers : public views::NativeViewHost {
 
 }  // namespace electron
 
-#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_NATIVE_VIEW_HOST_SCROLL_WITH_LAYERS_H_
+#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_NATIVE_VIEW_HOST_SCROLL_WITH_LAYERS_H_

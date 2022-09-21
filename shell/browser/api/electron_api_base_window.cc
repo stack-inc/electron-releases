@@ -308,17 +308,6 @@ void BaseWindow::OnWindowMessage(UINT message, WPARAM w_param, LPARAM l_param) {
 }
 #endif
 
-void BaseWindow::OnChildViewDetached(NativeView* view) {
-  auto* api_view = TrackableObject::FromWrappedClass(isolate(), view);
-  if (api_view) {
-    auto get_that_view = base_views_.find(api_view->GetID());
-    if (get_that_view != base_views_.end()) {
-      (*get_that_view).second.Reset();
-      base_views_.erase(get_that_view);
-    }
-  }
-}
-
 void BaseWindow::SetContentView(gin::Handle<View> view) {
   ResetBrowserViews();
   ResetBaseViews();
@@ -331,8 +320,12 @@ void BaseWindow::SetContentBaseView(gin::Handle<BaseView> view) {
   ResetBaseViews();
   if (!view->EnsureDetachFromParent())
     return;
+  if (api_content_base_view_)
+    api_content_base_view_->BecomeContentView(nullptr);
+  window_->SetContentView(view.get());
   content_base_view_.Reset(isolate(), view.ToV8());
-  window_->SetContentView(view->view());
+  api_content_base_view_ = view.get();
+  api_content_base_view_->BecomeContentView(this);
 }
 
 void BaseWindow::CloseImmediately() {
@@ -816,45 +809,42 @@ void BaseWindow::SetTopBrowserView(gin::Handle<BrowserView> browser_view,
   window_->SetTopBrowserView(browser_view->view());
 }
 
-void BaseWindow::AddChildView(v8::Local<v8::Value> value) {
-  gin::Handle<BaseView> base_view;
-  if (value->IsObject() && gin::ConvertFromV8(isolate(), value, &base_view)) {
-    auto get_that_view = base_views_.find(base_view->GetID());
-    if (get_that_view == base_views_.end()) {
-      if (!base_view->EnsureDetachFromParent())
-        return;
-      window_->AddChildView(base_view->view());
-      base_views_[base_view->GetID()].Reset(isolate(), value);
-    }
-  }
-}
-
-void BaseWindow::RemoveChildView(v8::Local<v8::Value> value) {
-  gin::Handle<BaseView> base_view;
-  if (value->IsObject() && gin::ConvertFromV8(isolate(), value, &base_view)) {
-    auto get_that_view = base_views_.find(base_view->GetID());
-    if (get_that_view != base_views_.end()) {
-      window_->RemoveChildView(base_view->view());
-      (*get_that_view).second.Reset(isolate(), value);
-      base_views_.erase(get_that_view);
-    }
-  }
-}
-
-void BaseWindow::SetTopChildView(v8::Local<v8::Value> value,
-                                 gin_helper::Arguments* args) {
-  gin::Handle<BaseView> base_view;
-  if (value->IsObject() && gin::ConvertFromV8(isolate(), value, &base_view)) {
-    auto* owner_window = base_view->view()->GetWindow();
-    auto get_that_view = base_views_.find(base_view->GetID());
-    if (get_that_view == base_views_.end() ||
-        (owner_window && owner_window != window_.get())) {
-      args->ThrowError("Given BaseView is not attached to the window");
+void BaseWindow::AddChildView(gin::Handle<BaseView> base_view) {
+  auto iter = base_views_.find(base_view->GetID());
+  if (iter == base_views_.end()) {
+    if (!base_view->EnsureDetachFromParent())
       return;
-    }
-
-    window_->SetTopChildView(base_view->view());
+    window_->AddChildView(base_view.get());
+    base_view->SetWindow(this);
+    base_views_[base_view->GetID()].Reset(isolate(), base_view.ToV8());
   }
+}
+
+bool BaseWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
+  if (base_view.get() == api_content_base_view_)
+    return false;
+
+  auto iter = base_views_.find(base_view->GetID());
+  if (iter != base_views_.end()) {
+    window_->RemoveChildView(base_view.get());
+    base_view->SetWindow(nullptr);
+    iter->second.Reset();
+    base_views_.erase(iter);
+  }
+
+  return true;
+}
+
+void BaseWindow::SetTopChildView(gin::Handle<BaseView> base_view,
+                                 gin_helper::Arguments* args) {
+  BaseWindow* owner_window = base_view->GetWindow();
+  auto iter = base_views_.find(base_view->GetID());
+  if (iter == base_views_.end() || (owner_window && owner_window != this)) {
+    args->ThrowError("Given BaseView is not attached to the window");
+    return;
+  }
+
+  window_->SetTopChildView(base_view.get());
 }
 
 std::string BaseWindow::GetMediaSourceId() const {
@@ -1208,11 +1198,10 @@ void BaseWindow::ResetBaseViews() {
         !base_view.IsEmpty()) {
       // There's a chance that the BaseView may have been reparented - only
       // reset if the owner window is *this* window.
-      auto* owner_window = base_view->view()->GetWindow();
-      if (owner_window && owner_window == window_.get()) {
-        base_view->view()->SetWindow(nullptr);
-        owner_window->RemoveChildView(base_view->view());
-      }
+      BaseWindow* owner_window = base_view->GetWindow();
+      DCHECK_EQ(owner_window, this);
+      base_view->SetWindow(nullptr);
+      window_->RemoveChildView(base_view.get());
     }
 
     item.second.Reset();
