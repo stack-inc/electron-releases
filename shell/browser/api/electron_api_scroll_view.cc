@@ -1,117 +1,81 @@
+// Copyright (c) 2022 GitHub, Inc.
+// Use of this source code is governed by the MIT license that can be
+// found in the LICENSE file.
+
 #include "shell/browser/api/electron_api_scroll_view.h"
 
 #include "gin/handle.h"
-#include "shell/browser/api/electron_api_base_view.h"
 #include "shell/browser/browser.h"
-#include "shell/browser/native_window.h"
 #include "shell/common/gin_converters/gfx_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
+#include "ui/base/ui_base_features.h"
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#include "ui/views/controls/scroll_view.h"
+#endif
 
 namespace electron {
 
 namespace api {
 
-namespace {
+ScrollView::ScrollView(gin::Arguments* args,
+                       const gin_helper::Dictionary& options) {
+  CreateScrollView();
 
-ScrollBarMode ConvertToScrollBarMode(std::string mode) {
-  if (mode == "disabled")
-    return ScrollBarMode::kDisabled;
-  else if (mode == "enabled-but-hidden")
-    return ScrollBarMode::kHiddenButEnabled;
-  return ScrollBarMode::kEnabled;
-}
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  bool smooth_scroll = false;
+  if (options.Get("smoothScroll", &smooth_scroll))
+    SetSmoothScroll(smooth_scroll);
+  bool block_scroll_view_when_focus = false;
+  if (options.Get("blockScrollViewWhenFocus", &block_scroll_view_when_focus))
+    SetBlockScrollViewWhenFocus(block_scroll_view_when_focus);
+#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
 
-std::string ConvertFromScrollBarMode(ScrollBarMode mode) {
-  if (mode == ScrollBarMode::kDisabled)
-    return "disabled";
-  else if (mode == ScrollBarMode::kHiddenButEnabled)
-    return "enabled-but-hidden";
-  return "enabled";
-}
-
-ScrollElasticity ConvertToScrollElasticity(std::string elasticity) {
-  if (elasticity == "none")
-    return ScrollElasticity::kNone;
-  else if (elasticity == "allowed")
-    return ScrollElasticity::kAllowed;
-  return ScrollElasticity::kAutomatic;
-}
-
-std::string ConvertFromScrollElasticity(ScrollElasticity elasticity) {
-  if (elasticity == ScrollElasticity::kNone)
-    return "none";
-  else if (elasticity == ScrollElasticity::kAllowed)
-    return "allowed";
-  return "automatic";
-}
-
-}  // namespace
-
-ScrollView::ScrollView(gin::Arguments* args, NativeScrollView* scroll)
-    : BaseView(args->isolate(), scroll), scroll_(scroll) {
   InitWithArgs(args);
 }
 
 ScrollView::~ScrollView() = default;
 
-void ScrollView::ResetChildView(BaseView* view) {
-  BaseView::ResetChildView(view);
-
-  if (view->GetID() == content_view_id_) {
-    content_view_id_ = 0;
+void ScrollView::RemoveChildView(gin::Handle<BaseView> base_view) {
+  if (base_view.get() == api_content_view_) {
+    ResetContentViewImpl();
+    api_content_view_->SetParent(nullptr);
+    api_content_view_ = nullptr;
     content_view_.Reset();
+    return;
   }
+
+  BaseView::RemoveChildView(base_view);
 }
 
 void ScrollView::ResetChildViews() {
   BaseView::ResetChildViews();
 
-  content_view_id_ = 0;
   content_view_.Reset();
+  api_content_view_ = nullptr;
 }
 
-#if BUILDFLAG(IS_MAC)
-void ScrollView::OnWillStartLiveScroll(NativeView* observed_view) {
-  Emit("will-start-live-scroll");
+void ScrollView::SetWindowForChildren(BaseWindow* window) {
+  BaseView::SetWindowForChildren(window);
+
+  if (api_content_view_)
+    api_content_view_->SetWindow(window);
 }
 
-void ScrollView::OnDidLiveScroll(NativeView* observed_view) {
-  Emit("did-live-scroll");
-}
-
-void ScrollView::OnDidEndLiveScroll(NativeView* observed_view) {
-  Emit("did-end-live-scroll");
-}
-
-void ScrollView::OnScrollWheel(NativeView* observed_view,
-                               bool mouse_event,
-                               float scrolling_delta_x,
-                               float scrolling_delta_y,
-                               std::string phase,
-                               std::string momentum_phase) {
-  Emit("scroll-wheel", mouse_event, scrolling_delta_x, scrolling_delta_y, phase,
-       momentum_phase);
-}
-#endif  // BUILDFLAG(IS_MAC)
-
-void ScrollView::OnDidScroll(NativeView* observed_view) {
-  Emit("did-scroll");
-}
-
-void ScrollView::SetContentView(v8::Local<v8::Value> value) {
-  gin::Handle<BaseView> content_view;
-  if (value->IsObject() &&
-      gin::ConvertFromV8(isolate(), value, &content_view)) {
-    if (content_view->GetID() != content_view_id_) {
-      if (!content_view->EnsureDetachFromParent())
-        return;
-      scroll_->SetContentView(content_view->view());
-      content_view_id_ = content_view->GetID();
-      content_view_.Reset(isolate(), value);
-    }
-  }
+void ScrollView::SetContentView(gin::Handle<BaseView> base_view) {
+  if (!base_view->EnsureDetachFromParent())
+    return;
+  if (base_view.get() == this || base_view->GetParent() ||
+      base_view.get() == api_content_view_)
+    return;
+  if (api_content_view_)
+    api_content_view_->SetParent(nullptr);
+  SetContentViewImpl(base_view.get());
+  base_view->SetParent(this);
+  content_view_.Reset(isolate(), base_view.ToV8());
+  api_content_view_ = base_view.get();
 }
 
 v8::Local<v8::Value> ScrollView::GetContentView() const {
@@ -121,150 +85,29 @@ v8::Local<v8::Value> ScrollView::GetContentView() const {
   return v8::Local<v8::Value>::New(isolate(), content_view_);
 }
 
-void ScrollView::SetContentSize(gfx::Size size) {
-  scroll_->SetContentSize(size);
-}
-
 gfx::Size ScrollView::GetContentSize() const {
-  return scroll_->GetContentSize();
-}
-
-void ScrollView::SetHorizontalScrollBarMode(std::string mode) {
-  scroll_->SetHorizontalScrollBarMode(ConvertToScrollBarMode(mode));
-}
-
-std::string ScrollView::GetHorizontalScrollBarMode() const {
-  return ConvertFromScrollBarMode(scroll_->GetHorizontalScrollBarMode());
-}
-
-void ScrollView::SetVerticalScrollBarMode(std::string mode) {
-  scroll_->SetVerticalScrollBarMode(ConvertToScrollBarMode(mode));
-}
-
-std::string ScrollView::GetVerticalScrollBarMode() const {
-  return ConvertFromScrollBarMode(scroll_->GetVerticalScrollBarMode());
-}
-
-void ScrollView::SetScrollWheelSwapped(bool swap) {
-  scroll_->SetScrollWheelSwapped(swap);
-}
-
-bool ScrollView::IsScrollWheelSwapped() {
-  return scroll_->IsScrollWheelSwapped();
-}
-
-void ScrollView::SetScrollEventsEnabled(bool enable) {
-  scroll_->SetScrollEventsEnabled(enable);
-}
-
-bool ScrollView::IsScrollEventsEnabled() {
-  return scroll_->IsScrollEventsEnabled();
-}
-
-void ScrollView::SetHorizontalScrollElasticity(std::string elasticity) {
-  scroll_->SetHorizontalScrollElasticity(ConvertToScrollElasticity(elasticity));
-}
-
-std::string ScrollView::GetHorizontalScrollElasticity() const {
-  return ConvertFromScrollElasticity(scroll_->GetHorizontalScrollElasticity());
-}
-
-void ScrollView::SetVerticalScrollElasticity(std::string elasticity) {
-  scroll_->SetVerticalScrollElasticity(ConvertToScrollElasticity(elasticity));
-}
-
-std::string ScrollView::GetVerticalScrollElasticity() const {
-  return ConvertFromScrollElasticity(scroll_->GetVerticalScrollElasticity());
+  return api_content_view_->GetBounds().size();
 }
 
 v8::Local<v8::Promise> ScrollView::SetScrollPosition(gfx::Point point) {
   gin_helper::Promise<void> promise(isolate());
   auto handle = promise.GetHandle();
-  scroll_->SetScrollPosition(point,
-      base::BindOnce([](gin_helper::Promise<void> promise, std::string error) {
-        if (error.empty()) {
-          promise.Resolve();
-        } else {
-          promise.RejectWithErrorMessage(error);
-        }
-      },
-      std::move(promise)));
+  SetScrollPositionImpl(
+      point, base::BindOnce(
+                 [](gin_helper::Promise<void> promise, std::string error) {
+                   if (error.empty()) {
+                     promise.Resolve();
+                   } else {
+                     promise.RejectWithErrorMessage(error);
+                   }
+                 },
+                 std::move(promise)));
   return handle;
 }
 
-gfx::Point ScrollView::GetScrollPosition() const {
-  return scroll_->GetScrollPosition();
+void ScrollView::NotifyDidScroll() {
+  Emit("did-scroll");
 }
-
-gfx::Point ScrollView::GetMaximumScrollPosition() const {
-  return scroll_->GetMaximumScrollPosition();
-}
-
-#if BUILDFLAG(IS_MAC)
-void ScrollView::ScrollToPoint(gfx::Point point,
-                               const AnimationOptions& options) {
-  scroll_->ScrollToPoint(point, options);
-}
-
-void ScrollView::ScrollPointToCenter(gfx::Point point,
-                                     const AnimationOptions& options) {
-  scroll_->ScrollPointToCenter(point, options);
-}
-
-void ScrollView::SetOverlayScrollbar(bool overlay) {
-  scroll_->SetOverlayScrollbar(overlay);
-}
-
-bool ScrollView::IsOverlayScrollbar() const {
-  return scroll_->IsOverlayScrollbar();
-}
-
-void ScrollView::SetScrollWheelFactor(double factor) {
-  scroll_->SetScrollWheelFactor(factor);
-}
-
-double ScrollView::GetScrollWheelFactor() {
-  return scroll_->GetScrollWheelFactor();
-}
-#endif
-
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
-void ScrollView::ClipHeightTo(int min_height, int max_height) {
-  scroll_->ClipHeightTo(min_height, max_height);
-}
-
-int ScrollView::GetMinHeight() const {
-  return scroll_->GetMinHeight();
-}
-
-int ScrollView::GetMaxHeight() const {
-  return scroll_->GetMaxHeight();
-}
-
-void ScrollView::ScrollRectToVisible(const gfx::Rect& rect) {
-  scroll_->ScrollRectToVisible(rect);
-}
-
-gfx::Rect ScrollView::GetVisibleRect() const {
-  return scroll_->GetVisibleRect();
-}
-
-void ScrollView::SetAllowKeyboardScrolling(bool allow) {
-  scroll_->SetAllowKeyboardScrolling(allow);
-}
-
-bool ScrollView::GetAllowKeyboardScrolling() const {
-  return scroll_->GetAllowKeyboardScrolling();
-}
-
-void ScrollView::SetDrawOverflowIndicator(bool indicator) {
-  scroll_->SetDrawOverflowIndicator(indicator);
-}
-
-bool ScrollView::GetDrawOverflowIndicator() const {
-  return scroll_->GetDrawOverflowIndicator();
-}
-#endif
 
 // static
 gin_helper::WrappableBase* ScrollView::New(gin_helper::ErrorThrower thrower,
@@ -276,26 +119,8 @@ gin_helper::WrappableBase* ScrollView::New(gin_helper::ErrorThrower thrower,
 
   gin::Dictionary options = gin::Dictionary::CreateEmpty(args->isolate());
   args->GetNext(&options);
-  absl::optional<ScrollBarMode> horizontal_mode = absl::nullopt;
-  absl::optional<ScrollBarMode> vertical_mode = absl::nullopt;
-  std::string mode;
-  if (options.Get("horizontalScrollBarMode", &mode))
-    horizontal_mode = absl::make_optional(ConvertToScrollBarMode(mode));
-  if (options.Get("verticalScrollBarMode", &mode))
-    vertical_mode = absl::make_optional(ConvertToScrollBarMode(mode));
 
-  auto* native_scroll = new NativeScrollView(horizontal_mode, vertical_mode);
-
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
-  bool smooth_scroll = false;
-  if (options.Get("smoothScroll", &smooth_scroll))
-    native_scroll->SetSmoothScroll(smooth_scroll);
-  bool block_scroll_view_when_focus = false;
-  if (options.Get("blockScrollViewWhenFocus", &block_scroll_view_when_focus))
-    native_scroll->SetBlockScrollViewWhenFocus(block_scroll_view_when_focus);
-#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
-
-  return new ScrollView(args, native_scroll);
+  return new ScrollView(args, options);
 }
 
 // static

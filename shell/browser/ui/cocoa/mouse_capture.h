@@ -5,12 +5,14 @@
 
 namespace electron {
 
-class NativeView;
+namespace api {
+class BaseView;
+}
 
 // Simulating the SetCapture of Windows.
 class MouseCapture {
  public:
-  explicit MouseCapture(NativeView* view);
+  explicit MouseCapture(api::BaseView* view);
   ~MouseCapture();
 
   // disable copy
@@ -20,7 +22,7 @@ class MouseCapture {
  private:
   void ProcessCapturedMouseEvent(NSEvent* event);
 
-  NativeView* view_;
+  api::BaseView* view_;
   id local_monitor_;
   id global_monitor_;
 };

@@ -2,29 +2,28 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#include "electron/shell/browser/ui/views/scroll_with_layers/scroll_view_scroll_with_layers.h"
+#include "shell/browser/ui/views/scroll/scroll_view_scroll_with_layers.h"
 
+#include "shell/browser/ui/views/scroll/native_view_host_scroll_with_layers.h"
 #include "ui/aura/window.h"
 #include "ui/compositor/layer.h"
 #include "ui/gfx/native_widget_types.h"
 
-#include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
-
 namespace electron {
 
 ScrollViewScrollWithLayers::ScrollViewScrollWithLayers()
-    : StackScrollView(views::ScrollView::ScrollWithLayers::kEnabled) {
+    : ScrollView(views::ScrollView::ScrollWithLayers::kEnabled) {
   on_contents_layer_scrolled_subscription_ =
-      this->AddContentsLayerScrolledCallback(
-          base::BindRepeating(&ScrollViewScrollWithLayers::ContentsLayerScrolled,
-              base::Unretained(this)));
+      this->AddContentsLayerScrolledCallback(base::BindRepeating(
+          &ScrollViewScrollWithLayers::ContentsLayerScrolled,
+          base::Unretained(this)));
 }
 
 ScrollViewScrollWithLayers::~ScrollViewScrollWithLayers() = default;
 
 void ScrollViewScrollWithLayers::ContentsLayerScrolled() {
   scroll_ended_timier_.Start(FROM_HERE, base::Seconds(2), this,
-      &ScrollViewScrollWithLayers::ContentsScrollEnded);
+                             &ScrollViewScrollWithLayers::ContentsScrollEnded);
 
   ContentsLayerScrolledImpl(this);
   is_scrolling = true;

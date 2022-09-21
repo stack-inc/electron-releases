@@ -13,7 +13,9 @@
 
 namespace electron {
 
-class NativeView;
+namespace api {
+class BaseView;
+}
 
 // A private class that holds views specific private data.
 // Object-C does not support multi-inheiritance, so it is impossible to add
@@ -22,7 +24,7 @@ struct NativeViewPrivate {
   NativeViewPrivate();
   ~NativeViewPrivate();
 
-  NativeView* shell = nullptr;
+  api::BaseView* shell = nullptr;
   bool focusable = true;
   bool hovered = false;
   bool is_content_view = false;
@@ -84,7 +86,7 @@ struct NativeViewPrivate {
 
 // Extended methods of ElectronNativeViewProtocol.
 @interface NSView (ElectronNativeViewMethods) <ElectronNativeViewProtocol>
-- (electron::NativeView*)shell;
+- (electron::api::BaseView*)shell;
 - (void)enableTracking;
 - (void)disableTracking;
 @end

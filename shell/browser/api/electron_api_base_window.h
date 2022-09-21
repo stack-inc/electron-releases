@@ -37,6 +37,8 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
   NativeWindow* window() const { return window_.get(); }
 
  protected:
+  friend class BaseView;
+
   // Common constructor.
   BaseWindow(v8::Isolate* isolate, const gin_helper::Dictionary& options);
   // Creating independent BaseWindow instance.
@@ -87,7 +89,6 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
 #if BUILDFLAG(IS_WIN)
   void OnWindowMessage(UINT message, WPARAM w_param, LPARAM l_param) override;
 #endif
-  void OnChildViewDetached(NativeView* view) override;
 
   // Public APIs of NativeWindow.
   void SetContentView(gin::Handle<View> view);
@@ -183,9 +184,9 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
                                  gin_helper::Arguments* args);
   virtual std::vector<v8::Local<v8::Value>> GetBrowserViews() const;
   virtual void ResetBrowserViews();
-  virtual void AddChildView(v8::Local<v8::Value> value);
-  virtual void RemoveChildView(v8::Local<v8::Value> value);
-  virtual void SetTopChildView(v8::Local<v8::Value> value,
+  virtual void AddChildView(gin::Handle<BaseView> base_view);
+  virtual bool RemoveChildView(gin::Handle<BaseView> base_view);
+  virtual void SetTopChildView(gin::Handle<BaseView> base_view,
                                gin_helper::Arguments* args);
   virtual std::vector<v8::Local<v8::Value>> GetViews() const;
   virtual void ResetBaseViews();
@@ -277,6 +278,7 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
 
   v8::Global<v8::Value> content_view_;
   v8::Global<v8::Value> content_base_view_;
+  BaseView* api_content_base_view_ = nullptr;
   std::map<int32_t, v8::Global<v8::Value>> browser_views_;
   std::map<int32_t, v8::Global<v8::Value>> base_views_;
   v8::Global<v8::Value> menu_;
