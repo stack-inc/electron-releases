@@ -2,7 +2,7 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#include "electron/shell/browser/ui/views/stack_smooth_scroll/stack_smooth_scroll_animator.h"
+#include "shell/browser/ui/views/scroll/smooth_scroll_animator.h"
 
 #include <cmath>
 
@@ -24,7 +24,7 @@ base::TimeDelta CalculateInterval(int frame_rate) {
 
 }  // namespace
 
-class StackSmoothScrollAnimator::ContinuousAnimation : public gfx::Animation {
+class SmoothScrollAnimator::ContinuousAnimation : public gfx::Animation {
  public:
   ContinuousAnimation(gfx::AnimationDelegate* delegate)
       : Animation(CalculateInterval(kDefaultFrameRate)) {
@@ -33,13 +33,11 @@ class StackSmoothScrollAnimator::ContinuousAnimation : public gfx::Animation {
   ~ContinuousAnimation() override = default;
 
   double GetCurrentValue() const override {
-    return delta_.InMillisecondsF() /  base::Time::kMillisecondsPerSecond;
+    return delta_.InMillisecondsF() / base::Time::kMillisecondsPerSecond;
   }
 
  protected:
-  void AnimationStarted() override {
-    last_time_ = base::TimeTicks::Now();
-  }
+  void AnimationStarted() override { last_time_ = base::TimeTicks::Now(); }
 
   void Step(base::TimeTicks time_now) override {
     delta_ = time_now - last_time_;
@@ -54,20 +52,18 @@ class StackSmoothScrollAnimator::ContinuousAnimation : public gfx::Animation {
   base::TimeDelta delta_;
 };
 
-StackSmoothScrollAnimator::StackSmoothScrollAnimator(
-    views::ScrollBar* scroll_bar)
-        : scroll_bar_(scroll_bar),
-          animation_(nullptr),
-          dest_offset_x_(0),
-          dest_offset_y_(0),
-          current_offset_x_(0),
-          current_offset_y_(0) {
-}
-StackSmoothScrollAnimator::~StackSmoothScrollAnimator() {
+SmoothScrollAnimator::SmoothScrollAnimator(views::ScrollBar* scroll_bar)
+    : scroll_bar_(scroll_bar),
+      animation_(nullptr),
+      dest_offset_x_(0),
+      dest_offset_y_(0),
+      current_offset_x_(0),
+      current_offset_y_(0) {}
+SmoothScrollAnimator::~SmoothScrollAnimator() {
   Stop();
 }
 
-void StackSmoothScrollAnimator::Start(int offset_x, int offset_y) {
+void SmoothScrollAnimator::Start(int offset_x, int offset_y) {
   if (!animation_) {
     current_offset_x_ = 0;
     current_offset_y_ = 0;
@@ -81,7 +77,7 @@ void StackSmoothScrollAnimator::Start(int offset_x, int offset_y) {
   dest_offset_y_ += offset_y;
 }
 
-void StackSmoothScrollAnimator::Stop() {
+void SmoothScrollAnimator::Stop() {
   if (animation_) {
     animation_->Stop();
     delete animation_;
@@ -89,7 +85,7 @@ void StackSmoothScrollAnimator::Stop() {
   }
 }
 
-void StackSmoothScrollAnimator::AnimationProgressed(
+void SmoothScrollAnimator::AnimationProgressed(
     const gfx::Animation* animation) {
   double delta_x = dest_offset_x_ - current_offset_x_;
   double delta_y = dest_offset_y_ - current_offset_y_;

@@ -74,8 +74,6 @@ app.whenReady().then(() => {
 ### `new ScrollView([options])` _Experimental_
 
 * `options` Object (optional)
-  * `horizontalScrollBarMode` string (optional) - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
-  * `verticalScrollBarMode` string (optional) - Can be `disabled`, `enabled-but-hidden`, `enabled`. Default is `enabled`.
   * `smoothScroll` boolean (optional) - When is `true` enables smooth scroll in ScrollView. Default is `false`.
   * `blockScrollViewWhenFocus` boolean (optional) - When is `true` blocks scrolling the view to visible when the view is focussed (applying it to all subviews). Default is `false`.
 

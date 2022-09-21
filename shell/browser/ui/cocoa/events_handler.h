@@ -5,13 +5,15 @@
 
 namespace electron {
 
-class NativeView;
+namespace api {
+class BaseView;
+}
 
 // Dynamically add event methods to a NSView.
 void AddMouseEventHandlerToClass(Class cl);
 
 // Dispatch mouse events to a view.
-bool DispatchMouseEvent(NativeView* view, NSEvent* event);
+bool DispatchMouseEvent(api::BaseView* view, NSEvent* event);
 
 }  // namespace electron
 
