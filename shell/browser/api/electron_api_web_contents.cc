@@ -899,11 +899,9 @@ void WebContents::InitWithSessionAndOptions(
     gin::Handle<api::Session> session,
     const gin_helper::Dictionary& options) {
   Observe(owned_web_contents.get());
-  /***** stack *****/
   if (!WebContentsPreferences::From(web_contents())) {
     new WebContentsPreferences(web_contents(), options);
   }
-  /*****************/
   InitWithWebContents(std::move(owned_web_contents), session->browser_context(),
                       IsGuest());
 

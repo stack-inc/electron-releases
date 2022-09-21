@@ -1,3 +1,7 @@
+// Copyright (c) 2022 GitHub, Inc.
+// Use of this source code is governed by the MIT license that can be
+// found in the LICENSE file.
+
 #include "shell/browser/api/electron_api_web_browser_view.h"
 
 #include <vector>
@@ -6,30 +10,32 @@
 #include "content/browser/web_contents/web_contents_impl.h"  // nogncheck
 #include "content/public/browser/render_widget_host_view.h"
 #include "gin/handle.h"
+#include "shell/browser/api/electron_api_base_window.h"
 #include "shell/browser/api/electron_api_web_contents.h"
 #include "shell/browser/browser.h"
+#include "shell/browser/ui/inspectable_web_contents.h"
+#include "shell/browser/ui/inspectable_web_contents_view.h"
 #include "shell/browser/web_contents_preferences.h"
 #include "shell/common/gin_converters/image_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
 #include "shell/common/options_switches.h"
+#include "ui/gfx/image/image.h"
 
 namespace electron {
 
 namespace api {
 
 WebBrowserView::WebBrowserView(gin::Arguments* args,
-                               gin::Handle<WebContents> web_contents,
-                               NativeWebBrowserView* view)
-    : BaseView(args->isolate(), view), view_(view) {
+                               gin::Handle<WebContents> web_contents) {
+  CreateWebBrowserView(web_contents->inspectable_web_contents());
   InitWithArgs(args);
 
   web_contents_.Reset(args->isolate(), web_contents.ToV8());
   api_web_contents_ = web_contents.get();
   api_web_contents_->AddObserver(this);
   Observe(api_web_contents_->web_contents());
-  view_->AddObserver(this);
 }
 
 WebBrowserView::~WebBrowserView() {
@@ -37,22 +43,6 @@ WebBrowserView::~WebBrowserView() {
     web_contents()->RemoveObserver(this);
     web_contents()->Destroy();
   }
-}
-
-void WebBrowserView::OnSettingOwnerWindow(NativeWindow* window) {
-  // Ensure WebContents and BrowserView owner windows are in sync.
-  if (web_contents())
-    web_contents()->SetOwnerWindow(window);
-
-  if (owner_window_.get()) {
-    owner_window_->remove_inspectable_view(
-        view_->GetInspectableWebContentsView());
-  }
-
-  owner_window_ = window ? window->GetWeakPtr() : nullptr;
-
-  if (owner_window_.get() && view_->GetInspectableWebContentsView())
-    owner_window_->add_inspectable_view(view_->GetInspectableWebContentsView());
 }
 
 void WebBrowserView::WebContentsDestroyed() {
@@ -63,7 +53,7 @@ void WebBrowserView::WebContentsDestroyed() {
 
 void WebBrowserView::OnDraggableRegionsUpdated(
     const std::vector<mojom::DraggableRegionPtr>& regions) {
-  InspectableWebContentsView* iwc_view = view_->GetInspectableWebContentsView();
+  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
     return;
   iwc_view->UpdateDraggableRegions(regions);
@@ -89,7 +79,30 @@ void WebBrowserView::SetBackgroundColorImpl(const SkColor& color) {
   }
 }
 
+void WebBrowserView::SetWindowForChildren(BaseWindow* window) {
+  BaseView::SetWindowForChildren(window);
+
+  // Ensure WebContents and BrowserView owner windows are in sync.
+  if (web_contents())
+    web_contents()->SetOwnerWindow(window ? window->window() : nullptr);
+
+  if (owner_window_.get() && owner_window_->window()) {
+    owner_window_->window()->remove_inspectable_view(
+        GetInspectableWebContentsView());
+  }
+
+  owner_window_ = window ? window->GetWeakPtr() : nullptr;
+
+  if (owner_window_.get() && owner_window_->window() &&
+      GetInspectableWebContentsView())
+    owner_window_->window()->add_inspectable_view(
+        GetInspectableWebContentsView());
+}
+
 void WebBrowserView::Hide(bool freeze, gfx::Image thumbnail) {
+  if (!web_contents())
+    return;
+
   if (freeze && !page_frozen_) {
     auto* wc =
         static_cast<content::WebContentsImpl*>(web_contents()->web_contents());
@@ -97,10 +110,17 @@ void WebBrowserView::Hide(bool freeze, gfx::Image thumbnail) {
     wc->SetPageFrozen(true);
     page_frozen_ = true;
   }
-  view_->ShowThumbnail(thumbnail);
+
+  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  iwc_view->ShowThumbnail(thumbnail);
 }
 
 void WebBrowserView::Show() {
+  if (!web_contents())
+    return;
+
   if (page_frozen_) {
     auto* wc =
         static_cast<content::WebContentsImpl*>(web_contents()->web_contents());
@@ -108,7 +128,11 @@ void WebBrowserView::Show() {
     wc->WasShown();
     page_frozen_ = false;
   }
-  view_->HideThumbnail();
+
+  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  iwc_view->HideThumbnail();
 }
 
 v8::Local<v8::Value> WebBrowserView::GetWebContents(v8::Isolate* isolate) {
@@ -117,6 +141,12 @@ v8::Local<v8::Value> WebBrowserView::GetWebContents(v8::Isolate* isolate) {
   }
 
   return v8::Local<v8::Value>::New(isolate, web_contents_);
+}
+
+InspectableWebContentsView* WebBrowserView::GetInspectableWebContentsView() {
+  if (!web_contents() || !web_contents()->inspectable_web_contents())
+    return nullptr;
+  return web_contents()->inspectable_web_contents()->GetView();
 }
 
 // static
@@ -146,10 +176,7 @@ gin_helper::WrappableBase* WebBrowserView::New(gin_helper::ErrorThrower thrower,
   auto web_contents =
       WebContents::CreateFromWebPreferences(isolate, web_preferences);
 
-  NativeWebBrowserView* view =
-      new NativeWebBrowserView(web_contents->inspectable_web_contents());
-
-  auto* web_browser_view = new WebBrowserView(args, web_contents, view);
+  auto* web_browser_view = new WebBrowserView(args, web_contents);
   web_browser_view->Pin(isolate);
   return web_browser_view;
 }

@@ -17,6 +17,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/desktop_media_id.h"
+#include "shell/browser/api/electron_api_base_view.h"
 #include "shell/browser/api/electron_api_web_contents.h"
 #include "shell/browser/native_browser_view_views.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
@@ -447,8 +448,8 @@ void NativeWindowViews::SetContentView(views::View* view) {
   root_view_->Layout();
 }
 
-void NativeWindowViews::SetContentViewImpl(NativeView* view) {
-  SetContentView(view->GetNative());
+void NativeWindowViews::SetContentViewImpl(api::BaseView* view) {
+  SetContentView(view->GetView());
 }
 
 void NativeWindowViews::Close() {
@@ -1303,38 +1304,34 @@ void NativeWindowViews::SetTopBrowserView(NativeBrowserView* view) {
         view->GetInspectableWebContentsView()->GetView(), -1);
 }
 
-void NativeWindowViews::AddChildView(NativeView* view) {
+void NativeWindowViews::AddChildView(api::BaseView* view) {
   if (!content_view())
     return;
 
   if (!view)
     return;
 
-  content_view()->AddChildView(view->GetNative());
-  view->SetWindow(this);
+  content_view()->AddChildView(view->GetView());
 }
 
-bool NativeWindowViews::RemoveChildView(NativeView* view) {
+void NativeWindowViews::RemoveChildView(api::BaseView* view) {
   if (!content_view())
-    return false;
+    return;
 
   if (!view)
-    return false;
+    return;
 
-  view->SetWindow(nullptr);
-  content_view()->RemoveChildView(view->GetNative());
-  return true;
+  content_view()->RemoveChildView(view->GetView());
 }
 
-void NativeWindowViews::SetTopChildView(NativeView* view) {
+void NativeWindowViews::SetTopChildView(api::BaseView* view) {
   if (!content_view())
     return;
 
   if (!view)
     return;
 
-  content_view()->ReorderChildView(view->GetNative(), -1);
-  view->SetWindow(this);
+  content_view()->ReorderChildView(view->GetView(), -1);
 }
 
 void NativeWindowViews::SetParentWindow(NativeWindow* parent) {

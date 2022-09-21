@@ -2,7 +2,7 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#include "electron/shell/browser/ui/views/scroll_with_layers/native_view_host_scroll_with_layers.h"
+#include "shell/browser/ui/views/scroll/native_view_host_scroll_with_layers.h"
 
 #include "ui/views/controls/native/native_view_host_wrapper.h"
 
@@ -21,8 +21,8 @@ void NativeViewHostScrollWithLayers::Layout() {
     return;
 
   gfx::Rect vis_bounds = GetVisibleBounds();
-  bool visible = !vis_bounds.IsEmpty() || first_layout_visible_ ||
-      force_visible_layout_;
+  bool visible =
+      !vis_bounds.IsEmpty() || first_layout_visible_ || force_visible_layout_;
   // TODO: Add option to not hide web contents when scrolling.
   // TODO: Cache wbe contents and view port when scrolling.
   if (!vis_bounds.IsEmpty())
@@ -34,7 +34,7 @@ void NativeViewHostScrollWithLayers::Layout() {
       int x = vis_bounds.x();
       int y = vis_bounds.y();
       native_wrapper()->InstallClip(x, y, vis_bounds.width(),
-                                  vis_bounds.height());
+                                    vis_bounds.height());
     } else if (native_wrapper()->HasInstalledClip()) {
       // The whole widget is visible but we installed a clip on the widget,
       // uninstall it.
@@ -52,9 +52,8 @@ void NativeViewHostScrollWithLayers::Layout() {
     gfx::Size native_size =
         native_view_size().IsEmpty() ? local_bounds.size() : native_view_size();
     native_wrapper()->ShowWidget(local_bounds.x(), local_bounds.y(),
-                                local_bounds.width(), local_bounds.height(),
-                                native_size.width(),
-                                native_size.height());
+                                 local_bounds.width(), local_bounds.height(),
+                                 native_size.width(), native_size.height());
   } else {
     native_wrapper()->HideWidget();
   }

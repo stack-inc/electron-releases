@@ -24,7 +24,9 @@ enum class ResizeEdge;
 
 namespace electron {
 
-class NativeView;
+namespace api {
+class BaseView;
+}
 
 class NativeWindowObserver : public base::CheckedObserver {
  public:
@@ -107,8 +109,6 @@ class NativeWindowObserver : public base::CheckedObserver {
   virtual void OnExecuteAppCommand(const std::string& command_name) {}
 
   virtual void UpdateWindowControlsOverlay(const gfx::Rect& bounding_rect) {}
-
-  virtual void OnChildViewDetached(NativeView* view) {}
 };
 
 }  // namespace electron

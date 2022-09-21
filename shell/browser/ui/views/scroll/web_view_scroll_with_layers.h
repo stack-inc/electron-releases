@@ -2,8 +2,8 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_WEB_VIEW_SCROLL_WITH_LAYERS_H_
-#define ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_WEB_VIEW_SCROLL_WITH_LAYERS_H_
+#ifndef ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WEB_VIEW_SCROLL_WITH_LAYERS_H_
+#define ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WEB_VIEW_SCROLL_WITH_LAYERS_H_
 
 #include "ui/views/controls/webview/webview.h"
 
@@ -16,10 +16,9 @@ class InspectableWebContentsViewViews;
 class WebViewScrollWithLayers : public views::WebView {
  public:
   WebViewScrollWithLayers(InspectableWebContentsViewViews* iwcvv,
-      std::unique_ptr<views::NativeViewHost> holder,
-      content::BrowserContext* browser_context)
-          : views::WebView(std::move(holder), browser_context),
-            iwcvv_(iwcvv) {}
+                          std::unique_ptr<views::NativeViewHost> holder,
+                          content::BrowserContext* browser_context)
+      : views::WebView(std::move(holder), browser_context), iwcvv_(iwcvv) {}
 
   WebViewScrollWithLayers(const WebViewScrollWithLayers&) = delete;
   WebViewScrollWithLayers(WebViewScrollWithLayers&&) = delete;
@@ -36,4 +35,4 @@ class WebViewScrollWithLayers : public views::WebView {
 
 }  // namespace electron
 
-#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WITH_LAYERS_WEB_VIEW_SCROLL_WITH_LAYERS_H_
+#endif  // ELECTRON_SHELL_BROWSER_UI_VIEWS_SCROLL_WEB_VIEW_SCROLL_WITH_LAYERS_H_

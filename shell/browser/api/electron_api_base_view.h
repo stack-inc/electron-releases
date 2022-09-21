@@ -1,15 +1,39 @@
-#ifndef SHELL_BROWSER_API_ELECTRON_API_BASE_VIEW_H_
-#define SHELL_BROWSER_API_ELECTRON_API_BASE_VIEW_H_
+// Copyright (c) 2022 GitHub, Inc.
+// Use of this source code is governed by the MIT license that can be
+// found in the LICENSE file.
+
+#ifndef ELECTRON_SHELL_BROWSER_API_ELECTRON_API_BASE_VIEW_H_
+#define ELECTRON_SHELL_BROWSER_API_ELECTRON_API_BASE_VIEW_H_
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "shell/browser/ui/native_view.h"
-#include "shell/browser/ui/view_utils.h"
 #include "shell/common/gin_helper/error_thrower.h"
 #include "shell/common/gin_helper/trackable_object.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "ui/gfx/geometry/point.h"
+#include "ui/gfx/geometry/rect.h"
+#include "ui/gfx/geometry/size.h"
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#include "ui/views/animation/bounds_animator.h"
+#include "ui/views/view_observer.h"
+#endif
+
+#if BUILDFLAG(IS_MAC)
+#ifdef __OBJC__
+@class NSEvent;
+@class NSView;
+#else
+class NSEvent;
+struct NSView;
+#endif
+#elif defined(TOOLKIT_VIEWS)
+namespace views {
+class View;
+}
+#endif
 
 namespace gin {
 class Arguments;
@@ -21,63 +45,181 @@ namespace electron {
 
 namespace api {
 
-class BaseView : public gin_helper::TrackableObject<BaseView>,
-                 public NativeView::Observer {
+class BaseWindow;
+
+#if BUILDFLAG(IS_MAC)
+using NATIVEEVENT = NSEvent*;
+using NATIVEVIEW = NSView*;
+#elif defined(TOOLKIT_VIEWS)
+using NATIVEVIEW = views::View*;
+#endif
+
+#if BUILDFLAG(IS_MAC)
+// Supported event types.
+enum class EventType {
+  kUnknown,
+  kLeftMouseDown,
+  kRightMouseDown,
+  kOtherMouseDown,
+  kLeftMouseUp,
+  kRightMouseUp,
+  kOtherMouseUp,
+  kMouseMove,
+  kMouseEnter,
+  kMouseLeave,
+};
+
+// Base event type.
+struct NativeEvent {
+  EventType type;
+
+  // Time when event was created, starts from when machine was booted.
+  uint32_t timestamp;
+
+  // The underlying native event.
+  NATIVEEVENT native_event;
+
+ protected:
+  NativeEvent(NATIVEEVENT event, NATIVEVIEW view);
+};
+
+struct NativeMouseEvent : public NativeEvent {
+  // Create from the native event.
+  NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view);
+
+  int button;
+  gfx::Point position_in_view;
+  gfx::Point position_in_window;
+};
+#endif  // BUILDFLAG(IS_MAC)
+
+class BaseView : public gin_helper::TrackableObject<BaseView>
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+    ,
+                 public views::ViewObserver
+#endif
+{
  public:
+  struct RoundedCornersOptions {
+    RoundedCornersOptions() = default;
+
+    float radius = 0.f;
+    bool top_left = false;
+    bool top_right = false;
+    bool bottom_left = false;
+    bool bottom_right = false;
+  };
+
+  struct ClippingInsetOptions {
+    ClippingInsetOptions() = default;
+
+    int top = 0;
+    int left = 0;
+    int bottom = 0;
+    int right = 0;
+  };
+
+  enum class TimingFunction {
+    kLinear,
+    kEaseIn,
+    kEaseOut,
+    kEaseInEaseOut,
+    kDefault,
+  };
+
+  struct AnimationOptions {
+    AnimationOptions() = default;
+
+    bool animation = false;
+    float duration = 0.4;
+    TimingFunction timing_function = TimingFunction::kLinear;
+    float cx1 = 0.0, cy1 = 0.0, cx2 = 1.0, cy2 = 1.0;
+    bool use_control_points = false;
+  };
+
+  struct BoundsAnimationOptions : public AnimationOptions {
+    BoundsAnimationOptions() = default;
+
+    gfx::Rect from_bounds;
+    bool use_from_bounds = false;
+  };
+
+  enum class AnchorXPos {
+    kUnknown,
+    kLeft,
+    kCenter,
+    kRight,
+    kPercentage,
+  };
+
+  enum class AnchorYPos {
+    kUnknown,
+    kTop,
+    kCenter,
+    kBottom,
+    kPercentage,
+  };
+
+  struct ScaleAnimationOptions : public AnimationOptions {
+    ScaleAnimationOptions() = default;
+
+    float scale_x = 1.0, scale_y = 1.0;
+    bool adjust_frame = true;
+    AnchorXPos anchor_x_pos = AnchorXPos::kUnknown;
+    AnchorYPos anchor_y_pos = AnchorYPos::kUnknown;
+    float anchor_x_percentage = 0.0, anchor_y_percentage = 0.0;
+  };
+
   static gin_helper::WrappableBase* New(gin_helper::ErrorThrower thrower,
                                         gin::Arguments* args);
 
   static void BuildPrototype(v8::Isolate* isolate,
                              v8::Local<v8::FunctionTemplate> prototype);
 
-  NativeView* view() const { return view_.get(); }
-
-  int32_t GetID() const;
-
-  bool EnsureDetachFromParent();
-
   // disable copy
   BaseView(const BaseView&) = delete;
   BaseView& operator=(const BaseView&) = delete;
 
+#if BUILDFLAG(IS_MAC)
+  bool IsView() { return !!nsview_; }
+  NATIVEVIEW GetNSView() const { return nsview_; }
+#else
+  bool IsView() { return !!view_; }
+  NATIVEVIEW GetView() const { return view_; }
+#endif
+
+  int32_t GetID() const;
+  bool EnsureDetachFromParent();
+  bool IsClickThrough() const;
+
  protected:
+  friend class BaseWindow;
   friend class ScrollView;
 
-  // Common constructor.
-  BaseView(v8::Isolate* isolate, NativeView* native_view);
-  // Creating independent BaseView instance.
-  BaseView(gin::Arguments* args, NativeView* native_view);
+  BaseView();
+  BaseView(gin::Arguments* args, bool vibrant, bool blurred);
   ~BaseView() override;
+
+  void CreateView();
 
   // TrackableObject:
   void InitWith(v8::Isolate* isolate, v8::Local<v8::Object> wrapper) override;
 
-  // NativeView::Observer:
-  void OnChildViewDetached(NativeView* observed_view,
-                           NativeView* view) override;
-#if BUILDFLAG(IS_MAC)
-  bool OnMouseDown(NativeView* observed_view,
-                   const NativeMouseEvent& event) override;
-  bool OnMouseUp(NativeView* observed_view,
-                 const NativeMouseEvent& event) override;
-  void OnMouseMove(NativeView* observed_view,
-                   const NativeMouseEvent& event) override;
-  void OnMouseEnter(NativeView* observed_view,
-                    const NativeMouseEvent& event) override;
-  void OnMouseLeave(NativeView* observed_view,
-                    const NativeMouseEvent& event) override;
-  void OnCaptureLost(NativeView* observed_view) override;
-#endif  // BUILDFLAG(IS_MAC)
-  void OnSizeChanged(NativeView* observed_view,
-                     gfx::Size old_size,
-                     gfx::Size new_size) override;
-  void OnViewIsDeleting(NativeView* observed_view) override;
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  // views::ViewObserver:
+  void OnViewBoundsChanged(views::View* observed_view) override;
+  void OnViewRemovedFromWidget(views::View* observed_view) override;
+  void OnViewIsDeleting(views::View* observed_view) override;
+  void OnViewHierarchyChanged(
+      views::View* observed_view,
+      const views::ViewHierarchyChangedDetails& details) override;
+#endif
 
+  // BaseView APIs.
   void SetZIndex(int z_index);
   int GetZIndex() const;
-  void SetClickThrough(bool clickThrough);
-  bool IsClickThrough() const;
-  void SetBounds(const gfx::Rect& bounds, gin::Arguments* args);
+  void SetClickThrough(bool click_through);
+  virtual void SetBounds(const gfx::Rect& bounds, gin::Arguments* args);
   gfx::Rect GetBounds() const;
   gfx::Point OffsetFromView(gin::Handle<BaseView> from) const;
   gfx::Point OffsetFromWindow() const;
@@ -88,7 +230,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   bool HasFocus() const;
   void SetFocusable(bool focusable);
   bool IsFocusable() const;
-  void SetBackgroundColor(const std::string& color_name);
+  virtual void SetBackgroundColor(const std::string& color_name);
 #if BUILDFLAG(IS_MAC)
   void SetVisualEffectMaterial(std::string material);
   std::string GetVisualEffectMaterial() const;
@@ -98,39 +240,121 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
   void SetBlurTintColorWithCalibratedWhite(float white, float alphaval);
   void SetBlurTintColorWithGenericGamma22White(float white, float alphaval);
   void SetBlurRadius(float radius);
-  float GetBlurRadius();
+  float GetBlurRadius() const;
   void SetBlurSaturationFactor(float factor);
-  float GetBlurSaturationFactor();
+  float GetBlurSaturationFactor() const;
   void SetCapture();
   void ReleaseCapture();
   bool HasCapture() const;
   void EnableMouseEvents();
   void SetMouseTrackingEnabled(bool enable);
-  bool IsMouseTrackingEnabled();
+  bool IsMouseTrackingEnabled() const;
 #endif
-  void SetRoundedCorners(const NativeView::RoundedCornersOptions& options);
-  void SetClippingInsets(const NativeView::ClippingInsetOptions& options);
+  virtual void SetRoundedCorners(const RoundedCornersOptions& options);
+  void SetClippingInsets(const ClippingInsetOptions& options);
   void ResetScaling();
   void SetScale(const ScaleAnimationOptions& options);
-  float GetScaleX();
-  float GetScaleY();
+  float GetScaleX() const;
+  float GetScaleY() const;
   void SetOpacity(const double opacity, gin::Arguments* args);
-  double GetOpacity();
-  void AddChildView(v8::Local<v8::Value> value);
-  void RemoveChildView(v8::Local<v8::Value> value);
+  double GetOpacity() const;
+  void AddChildView(gin::Handle<BaseView> base_view);
+  virtual void RemoveChildView(gin::Handle<BaseView> base_view);
   void RearrangeChildViews();
   std::vector<v8::Local<v8::Value>> GetViews() const;
   v8::Local<v8::Value> GetParentView() const;
   v8::Local<v8::Value> GetParentWindow() const;
 
+  // Helpers.
+
+  bool IsVibrant() const { return vibrant_; }
+  bool IsBlurred() const { return blurred_; }
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  // Should delete the |view_| in destructor.
+  void set_delete_view(bool should) { delete_view_ = should; }
+#endif
+
+  // Get children.
+  int ChildCount() const { return static_cast<int>(api_children_.size()); }
+
+  // Get parent.
+  BaseView* GetParent() const { return parent_; }
+
+  // Get window.
+  BaseWindow* GetWindow() const { return window_; }
+
+  void SetNativeView(NATIVEVIEW view);
+  void DestroyView();
+
+#if BUILDFLAG(IS_MAC)
+  void SetWantsLayer(bool wants);
+  bool WantsLayer() const;
+#endif
+
   virtual void SetBackgroundColorImpl(const SkColor& color);
-  virtual void ResetChildView(BaseView* view);
+
+  void AddChildViewImpl(BaseView* view);
+  void RemoveChildViewImpl(BaseView* view);
+
   virtual void ResetChildViews();
 
- private:
-  scoped_refptr<NativeView> view_;
+  void SetParent(BaseView* parent);
+  void BecomeContentView(BaseWindow* window);
 
-  std::map<int32_t, v8::Global<v8::Value>> base_views_;
+  void SetWindow(BaseWindow* window);
+  virtual void SetWindowForChildren(BaseWindow* window);
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  virtual void UpdateClickThrough();
+  void SetBlockScrollViewWhenFocus(bool block);
+  bool IsBlockScrollViewWhenFocus() const;
+  void UpdateBlockScrollViewWhenFocus();
+#endif
+
+ public:
+  // Notify that view's size has changed.
+  virtual void NotifySizeChanged(gfx::Size old_size, gfx::Size new_size);
+
+  // Notify that native view is destroyed.
+  void NotifyViewIsDeleting();
+
+#if BUILDFLAG(IS_MAC)
+  bool NotifyMouseDown(const NativeMouseEvent& event);
+  bool NotifyMouseUp(const NativeMouseEvent& event);
+  void NotifyMouseMove(const NativeMouseEvent& event);
+  void NotifyMouseEnter(const NativeMouseEvent& event);
+  void NotifyMouseLeave(const NativeMouseEvent& event);
+  void NotifyCaptureLost();
+#endif
+
+ private:
+#if BUILDFLAG(IS_MAC)
+  NATIVEVIEW nsview_ = nullptr;
+#else
+  NATIVEVIEW view_ = nullptr;
+#endif
+
+  bool vibrant_ = false;
+  bool blurred_ = false;
+
+  std::map<int32_t, v8::Global<v8::Value>> children_;
+  std::vector<BaseView*> api_children_;
+
+  int z_index_ = 1;
+  bool is_click_through_ = false;
+  RoundedCornersOptions rounded_corners_options_;
+
+#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+  bool delete_view_ = true;
+  gfx::Rect bounds_;
+  std::unique_ptr<views::BoundsAnimator> bounds_animator_;
+  bool block_scroll_view_when_focus = false;
+#endif
+
+  // Relationships.
+  BaseView* parent_ = nullptr;
+  BaseWindow* window_ = nullptr;
 
   // Reference to JS wrapper to prevent garbage collection.
   v8::Global<v8::Value> self_ref_;
@@ -140,4 +364,29 @@ class BaseView : public gin_helper::TrackableObject<BaseView>,
 
 }  // namespace electron
 
-#endif  // SHELL_BROWSER_API_ELECTRON_API_BASE_VIEW_H_
+namespace gin {
+
+template <>
+struct Converter<electron::api::BaseView::AnimationOptions> {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     electron::api::BaseView::AnimationOptions* options);
+};
+
+template <>
+struct Converter<electron::api::BaseView::BoundsAnimationOptions> {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     electron::api::BaseView::BoundsAnimationOptions* options);
+};
+
+template <>
+struct Converter<electron::api::BaseView::ScaleAnimationOptions> {
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     electron::api::BaseView::ScaleAnimationOptions* options);
+};
+
+}  // namespace gin
+
+#endif  // ELECTRON_SHELL_BROWSER_API_ELECTRON_API_BASE_VIEW_H_

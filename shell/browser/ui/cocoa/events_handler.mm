@@ -3,17 +3,17 @@
 #include <objc/objc-runtime.h>
 
 #include "base/notreached.h"
+#include "shell/browser/api/electron_api_base_view.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
-#include "shell/browser/ui/native_view.h"
 
 namespace electron {
 
 namespace {
 
-NativeView* CheckAndGetView(NSView* self) {
+api::BaseView* CheckAndGetView(NSView* self) {
   CHECK([self respondsToSelector:@selector(shell)])
       << "Handler called for view other than ElectronNativeView";
-  NativeView* view = [self shell];
+  api::BaseView* view = [self shell];
   DCHECK(view) << "Handler called after view is destroyed";
   return view;
 }
@@ -23,7 +23,7 @@ bool NativeDummy(NSView* self, SEL _cmd) {
 }
 
 void OnMouseEvent(NSView* self, SEL _cmd, NSEvent* event) {
-  NativeView* view = CheckAndGetView(self);
+  api::BaseView* view = CheckAndGetView(self);
   if (!view)
     return;
 
@@ -58,31 +58,31 @@ void AddMouseEventHandlerToClass(Class cl) {
   class_addMethod(cl, @selector(mouseExited:), (IMP)OnMouseEvent, "v@:@");
 }
 
-bool DispatchMouseEvent(NativeView* view, NSEvent* event) {
+bool DispatchMouseEvent(api::BaseView* view, NSEvent* event) {
   bool prevent_default = false;
-  NativeViewPrivate* priv = [view->GetNative() nativeViewPrivate];
-  NativeMouseEvent mouse_event(event, view->GetNative());
+  NativeViewPrivate* priv = [view->GetNSView() nativeViewPrivate];
+  api::NativeMouseEvent mouse_event(event, view->GetNSView());
   switch (mouse_event.type) {
-    case EventType::kLeftMouseDown:
-    case EventType::kRightMouseDown:
-    case EventType::kOtherMouseDown:
+    case api::EventType::kLeftMouseDown:
+    case api::EventType::kRightMouseDown:
+    case api::EventType::kOtherMouseDown:
       prevent_default = view->NotifyMouseDown(mouse_event);
       break;
-    case EventType::kLeftMouseUp:
-    case EventType::kRightMouseUp:
-    case EventType::kOtherMouseUp:
+    case api::EventType::kLeftMouseUp:
+    case api::EventType::kRightMouseUp:
+    case api::EventType::kOtherMouseUp:
       prevent_default = view->NotifyMouseUp(mouse_event);
       break;
-    case EventType::kMouseMove:
+    case api::EventType::kMouseMove:
       view->NotifyMouseMove(mouse_event);
       prevent_default = true;
       break;
-    case EventType::kMouseEnter:
+    case api::EventType::kMouseEnter:
       priv->hovered = true;
       view->NotifyMouseEnter(mouse_event);
       prevent_default = true;
       break;
-    case EventType::kMouseLeave:
+    case api::EventType::kMouseLeave:
       priv->hovered = false;
       view->NotifyMouseLeave(mouse_event);
       prevent_default = true;
