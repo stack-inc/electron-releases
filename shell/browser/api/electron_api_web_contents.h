@@ -441,6 +441,7 @@ class WebContents : public ExclusiveAccessContext,
 
   void SetImageAnimationPolicy(const std::string& new_policy);
   gfx::Size GetPreferredSize();
+  void SetCursor(v8::Local<v8::Value> cursor_value, gin::Arguments* args);
 
   // content::RenderWidgetHost::InputEventObserver:
   void OnInputEvent(const blink::WebInputEvent& event) override;
