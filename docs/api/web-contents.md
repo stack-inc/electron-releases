@@ -2006,6 +2006,16 @@ This corresponds to the [animationPolicy][] accessibility feature in Chromium.
 
 Returns [`Size`](structures/size.md) - The preferred size of the contents.
 
+#### `contents.setCursor(cursorImage[, options])`
+
+* `cursorImage` [NativeImage](native-image.md) | string - The image of the custom cursor.
+* `options` Object (optional)
+  * `scaleFactor` float (optional) - Scaling factor of the image. Defaults to 1.0.
+  * `deviceScaleFactor` Float (optional) - Scaling factor for the custom cursor. Defaults to 1.0.
+  * `hotspot` [Point](structures/point.md) (optional) - coordinates of the custom cursor's hotspot.
+
+Note: The width and height of the `cursorImage` divided by the `deviceScaleFactor` cannot exceed 150.
+
 ### Instance Properties
 
 #### `contents.ipc` _Readonly_

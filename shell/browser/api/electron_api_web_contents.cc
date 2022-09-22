@@ -136,6 +136,7 @@
 #include "third_party/blink/public/mojom/frame/fullscreen.mojom.h"
 #include "third_party/blink/public/mojom/messaging/transferable_message.mojom.h"
 #include "third_party/blink/public/mojom/renderer_preferences.mojom.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "ui/base/cursor/cursor.h"
 #include "ui/base/cursor/mojom/cursor_type.mojom-shared.h"
@@ -3717,6 +3718,58 @@ gfx::Size WebContents::GetPreferredSize() {
   return web_contents()->GetPreferredSize();
 }
 
+void WebContents::SetCursor(v8::Local<v8::Value> cursor_value,
+                            gin::Arguments* args) {
+  NativeImage* cursor_image = nullptr;
+  if (!NativeImage::TryConvertNativeImage(args->isolate(), cursor_value,
+                                          &cursor_image) ||
+      cursor_image->image().IsEmpty()) {
+    gin_helper::ErrorThrower(args->isolate())
+        .ThrowError("The valid 'cursor' parameter is required");
+    return;
+  }
+
+  auto* rfh = web_contents()->GetMainFrame();
+  if (!rfh)
+    return;
+
+  auto* rwhv = rfh->GetView();
+  if (!rwhv)
+    return;
+
+  auto* rwh_impl =
+      static_cast<content::RenderWidgetHostImpl*>(rwhv->GetRenderWidgetHost());
+  if (!rwh_impl)
+    return;
+
+  float scale_factor = 1.0f;
+  float device_scale_factor = rwh_impl->GetDeviceScaleFactor();
+  gfx::Point hotspot(-1, -1);
+  gin_helper::Dictionary options;
+  if (args->GetNext(&options)) {
+    options.Get("scaleFactor", &scale_factor);
+    options.Get("deviceScaleFactor", &device_scale_factor);
+    options.Get("hotspot", &hotspot);
+  }
+
+  const SkBitmap bitmap = cursor_image->image()
+                              .AsImageSkia()
+                              .GetRepresentation(scale_factor)
+                              .GetBitmap();
+
+  if (hotspot.x() == -1 || hotspot.y() == -1) {
+    hotspot.set_x(bitmap.width() / 2);
+    hotspot.set_y(bitmap.height() / 2);
+  }
+
+  ui::Cursor cursor(ui::mojom::CursorType::kCustom);
+  cursor.set_image_scale_factor(device_scale_factor);
+  cursor.set_custom_bitmap(bitmap);
+  cursor.set_custom_hotspot(gfx::Point(hotspot.x() * device_scale_factor,
+                                       hotspot.y() * device_scale_factor));
+  rwh_impl->SetCursor(cursor);
+}
+
 void WebContents::OnInputEvent(const blink::WebInputEvent& event) {
   Emit("input-event", event);
 }
@@ -4318,6 +4371,7 @@ v8::Local<v8::ObjectTemplate> WebContents::FillObjectTemplate(
       .SetMethod("setImageAnimationPolicy",
                  &WebContents::SetImageAnimationPolicy)
       .SetMethod("getPreferredSize", &WebContents::GetPreferredSize)
+      .SetMethod("setCursor", &WebContents::SetCursor)
       .SetMethod("_getProcessMemoryInfo", &WebContents::GetProcessMemoryInfo)
       .SetProperty("id", &WebContents::ID)
       .SetProperty("session", &WebContents::Session)
