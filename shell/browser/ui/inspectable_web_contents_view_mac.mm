@@ -342,10 +342,12 @@ gfx::Point InspectableWebContentsViewMac::GetMouseLocation() {
   NSPoint position = [web_view
       convertPoint:[[web_view window] mouseLocationOutsideOfEventStream]
           fromView:nil];
-  if ([web_view isFlipped])
-    return gfx::Point(position.x, position.y);
-  NSRect frame = [web_view frame];
-  return gfx::Point(position.x, NSHeight(frame) - position.y);
+  auto* superview = web_view.superview;
+  if (superview && ![superview isFlipped]) {
+    return gfx::Point(position.x, superview.frame.size.height - position.y -
+                                      web_view.frame.size.height);
+  }
+  return gfx::Point(position.x, position.y);
 }
 
 }  // namespace electron
