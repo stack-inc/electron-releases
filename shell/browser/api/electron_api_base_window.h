@@ -18,6 +18,7 @@
 #include "shell/common/api/electron_api_native_image.h"
 #include "shell/common/gin_helper/error_thrower.h"
 #include "shell/common/gin_helper/trackable_object.h"
+#include "ui/base/cursor/cursor.h"
 
 namespace electron {
 
@@ -255,6 +256,7 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
   bool SetThumbnailToolTip(const std::string& tooltip);
   void SetAppDetails(const gin_helper::Dictionary& options);
 #endif
+  void SetCursor(v8::Local<v8::Value> cursor_value, gin::Arguments* args);
   int32_t GetID() const;
 
   // Helpers.
@@ -277,6 +279,8 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
   typedef std::map<UINT, MessageCallback> MessageCallbackMap;
   MessageCallbackMap messages_callback_map_;
 #endif
+
+  std::unique_ptr<ui::Cursor> custom_cursor_;
 
   v8::Global<v8::Value> content_view_;
   v8::Global<v8::Value> content_base_view_;

@@ -28,9 +28,14 @@
 #include "shell/common/gin_helper/persistent_dictionary.h"
 #include "shell/common/node_includes.h"
 #include "shell/common/options_switches.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 
 #if defined(TOOLKIT_VIEWS)
 #include "shell/browser/native_window_views.h"
+#endif
+
+#if defined(USE_AURA)
+#include "ui/base/cursor/cursor_factory.h"
 #endif
 
 #if BUILDFLAG(IS_WIN)
@@ -1178,6 +1183,52 @@ void BaseWindow::SetAppDetails(const gin_helper::Dictionary& options) {
 }
 #endif
 
+void BaseWindow::SetCursor(v8::Local<v8::Value> cursor_value,
+                           gin::Arguments* args) {
+  NativeImage* cursor_image = nullptr;
+  if (!NativeImage::TryConvertNativeImage(args->isolate(), cursor_value,
+                                          &cursor_image) ||
+      cursor_image->image().IsEmpty()) {
+    gin_helper::ErrorThrower(args->isolate())
+        .ThrowError("The valid 'cursor' parameter is required");
+    return;
+  }
+
+  float bitmap_scale_factor = 1.0f;
+  float cursor_scale_factor = 1.0f;
+  gfx::Point hotspot(-1, -1);
+  gin_helper::Dictionary options;
+  if (args->GetNext(&options)) {
+    options.Get("bitmapScaleFactor", &bitmap_scale_factor);
+    options.Get("cursorScaleFactor", &cursor_scale_factor);
+    options.Get("hotspot", &hotspot);
+  }
+
+  const SkBitmap bitmap = cursor_image->image()
+                              .AsImageSkia()
+                              .GetRepresentation(bitmap_scale_factor)
+                              .GetBitmap();
+
+  if (hotspot.x() == -1 || hotspot.y() == -1) {
+    hotspot.set_x(bitmap.width() / 2);
+    hotspot.set_y(bitmap.height() / 2);
+  }
+  hotspot.set_x(hotspot.x() * cursor_scale_factor);
+  hotspot.set_y(hotspot.y() * cursor_scale_factor);
+
+  custom_cursor_ = std::make_unique<ui::Cursor>(ui::mojom::CursorType::kCustom);
+  custom_cursor_->set_image_scale_factor(cursor_scale_factor);
+  custom_cursor_->set_custom_bitmap(bitmap);
+  custom_cursor_->set_custom_hotspot(hotspot);
+#if defined(USE_AURA)
+  custom_cursor_->SetPlatformCursor(
+      ui::CursorFactory::GetInstance()->CreateImageCursor(
+          ui::mojom::CursorType::kCustom, bitmap, hotspot));
+#endif
+
+  window_->widget()->SetCursor(*custom_cursor_);
+}
+
 int32_t BaseWindow::GetID() const {
   return weak_map_id();
 }
@@ -1412,6 +1463,7 @@ void BaseWindow::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setThumbnailToolTip", &BaseWindow::SetThumbnailToolTip)
       .SetMethod("setAppDetails", &BaseWindow::SetAppDetails)
 #endif
+      .SetMethod("setCursor", &BaseWindow::SetCursor)
       .SetProperty("id", &BaseWindow::GetID);
 }
 

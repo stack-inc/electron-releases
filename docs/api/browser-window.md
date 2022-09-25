@@ -1753,6 +1753,16 @@ with `addChildView`.
 On a Window with Window Controls Overlay already enabled, this method updates
 the style of the title bar overlay.
 
+#### `win.setCursor(cursorImage[, options])`
+
+* `cursorImage` [NativeImage](native-image.md) | string - The image of the custom cursor.
+* `options` Object (optional)
+  * `bitmapScaleFactor` float (optional) - Scaling factor of the image. Defaults to 1.0.
+  * `cursorScaleFactor` Float (optional) - Scaling factor of the custom cursor. Defaults to 1.0.
+  * `hotspot` [Point](structures/point.md) (optional) - coordinates of the custom cursor's hotspot. Defaults to the center of the cursor.
+
+**Note:** The width and height of the `cursorImage` divided by the `cursorScaleFactor` cannot exceed 150.
+
 [runtime-enabled-features]: https://cs.chromium.org/chromium/src/third_party/blink/renderer/platform/runtime_enabled_features.json5?l=70
 [page-visibility-api]: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
 [quick-look]: https://en.wikipedia.org/wiki/Quick_Look
