@@ -8,6 +8,7 @@
 #import <AppKit/AppKit.h>
 #import <objc/runtime.h>
 
+#include "base/logging.h"
 #include "base/strings/sys_string_conversions.h"
 #import "shell/browser/ui/cocoa/electron_inspectable_web_contents_view.h"
 #include "shell/browser/ui/drag_util.h"
@@ -342,8 +343,10 @@ gfx::Point InspectableWebContentsViewMac::GetMouseLocation() {
   NSPoint position = [web_view
       convertPoint:[[web_view window] mouseLocationOutsideOfEventStream]
           fromView:nil];
+VLOG(0) << "@@position: (" << position.x << ", " << position.y << ")";
   auto* superview = web_view.superview;
   if (superview && ![superview isFlipped]) {
+VLOG(0) << "@@superview isFlipped; superview.frame.size.height: " << superview.frame.size.height << ", web_view.frame.size.height: " << web_view.frame.size.height;
     return gfx::Point(position.x, superview.frame.size.height - position.y -
                                       web_view.frame.size.height);
   }
