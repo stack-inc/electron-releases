@@ -4,12 +4,9 @@ const { app, BaseWindow, BrowserWindow, WebBrowserView } = require('electron');
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1400, height: 1200 });
 
-  const webBrowserView = new WebBrowserView();
-  webBrowserView.webContents.loadFile(path.join(__dirname, 'update_target_url.html'));
-  webBrowserView.setBounds({x: 200, y: 200, width: 500, height: 500});
-  win.addChildView(webBrowserView);
+  win.webContents.loadFile(path.join(__dirname, 'update_target_url.html'));
 
-  webBrowserView.webContents.on('update-target-url', (_event, url, location) => {
+  win.webContents.on('update-target-url', (_event, url, location) => {
     console.log('update-target - url: ' + url + '; location: (' + location.x + ', ' + location.y + ')');
   });
 });

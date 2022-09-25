@@ -347,8 +347,7 @@ VLOG(0) << "@@position: (" << position.x << ", " << position.y << ")";
   auto* superview = web_view.superview;
   if (superview && ![superview isFlipped]) {
 VLOG(0) << "@@superview isFlipped; superview.frame.size.height: " << superview.frame.size.height << ", web_view.frame.size.height: " << web_view.frame.size.height;
-    return gfx::Point(position.x, superview.frame.size.height - position.y -
-                                      web_view.frame.size.height);
+    return gfx::Point(position.x, superview.frame.size.height - position.y);
   }
   return gfx::Point(position.x, position.y);
 }
