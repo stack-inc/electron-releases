@@ -285,8 +285,7 @@ gfx::Point InspectableWebContentsViewMac::GetMouseLocation() {
           fromView:nil];
   auto* superview = web_view.superview;
   if (superview && ![superview isFlipped]) {
-    return gfx::Point(position.x, superview.frame.size.height - position.y -
-                                      web_view.frame.size.height);
+    return gfx::Point(position.x, superview.frame.size.height - position.y);
   }
   return gfx::Point(position.x, position.y);
 }
