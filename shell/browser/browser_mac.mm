@@ -29,12 +29,15 @@
 #include "shell/common/gin_helper/error_thrower.h"
 #include "shell/common/gin_helper/promise.h"
 #include "shell/common/platform_util.h"
+#include "ui/base/cocoa/cursor_utils.h"
 #include "ui/gfx/image/image.h"
 #include "url/gurl.h"
 
 namespace electron {
 
 namespace {
+
+static base::scoped_nsobject<NSCursor> _currentCursor;
 
 NSString* GetAppPathForProtocol(const GURL& url) {
   NSURL* ns_url = [NSURL
@@ -507,6 +510,36 @@ void Browser::SetSecureKeyboardEntryEnabled(bool enabled) {
   } else {
     password_input_enabler_.reset();
   }
+}
+
+void Browser::SetSystemCursor(const gfx::Image& image,
+                              float scale_factor,
+                              const gfx::Point& hotspot) {
+  const SkBitmap bitmap =
+      image.AsImageSkia().GetRepresentation(scale_factor).GetBitmap();
+
+  gfx::Point cursor_hotspot = hotspot;
+  if (hotspot.x() == -1 || hotspot.y() == -1) {
+    cursor_hotspot.set_x(bitmap.width() / 2);
+    cursor_hotspot.set_y(bitmap.height() / 2);
+  }
+
+  custom_cursor_ = std::make_unique<ui::Cursor>(ui::mojom::CursorType::kCustom);
+  custom_cursor_->set_image_scale_factor(scale_factor);
+  custom_cursor_->set_custom_bitmap(bitmap);
+  custom_cursor_->set_custom_hotspot(hotspot);
+
+  gfx::NativeCursor cursor = ui::GetNativeCursor(*custom_cursor_);
+  _currentCursor.reset([cursor retain]);
+  [_currentCursor set];
+}
+
+void Browser::RestoreSystemCursor() {
+  custom_cursor_ =
+      std::make_unique<ui::Cursor>(ui::mojom::CursorType::kPointer);
+  gfx::NativeCursor cursor = ui::GetNativeCursor(*custom_cursor_);
+  _currentCursor.reset([cursor retain]);
+  [_currentCursor set];
 }
 
 }  // namespace electron
