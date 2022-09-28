@@ -389,7 +389,6 @@ void ScrollView::SetScrollPositionImpl(
 
   api_content_view_->GetView()->ScrollRectToVisible(gfx::Rect(
       point.x(), point.y(), visible_rect.width(), visible_rect.height()));
-  api_content_view_->GetView()->InvalidateLayout();
 
   if (horiz_mode == views::ScrollView::ScrollBarMode::kDisabled)
     scroll->SetHorizontalScrollBarMode(horiz_mode);
@@ -397,6 +396,8 @@ void ScrollView::SetScrollPositionImpl(
     scroll->SetVerticalScrollBarMode(vert_mode);
 
   std::move(callback).Run(std::string());
+
+  api_content_view_->GetView()->InvalidateLayout();
 }
 
 }  // namespace api

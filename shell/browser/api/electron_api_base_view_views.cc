@@ -18,6 +18,8 @@
 #include "ui/views/view.h"
 #include "ui/views/view_class_properties.h"
 
+#include "electron/shell/browser/ui/views/smooth_bounds_animator.h"
+
 namespace electron {
 
 namespace api {
@@ -87,7 +89,7 @@ void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
     view_->SetBoundsRect(options.from_bounds);
 
   if (!bounds_animator_.get())
-    bounds_animator_ = std::make_unique<views::BoundsAnimator>(view_->parent());
+    bounds_animator_ = std::make_unique<SmoothBoundsAnimator>(view_->parent());
 
   bounds_animator_->SetAnimationDuration(
       base::Milliseconds(static_cast<int>(options.duration * 1000)));
