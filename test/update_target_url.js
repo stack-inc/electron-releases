@@ -1,11 +1,11 @@
 var path = require('path');
-const { app, BaseWindow, WebBrowserView } = require('electron');
+const { app, BrowserWindow, WebBrowserView } = require('electron');
 
 app.whenReady().then(() => {
-  const win = new BaseWindow({ width: 1400, height: 1200 });
+  const win = new BrowserWindow({ width: 1400, height: 1200 });
 
   const webBrowserView = new WebBrowserView();
-  webBrowserView.webContents.loadURL(path.join(__dirname, 'update_target_url.html'));
+  webBrowserView.webContents.loadFile(path.join(__dirname, 'update_target_url.html'));
   webBrowserView.setBounds({x: 200, y: 200, width: 500, height: 500});
   win.addChildView(webBrowserView);
 
