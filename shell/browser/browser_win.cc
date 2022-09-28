@@ -40,11 +40,14 @@
 #include "shell/common/gin_helper/dictionary.h"
 #include "shell/common/skia_util.h"
 #include "skia/ext/legacy_display_globals.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/events/keycodes/keyboard_code_conversion_win.h"
+#include "ui/gfx/icon_util.h"
+#include "ui/gfx/image/image_skia_rep_default.h"
 #include "ui/strings/grit/ui_strings.h"
 
 namespace electron {
@@ -853,6 +856,36 @@ void Browser::ShowAboutPanel() {
 
 void Browser::SetAboutPanelOptions(base::DictionaryValue options) {
   about_panel_options_ = std::move(options);
+}
+
+void Browser::SetSystemCursor(const gfx::Image& image, float scale_factor, const gfx::Point& hotspot) {
+  const SkBitmap bitmap = image
+                              .AsImageSkia()
+                              .GetRepresentation(scale_factor)
+                              .GetBitmap();
+
+  gfx::Point cursor_hotspot = hotspot;
+  if (hotspot.x() == -1 || hotspot.y() == -1) {
+    cursor_hotspot.set_x(bitmap.width() / 2);
+    cursor_hotspot.set_y(bitmap.height() / 2);
+  }
+
+  if (!custom_cursor_.get())
+    default_hcursor_ = CopyCursor(::LoadCursor(0, IDC_ARROW));
+
+  custom_cursor_ = base::MakeRefCounted<ui::WinCursor>(
+      IconUtil::CreateCursorFromSkBitmap(bitmap, cursor_hotspot).release(),
+      /*should_destroy=*/true);
+
+  ::SetSystemCursor(custom_cursor_->hcursor(), 32512 /*OCR_NORMAL*/);
+}
+
+void Browser::RestoreSystemCursor() {
+  if (!custom_cursor_.get())
+    return;
+  ::SetSystemCursor(default_hcursor_, 32512 /*OCR_NORMAL*/);
+  ::DestroyCursor(default_hcursor_);
+  custom_cursor_.reset();
 }
 
 }  // namespace electron

@@ -542,4 +542,8 @@ void Browser::SetSecureKeyboardEntryEnabled(bool enabled) {
   }
 }
 
+void Browser::SetSystemCursor(const gfx::Image& image, float scale_factor, const gfx::Point& hotspot) {}
+
+void Browser::RestoreSystemCursor() {}
+
 }  // namespace electron

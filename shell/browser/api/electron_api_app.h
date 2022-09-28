@@ -249,6 +249,9 @@ class App : public ElectronBrowserClient::Delegate,
   JumpListResult SetJumpList(v8::Local<v8::Value> val, gin::Arguments* args);
 #endif  // BUILDFLAG(IS_WIN)
 
+  void SetSystemCursor(v8::Local<v8::Value> cursor_value, gin::Arguments* args);
+  void RestoreSystemCursor();
+
   std::unique_ptr<ProcessSingleton> process_singleton_;
 
 #if BUILDFLAG(USE_NSS_CERTS)
