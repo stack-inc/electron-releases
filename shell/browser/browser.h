@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "base/compiler_specific.h"
+#include "base/memory/scoped_refptr.h"
 #include "base/observer_list.h"
 #include "base/task/cancelable_task_tracker.h"
 #include "base/values.h"
@@ -17,15 +18,19 @@
 #include "shell/browser/browser_observer.h"
 #include "shell/browser/window_list_observer.h"
 #include "shell/common/gin_helper/promise.h"
+#include "ui/gfx/geometry/point.h"
+#include "ui/gfx/image/image.h"
 
 #if BUILDFLAG(IS_WIN)
 #include <windows.h>
 #include "base/files/file_path.h"
 #include "shell/browser/ui/win/taskbar_host.h"
+#include "ui/base/win/win_cursor.h"
 #endif
 
 #if BUILDFLAG(IS_MAC)
 #include "ui/base/cocoa/secure_password_input.h"
+#include "ui/base/cursor/cursor.h"
 #endif
 
 namespace base {
@@ -316,6 +321,11 @@ class Browser : public WindowListObserver {
   bool is_ready() const { return is_ready_; }
   v8::Local<v8::Value> WhenReady(v8::Isolate* isolate);
 
+  void SetSystemCursor(const gfx::Image& image,
+                       float scale_factor,
+                       const gfx::Point& hotspot);
+  void RestoreSystemCursor();
+
  protected:
   // Returns the version of application bundle or executable file.
   std::string GetExecutableFileVersion() const;
@@ -361,6 +371,8 @@ class Browser : public WindowListObserver {
 #if BUILDFLAG(IS_MAC)
   std::unique_ptr<ui::ScopedPasswordInputEnabler> password_input_enabler_;
   base::Time last_dock_show_;
+
+  std::unique_ptr<ui::Cursor> custom_cursor_;
 #endif
 
 #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_WIN)
@@ -376,6 +388,9 @@ class Browser : public WindowListObserver {
 
   // In charge of running taskbar related APIs.
   TaskbarHost taskbar_host_;
+
+  HCURSOR default_hcursor_ = 0;
+  scoped_refptr<ui::WinCursor> custom_cursor_;
 #endif
 };
 
