@@ -1470,6 +1470,19 @@ details.
 
 **Note:** Enable `Secure Keyboard Entry` only when it is needed and disable it when it is no longer needed.
 
+#### `app.setSystemCursor(cursorImage[, options])`
+
+* `cursorImage` [NativeImage](native-image.md) | string - The image of the custom cursor.
+* `options` Object (optional)
+  * `scaleFactor` float (optional) - Scaling factor of the representation in the image. Defaults to 1.0.
+  * `hotspot` [Point](structures/point.md) (optional) - coordinates of the custom cursor's hotspot. Defaults to the center of the image.
+
+Replaces the system arrow cursor by the custom image.
+
+#### `app.restoreSystemCursor()`
+
+Restores the system arrow cursor.
+
 ## Properties
 
 ### `app.accessibilitySupportEnabled` _macOS_ _Windows_

@@ -2010,11 +2010,11 @@ Returns [`Size`](structures/size.md) - The preferred size of the contents.
 
 * `cursorImage` [NativeImage](native-image.md) | string - The image of the custom cursor.
 * `options` Object (optional)
-  * `scaleFactor` float (optional) - Scaling factor of the image. Defaults to 1.0.
-  * `deviceScaleFactor` Float (optional) - Scaling factor for the custom cursor. Defaults to 1.0.
-  * `hotspot` [Point](structures/point.md) (optional) - coordinates of the custom cursor's hotspot.
+  * `scaleFactor` float (optional) - Scaling factor of the representation of the image. Defaults to 1.0.
+  * `cursorScaleFactor` Float (optional) - Scaling factor of the custom cursor. Defaults to the scale factor of the webContents.
+  * `hotspot` [Point](structures/point.md) (optional) - coordinates of the custom cursor's hotspot. Defaults to the center of the cursor.
 
-Note: The width and height of the `cursorImage` divided by the `deviceScaleFactor` cannot exceed 150.
+**Note:** The width and height of the `cursorImage` divided by the `cursorScaleFactor` cannot exceed 150.
 
 ### Instance Properties
 

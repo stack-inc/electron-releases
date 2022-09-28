@@ -3743,12 +3743,12 @@ void WebContents::SetCursor(v8::Local<v8::Value> cursor_value,
     return;
 
   float scale_factor = 1.0f;
-  float device_scale_factor = rwh_impl->GetDeviceScaleFactor();
+  float cursor_scale_factor = rwh_impl->GetDeviceScaleFactor();
   gfx::Point hotspot(-1, -1);
   gin_helper::Dictionary options;
   if (args->GetNext(&options)) {
     options.Get("scaleFactor", &scale_factor);
-    options.Get("deviceScaleFactor", &device_scale_factor);
+    options.Get("cursorScaleFactor", &cursor_scale_factor);
     options.Get("hotspot", &hotspot);
   }
 
@@ -3763,10 +3763,10 @@ void WebContents::SetCursor(v8::Local<v8::Value> cursor_value,
   }
 
   ui::Cursor cursor(ui::mojom::CursorType::kCustom);
-  cursor.set_image_scale_factor(device_scale_factor);
+  cursor.set_image_scale_factor(cursor_scale_factor);
   cursor.set_custom_bitmap(bitmap);
-  cursor.set_custom_hotspot(gfx::Point(hotspot.x() * device_scale_factor,
-                                       hotspot.y() * device_scale_factor));
+  cursor.set_custom_hotspot(gfx::Point(hotspot.x() * cursor_scale_factor,
+                                       hotspot.y() * cursor_scale_factor));
   rwh_impl->SetCursor(cursor);
 }
 
