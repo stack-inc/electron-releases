@@ -52,6 +52,7 @@
 #include "shell/browser/javascript_environment.h"
 #include "shell/browser/login_handler.h"
 #include "shell/browser/relauncher.h"
+#include "shell/common/api/electron_api_native_image.h"
 #include "shell/common/application_info.h"
 #include "shell/common/electron_command_line.h"
 #include "shell/common/electron_paths.h"
@@ -59,6 +60,7 @@
 #include "shell/common/gin_converters/blink_converter.h"
 #include "shell/common/gin_converters/callback_converter.h"
 #include "shell/common/gin_converters/file_path_converter.h"
+#include "shell/common/gin_converters/gfx_converter.h"
 #include "shell/common/gin_converters/gurl_converter.h"
 #include "shell/common/gin_converters/image_converter.h"
 #include "shell/common/gin_converters/net_converter.h"
@@ -70,6 +72,7 @@
 #include "shell/common/platform_util.h"
 #include "shell/common/v8_value_serializer.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
+#include "ui/gfx/geometry/point.h"
 #include "ui/gfx/image/image.h"
 
 #if BUILDFLAG(IS_WIN)
@@ -1666,6 +1669,32 @@ void ConfigureHostResolver(v8::Isolate* isolate,
       additional_dns_query_types_enabled);
 }
 
+void App::SetSystemCursor(v8::Local<v8::Value> cursor_value,
+                          gin::Arguments* args) {
+  NativeImage* cursor_image = nullptr;
+  if (!NativeImage::TryConvertNativeImage(args->isolate(), cursor_value,
+                                          &cursor_image) ||
+      cursor_image->image().IsEmpty()) {
+    gin_helper::ErrorThrower(args->isolate())
+        .ThrowError("The valid 'cursor' parameter is required");
+    return;
+  }
+
+  float scale_factor = 1.0f;
+  gfx::Point hotspot(-1, -1);
+  gin_helper::Dictionary options;
+  if (args->GetNext(&options)) {
+    options.Get("scaleFactor", &scale_factor);
+    options.Get("hotspot", &hotspot);
+  }
+
+  Browser::Get()->SetSystemCursor(cursor_image->image(), scale_factor, hotspot);
+}
+
+void App::RestoreSystemCursor() {
+  Browser::Get()->RestoreSystemCursor();
+}
+
 // static
 App* App::Get() {
   static base::NoDestructor<App> app;
@@ -1814,6 +1843,8 @@ gin::ObjectTemplateBuilder App::GetObjectTemplateBuilder(v8::Isolate* isolate) {
       .SetProperty("userAgentFallback", &App::GetUserAgentFallback,
                    &App::SetUserAgentFallback)
       .SetMethod("configureHostResolver", &ConfigureHostResolver)
+      .SetMethod("setSystemCursor", &App::SetSystemCursor)
+      .SetMethod("restoreSystemCursor", &App::RestoreSystemCursor)
       .SetMethod("enableSandbox", &App::EnableSandbox);
 }
 
