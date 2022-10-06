@@ -1466,7 +1466,7 @@ details.
 
 **Note:** Enable `Secure Keyboard Entry` only when it is needed and disable it when it is no longer needed.
 
-#### `app.setSystemCursor(cursorImage[, options])`
+#### `app.setArrowCursor(cursorImage[, options])` _Windows_
 
 * `cursorImage` [NativeImage](native-image.md) | string - The image of the custom cursor.
 * `options` Object (optional)
@@ -1475,9 +1475,19 @@ details.
 
 Replaces the system arrow cursor by the custom image.
 
-#### `app.restoreSystemCursor()`
+#### `app.resetArrowCursor()` _Windows_
 
-Restores the system arrow cursor.
+Resets the arrow cursor.
+
+#### `app.setCape(capePath)` _macOS_
+
+* `capePath` string - A cape path containing the pack of cursors.
+
+Applies a pack of cursors (called a cape). Each cape contains a multiple scales of representations of many cursors.
+
+#### `app.resetCape()` _macOS_
+
+Resets the all cursors.
 
 ## Properties
 
