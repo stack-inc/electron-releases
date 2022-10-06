@@ -776,9 +776,9 @@ void Browser::SetAboutPanelOptions(base::Value::Dict options) {
   about_panel_options_ = base::Value(std::move(options));
 }
 
-void Browser::SetSystemCursor(const gfx::Image& image,
-                              float scale_factor,
-                              const gfx::Point& hotspot) {
+void Browser::SetArrowCursor(const gfx::Image& image,
+                             float scale_factor,
+                             const gfx::Point& hotspot) {
   const SkBitmap bitmap =
       image.AsImageSkia().GetRepresentation(scale_factor).GetBitmap();
 
@@ -798,7 +798,7 @@ void Browser::SetSystemCursor(const gfx::Image& image,
   ::SetSystemCursor(custom_cursor_->hcursor(), 32512 /*OCR_NORMAL*/);
 }
 
-void Browser::RestoreSystemCursor() {
+void Browser::ResetArrowCursor() {
   if (!custom_cursor_.get())
     return;
   ::SetSystemCursor(default_hcursor_, 32512 /*OCR_NORMAL*/);
