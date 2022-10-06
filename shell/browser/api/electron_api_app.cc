@@ -1669,8 +1669,9 @@ void ConfigureHostResolver(v8::Isolate* isolate,
       additional_dns_query_types_enabled);
 }
 
-void App::SetSystemCursor(v8::Local<v8::Value> cursor_value,
-                          gin::Arguments* args) {
+#if BUILDFLAG(IS_WIN)
+void App::SetArrowCursor(v8::Local<v8::Value> cursor_value,
+                         gin::Arguments* args) {
   NativeImage* cursor_image = nullptr;
   if (!NativeImage::TryConvertNativeImage(args->isolate(), cursor_value,
                                           &cursor_image) ||
@@ -1688,12 +1689,23 @@ void App::SetSystemCursor(v8::Local<v8::Value> cursor_value,
     options.Get("hotspot", &hotspot);
   }
 
-  Browser::Get()->SetSystemCursor(cursor_image->image(), scale_factor, hotspot);
+  Browser::Get()->SetArrowCursor(cursor_image->image(), scale_factor, hotspot);
 }
 
-void App::RestoreSystemCursor() {
-  Browser::Get()->RestoreSystemCursor();
+void App::ResetArrowCursor() {
+  Browser::Get()->ResetArrowCursor();
 }
+#endif  // BUILDFLAG(IS_WIN)
+
+#if BUILDFLAG(IS_MAC)
+void App::SetCape(base::FilePath cape_path) {
+  Browser::Get()->SetCape(cape_path);
+}
+
+void App::ResetCape() {
+  Browser::Get()->ResetCape();
+}
+#endif  // BUILDFLAG(IS_MAC)
 
 // static
 App* App::Get() {
@@ -1843,8 +1855,14 @@ gin::ObjectTemplateBuilder App::GetObjectTemplateBuilder(v8::Isolate* isolate) {
       .SetProperty("userAgentFallback", &App::GetUserAgentFallback,
                    &App::SetUserAgentFallback)
       .SetMethod("configureHostResolver", &ConfigureHostResolver)
-      .SetMethod("setSystemCursor", &App::SetSystemCursor)
-      .SetMethod("restoreSystemCursor", &App::RestoreSystemCursor)
+#if BUILDFLAG(IS_WIN)
+      .SetMethod("setArrowCursor", &App::SetArrowCursor)
+      .SetMethod("resetArrowCursor", &App::ResetArrowCursor)
+#endif
+#if BUILDFLAG(IS_MAC)
+      .SetMethod("setCape", &App::SetCape)
+      .SetMethod("resetCape", &App::ResetCape)
+#endif
       .SetMethod("enableSandbox", &App::EnableSandbox);
 }
 
