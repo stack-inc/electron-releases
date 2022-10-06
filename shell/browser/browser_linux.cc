@@ -226,10 +226,4 @@ void Browser::SetAboutPanelOptions(base::Value::Dict options) {
   about_panel_options_ = base::Value(std::move(options));
 }
 
-void Browser::SetSystemCursor(const gfx::Image& image,
-                              float scale_factor,
-                              const gfx::Point& hotspot) {}
-
-void Browser::RestoreSystemCursor() {}
-
 }  // namespace electron

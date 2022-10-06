@@ -321,10 +321,17 @@ class Browser : public WindowListObserver {
   bool is_ready() const { return is_ready_; }
   v8::Local<v8::Value> WhenReady(v8::Isolate* isolate);
 
-  void SetSystemCursor(const gfx::Image& image,
-                       float scale_factor,
-                       const gfx::Point& hotspot);
-  void RestoreSystemCursor();
+#if BUILDFLAG(IS_WIN)
+  void SetArrowCursor(const gfx::Image& image,
+                      float scale_factor,
+                      const gfx::Point& hotspot);
+  void ResetArrowCursor();
+#endif
+
+#if BUILDFLAG(IS_MAC)
+  void SetCape(base::FilePath cape_path);
+  void ResetCape();
+#endif
 
  protected:
   // Returns the version of application bundle or executable file.
@@ -371,8 +378,6 @@ class Browser : public WindowListObserver {
 #if BUILDFLAG(IS_MAC)
   std::unique_ptr<ui::ScopedPasswordInputEnabler> password_input_enabler_;
   base::Time last_dock_show_;
-
-  std::unique_ptr<ui::Cursor> custom_cursor_;
 #endif
 
   base::Value about_panel_options_;
