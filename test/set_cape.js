@@ -1,6 +1,6 @@
 const { app, BrowserWindow, WebContents } = require('electron')
 
-var cursorIsSet = false;
+var capeIsApplied = false;
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1400, height: 1200 });
@@ -13,16 +13,18 @@ app.whenReady().then(() => {
       console.log('cursor changed! ' + type);
   });
 
-  setTimeout(async () => {
-    app.setSystemCursor(__dirname + '/cursor.png');
-    cursorIsSet = true;
-  }, 3000);
+  if (process.platform === 'darwin') {
+    setTimeout(async () => {
+      app.setCape(__dirname + '/com.maxrudberg.svanslosbluehazard.cape');
+      capeIsApplied = true;
+    }, 3000);
 
-  setTimeout(async () => {
-    if (cursorIsSet)
-      app.restoreSystemCursor();
-    cursorIsSet = false;
-  }, 15000);
+    setTimeout(async () => {
+      if (capeIsApplied)
+        app.resetCape();
+      capeIsApplied = false;
+    }, 15000);
+  }
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -34,6 +36,6 @@ app.on('window-all-closed', function () {
 });
 
 app.on('will-quit', function () {
-  if (cursorIsSet)
-    app.restoreSystemCursor();
+  if (capeIsApplied)
+    app.resetCape();
 });
