@@ -300,7 +300,7 @@ void ScrollView::CreateScrollView() {
   }
   [scroll.contentView setCopiesOnScroll:NO];
   [scroll.contentView setAutoresizesSubviews:NO];
-  SetNativeView(scroll);
+  SetView(scroll);
 }
 
 void ScrollView::SetContentSize(const gfx::Size& size) {
