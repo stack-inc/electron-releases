@@ -60,7 +60,7 @@ class WebBrowserView : public BaseView,
 
   // content::WebContentsObserver:
   void WebContentsDestroyed() override;
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   void RenderViewReady() override;
 #endif
 
@@ -74,7 +74,7 @@ class WebBrowserView : public BaseView,
 #endif
   void SetBackgroundColorImpl(const SkColor& color) override;
   void SetWindowForChildren(BaseWindow* window) override;
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   void SetRoundedCorners(const RoundedCornersOptions& options) override;
   void UpdateClickThrough() override;
 #endif

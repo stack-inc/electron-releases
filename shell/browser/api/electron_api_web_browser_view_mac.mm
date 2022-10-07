@@ -19,7 +19,7 @@ namespace api {
 
 void WebBrowserView::CreateWebBrowserView(
     InspectableWebContents* inspectable_web_contents) {
-  SetNativeView([[ElectronNativeView alloc] init]);
+  SetView([[ElectronNativeView alloc] init]);
 
   InspectableWebContentsView* iwc_view =
       inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;

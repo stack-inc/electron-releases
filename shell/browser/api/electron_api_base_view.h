@@ -16,7 +16,7 @@
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/size.h"
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
 #include "ui/views/animation/bounds_animator.h"
 #include "ui/views/view_observer.h"
 #endif
@@ -29,7 +29,7 @@
 class NSEvent;
 struct NSView;
 #endif
-#elif defined(TOOLKIT_VIEWS)
+#else
 namespace views {
 class View;
 }
@@ -46,13 +46,6 @@ namespace electron {
 namespace api {
 
 class BaseWindow;
-
-#if BUILDFLAG(IS_MAC)
-using NATIVEEVENT = NSEvent*;
-using NATIVEVIEW = NSView*;
-#elif defined(TOOLKIT_VIEWS)
-using NATIVEVIEW = views::View*;
-#endif
 
 #if BUILDFLAG(IS_MAC)
 // Supported event types.
@@ -77,15 +70,15 @@ struct NativeEvent {
   uint32_t timestamp;
 
   // The underlying native event.
-  NATIVEEVENT native_event;
+  NSEvent* native_event;
 
  protected:
-  NativeEvent(NATIVEEVENT event, NATIVEVIEW view);
+  NativeEvent(NSEvent* event, NSView* view);
 };
 
 struct NativeMouseEvent : public NativeEvent {
   // Create from the native event.
-  NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view);
+  NativeMouseEvent(NSEvent* event, NSView* view);
 
   int button;
   gfx::Point position_in_view;
@@ -94,7 +87,7 @@ struct NativeMouseEvent : public NativeEvent {
 #endif  // BUILDFLAG(IS_MAC)
 
 class BaseView : public gin_helper::TrackableObject<BaseView>
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
     ,
                  public views::ViewObserver
 #endif
@@ -182,10 +175,10 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
 #if BUILDFLAG(IS_MAC)
   bool IsView() { return !!nsview_; }
-  NATIVEVIEW GetNSView() const { return nsview_; }
+  NSView* GetNSView() const { return nsview_; }
 #else
   bool IsView() { return !!view_; }
-  NATIVEVIEW GetView() const { return view_; }
+  views::View* GetView() const { return view_; }
 #endif
 
   int32_t GetID() const;
@@ -205,7 +198,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   // TrackableObject:
   void InitWith(v8::Isolate* isolate, v8::Local<v8::Object> wrapper) override;
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   // views::ViewObserver:
   void OnViewBoundsChanged(views::View* observed_view) override;
   void OnViewRemovedFromWidget(views::View* observed_view) override;
@@ -270,7 +263,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   bool IsVibrant() const { return vibrant_; }
   bool IsBlurred() const { return blurred_; }
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   // Should delete the |view_| in destructor.
   void set_delete_view(bool should) { delete_view_ = should; }
 #endif
@@ -284,7 +277,11 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   // Get window.
   BaseWindow* GetWindow() const { return window_; }
 
-  void SetNativeView(NATIVEVIEW view);
+#if BUILDFLAG(IS_MAC)
+  void SetView(NSView* view);
+#else
+  void SetView(views::View* view);
+#endif
   void DestroyView();
 
 #if BUILDFLAG(IS_MAC)
@@ -305,7 +302,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   void SetWindow(BaseWindow* window);
   virtual void SetWindowForChildren(BaseWindow* window);
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   virtual void UpdateClickThrough();
   void SetBlockScrollViewWhenFocus(bool block);
   bool IsBlockScrollViewWhenFocus() const;
@@ -330,9 +327,9 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
  private:
 #if BUILDFLAG(IS_MAC)
-  NATIVEVIEW nsview_ = nullptr;
+  NSView* nsview_ = nullptr;
 #else
-  NATIVEVIEW view_ = nullptr;
+  views::View* view_ = nullptr;
 #endif
 
   bool vibrant_ = false;
@@ -345,7 +342,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   bool is_click_through_ = false;
   RoundedCornersOptions rounded_corners_options_;
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   bool delete_view_ = true;
   gfx::Rect bounds_;
   std::unique_ptr<views::BoundsAnimator> bounds_animator_;

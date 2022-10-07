@@ -102,12 +102,12 @@ gfx::Point GetPosInWindow(NSEvent* event, NSView* view) {
 
 }  // namespace
 
-NativeEvent::NativeEvent(NATIVEEVENT event, NATIVEVIEW view)
+NativeEvent::NativeEvent(NSEvent* event, NSView* view)
     : type(EventTypeFromNS(event)),
       timestamp([event timestamp] * 1000),
       native_event(event) {}
 
-NativeMouseEvent::NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view)
+NativeMouseEvent::NativeMouseEvent(NSEvent* event, NSView* view)
     : NativeEvent(event, view),
       button([event buttonNumber] + 1),
       position_in_view(GetPosInView(event, view)),
@@ -115,11 +115,11 @@ NativeMouseEvent::NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view)
 
 void BaseView::CreateView() {
   if (!IsVibrant() && !IsBlurred())
-    SetNativeView([[ElectronNativeView alloc] init]);
+    SetView([[ElectronNativeView alloc] init]);
   else if (IsVibrant())
-    SetNativeView([[ElectronNativeVibrantView alloc] init]);
+    SetView([[ElectronNativeVibrantView alloc] init]);
   else
-    SetNativeView([[ElectronNativeBlurredView alloc] init]);
+    SetView([[ElectronNativeBlurredView alloc] init]);
 }
 
 void BaseView::SetClickThrough(bool click_through) {
@@ -668,7 +668,7 @@ void BaseView::RearrangeChildViews() {
   [CATransaction commit];
 }
 
-void BaseView::SetNativeView(NATIVEVIEW view) {
+void BaseView::SetView(NSView* view) {
   nsview_ = view;
 
   if (!IsNativeView(view))

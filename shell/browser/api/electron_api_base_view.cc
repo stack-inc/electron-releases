@@ -20,10 +20,6 @@
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
-#include "ui/views/view.h"
-#endif
-
 namespace gin {
 
 namespace {

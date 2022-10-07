@@ -27,7 +27,7 @@ void WebBrowserView::CreateWebBrowserView(
     view = new views::View();
   }
 
-  SetNativeView(view);
+  SetView(view);
 }
 
 void WebBrowserView::RenderViewReady() {

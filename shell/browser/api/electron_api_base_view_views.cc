@@ -25,7 +25,7 @@ namespace electron {
 namespace api {
 
 void BaseView::CreateView() {
-  SetNativeView(new views::View());
+  SetView(new views::View());
 }
 
 void BaseView::OnViewBoundsChanged(views::View* observed_view) {
@@ -257,7 +257,7 @@ void BaseView::RearrangeChildViews() {
   }
 }
 
-void BaseView::SetNativeView(NATIVEVIEW view) {
+void BaseView::SetView(views::View* view) {
   if (view_) {
     view_->RemoveObserver(this);
     if (delete_view_)

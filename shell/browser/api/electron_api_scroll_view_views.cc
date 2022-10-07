@@ -121,7 +121,7 @@ void ScrollView::CreateScrollView() {
   on_contents_scrolled_subscription_ = scroll_view->AddContentsScrolledCallback(
       base::BindRepeating(&ScrollView::OnDidScroll, base::Unretained(this)));
 
-  SetNativeView(scroll_view);
+  SetView(scroll_view);
 }
 
 void ScrollView::SetBackgroundColor(const std::string& color_name) {
