@@ -470,6 +470,10 @@ void NativeWindowViews::SetContentViewImpl(api::BaseView* view) {
   SetContentView(view->GetView());
 }
 
+views::View* NativeWindowViews::GetRootView() {
+  return root_view_.get();
+}
+
 void NativeWindowViews::Close() {
   if (!IsClosable()) {
     WindowList::WindowCloseCancelled(this);

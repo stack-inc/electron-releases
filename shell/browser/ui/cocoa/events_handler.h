@@ -12,6 +12,8 @@ class BaseView;
 // Dynamically add event methods to a NSView.
 void AddMouseEventHandlerToClass(Class cl);
 
+bool IsMouseEventHandlerAddedToClass(Class cl);
+
 // Dispatch mouse events to a view.
 bool DispatchMouseEvent(api::BaseView* view, NSEvent* event);
 
