@@ -404,6 +404,10 @@ void NativeWindowMac::SetContentViewImpl(api::BaseView* view) {
   AddContentViewLayers();
 }
 
+views::View* NativeWindowMac::GetRootView() {
+  return root_view_.get();
+}
+
 void NativeWindowMac::Close() {
   if (!IsClosable()) {
     WindowList::WindowCloseCancelled(this);

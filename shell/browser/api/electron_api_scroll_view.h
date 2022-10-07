@@ -7,10 +7,10 @@
 
 #include "shell/browser/api/electron_api_base_view.h"
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
 #include "base/callback_list.h"
 #include "ui/compositor/compositor_observer.h"
-#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#endif  // !BUILDFLAG(IS_MAC)
 
 namespace gin_helper {
 class Dictionary;
@@ -39,7 +39,7 @@ class ScrollView : public BaseView {
   void CreateScrollView();
 
   // BaseView:
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   void SetBackgroundColor(const std::string& color_name) override;
   void UpdateClickThrough() override;
 #endif
@@ -75,7 +75,7 @@ class ScrollView : public BaseView {
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor() const;
 #endif
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   void ClipHeightTo(int min_height, int max_height);
   int GetMinHeight() const;
   int GetMaxHeight() const;
@@ -89,7 +89,7 @@ class ScrollView : public BaseView {
 
   // Helpers.
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   void SetSmoothScroll(bool enable);
   void OnDidScroll();
 #endif
@@ -115,7 +115,7 @@ class ScrollView : public BaseView {
   void NotifyDidScroll();
 
  private:
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   class CompositorObserver : public ui::CompositorObserver {
    public:
     CompositorObserver(ScrollView* scroll_view);
@@ -145,7 +145,7 @@ class ScrollView : public BaseView {
   bool smooth_scroll_ = false;
   bool scroll_events_ = false;
   base::CallbackListSubscription on_contents_scrolled_subscription_;
-#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#endif  // !BUILDFLAG(IS_MAC)
 
   v8::Global<v8::Value> content_view_;
   BaseView* api_content_view_ = nullptr;

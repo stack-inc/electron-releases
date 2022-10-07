@@ -24,12 +24,21 @@ Creates the new base view.
 
 Objects created with `new BaseView` emit the following events:
 
-#### Event: 'mouse-down' _macOS_ _Experimental_
+#### Event: 'size-changed' _Experimental_
 
 Returns:
 
 * `event` Event
-* `type` string - The type of the event. Possible values are: `left-mouse-down`, `right-mouse-down`, `other-mouse-down`, `left-mouse-up`, `right-mouse-up`, `other-mouse-up`, `mouse-move`, `mouse-enter`, `mouse-leave`.
+* `oldSize` [Size](structures/size.md) - Size the view was before.
+* `newSize` [Size](structures/size.md) - Size the view is being resized to.
+
+Emitted when the view's size has been changed.
+
+#### Event: 'mouse-down' _Experimental_
+
+Returns:
+
+* `event` Event
 * `timestamp` Integer - Time when event was created, starts from when machine was booted.
 * `button` Integer - The mouse button being pressed, `1` is for left button, `2` is for right button, `3` is for middle button.
 * `positionInView` [Point](structures/point.md) - Relative position inside the view where the event happened.
@@ -37,12 +46,11 @@ Returns:
 
 Emitted when pressing mouse buttons. Calling `event.preventDefault()` will prevent the view from receiving the mouse down event.
 
-#### Event: 'mouse-up' _macOS_ _Experimental_
+#### Event: 'mouse-up' _Experimental_
 
 Returns:
 
 * `event` Event
-* `type` string - The type of the event. Possible values are: `left-mouse-down`, `right-mouse-down`, `other-mouse-down`, `left-mouse-up`, `right-mouse-up`, `other-mouse-up`, `mouse-move`, `mouse-enter`, `mouse-leave`.
 * `timestamp` Integer - Time when event was created, starts from when machine was booted.
 * `button` Integer - The mouse button being pressed, `1` is for left button, `2` is for right button, `3` is for middle button.
 * `positionInView` [Point](structures/point.md) - Relative position inside the view where the event happened.
@@ -50,12 +58,11 @@ Returns:
 
 Emitted when releasing mouse buttons. Calling `event.preventDefault()` will prevent the view from receiving the mouse down event.
 
-#### Event: 'mouse-move' _macOS_ _Experimental_
+#### Event: 'mouse-move' _Experimental_
 
 Returns:
 
 * `event` Event
-* `type` string - The type of the event. Possible values are: `left-mouse-down`, `right-mouse-down`, `other-mouse-down`, `left-mouse-up`, `right-mouse-up`, `other-mouse-up`, `mouse-move`, `mouse-enter`, `mouse-leave`.
 * `timestamp` Integer - Time when event was created, starts from when machine was booted.
 * `button` Integer - The mouse button being pressed, `1` is for left button, `2` is for right button, `3` is for middle button.
 * `positionInView` [Point](structures/point.md) - Relative position inside the view where the event happened.
@@ -63,12 +70,11 @@ Returns:
 
 Emitted when user moves mouse in the view.
 
-#### Event: 'mouse-enter' _macOS_ _Experimental_
+#### Event: 'mouse-enter' _Experimental_
 
 Returns:
 
 * `event` Event
-* `type` string - The type of the event. Possible values are: `left-mouse-down`, `right-mouse-down`, `other-mouse-down`, `left-mouse-up`, `right-mouse-up`, `other-mouse-up`, `mouse-move`, `mouse-enter`, `mouse-leave`.
 * `timestamp` Integer - Time when event was created, starts from when machine was booted.
 * `button` Integer - The mouse button being pressed, `1` is for left button, `2` is for right button, `3` is for middle button.
 * `positionInView` [Point](structures/point.md) - Relative position inside the view where the event happened.
@@ -76,12 +82,11 @@ Returns:
 
 Emitted when mouse enters the view.
 
-#### Event: 'mouse-leave' _macOS_ _Experimental_
+#### Event: 'mouse-leave' _Experimental_
 
 Returns:
 
 * `event` Event
-* `type` string - The type of the event. Possible values are: `left-mouse-down`, `right-mouse-down`, `other-mouse-down`, `left-mouse-up`, `right-mouse-up`, `other-mouse-up`, `mouse-move`, `mouse-enter`, `mouse-leave`.
 * `timestamp` Integer - Time when event was created, starts from when machine was booted.
 * `button` Integer - The mouse button being pressed, `1` is for left button, `2` is for right button, `3` is for middle button.
 * `positionInView` [Point](structures/point.md) - Relative position inside the view where the event happened.
@@ -96,16 +101,6 @@ Returns:
 * `event` Event
 
 Emitted when the mouse capture on view has been released.
-
-#### Event: 'size-changed' _Experimental_
-
-Returns:
-
-* `event` Event
-* `oldSize` [Size](structures/size.md) - Size the view was before.
-* `newSize` [Size](structures/size.md) - Size the view is being resized to.
-
-Emitted when the view's size has been changed.
 
 ### Static Methods
 
@@ -325,15 +320,25 @@ Release mouse capture if the view has mouse capture.
 
 Returns `boolean` - Whether the view has mouse capture.
 
-#### `view.enableMouseEvents()` _macOS_ _Experimental_
+#### `view.enableMouseEvents()` _Experimental_
 
-Enable mouse events.
+Enable mouse events `mouse-down` and `mouse-up` for a view and all its children.
 
-#### `view.setMouseTrackingEnabled(enable)` _macOS_ _Experimental_
+**Note:** On Windows, you need to add event handlers separately for the given view and each of its children to handle the events for the entire hierarchy of the view.
+
+#### `view.areMouseEventsEnabled()` _Experimental_
+
+Returns `boolean` - Whether the mouse events are enabled.
+
+#### `view.setMouseTrackingEnabled(enable)` _Experimental_
 
 * `enable` boolean - Whether the mouse tracking is enabled. Default is `false`.
 
-#### `view.isMouseTrackingEnabled()` _macOS_ _Experimental_
+Enables/disables generating the mouse-tracking events: `mouse-move`, `mouse-enter`, `mouse-leave` for a view and all its children. Enabling tracking enables mouse events.
+
+**Note:** On Windows, you need to add event handlers separately for the given view and each of its children to handle the events for the entire hierarchy of the view.
+
+#### `view.isMouseTrackingEnabled()` _Experimental_
 
 Returns `boolean` - Whether the mouse tracking is enabled.
 
