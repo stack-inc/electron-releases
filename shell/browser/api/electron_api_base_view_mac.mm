@@ -33,93 +33,15 @@ const NSSize unitSize = {1.0, 1.0};
 // monitor, we have to assume only current app can capture view.
 BaseView* g_captured_view = nullptr;
 
-std::string ConvertFromEventType(EventType type) {
-  if (type == EventType::kLeftMouseDown)
-    return "left-mouse-down";
-  else if (type == EventType::kRightMouseDown)
-    return "right-mouse-down";
-  else if (type == EventType::kOtherMouseDown)
-    return "other-mouse-down";
-  else if (type == EventType::kLeftMouseUp)
-    return "left-mouse-up";
-  else if (type == EventType::kRightMouseUp)
-    return "right-mouse-up";
-  else if (type == EventType::kOtherMouseUp)
-    return "other-mouse-up";
-  else if (type == EventType::kMouseMove)
-    return "mouse-move";
-  else if (type == EventType::kMouseEnter)
-    return "mouse-enter";
-  else if (type == EventType::kMouseLeave)
-    return "mouse-leave";
-  return "unknown";
-}
-
-EventType EventTypeFromNS(NSEvent* event) {
-  switch ([event type]) {
-    case NSEventTypeLeftMouseDown:
-      return EventType::kLeftMouseDown;
-    case NSEventTypeRightMouseDown:
-      return EventType::kRightMouseDown;
-    case NSEventTypeOtherMouseDown:
-      return EventType::kOtherMouseDown;
-    case NSEventTypeLeftMouseUp:
-      return EventType::kLeftMouseUp;
-    case NSEventTypeRightMouseUp:
-      return EventType::kRightMouseUp;
-    case NSEventTypeOtherMouseUp:
-      return EventType::kOtherMouseUp;
-    case NSEventTypeLeftMouseDragged:
-    case NSEventTypeRightMouseDragged:
-    case NSEventTypeOtherMouseDragged:
-    case NSEventTypeMouseMoved:
-      return EventType::kMouseMove;
-    case NSEventTypeMouseEntered:
-      return EventType::kMouseEnter;
-    case NSEventTypeMouseExited:
-      return EventType::kMouseLeave;
-    default:
-      return EventType::kUnknown;
-  }
-}
-
-gfx::Point GetPosInView(NSEvent* event, NSView* view) {
-  NSPoint point = [view convertPoint:[event locationInWindow] fromView:nil];
-  if ([view isFlipped])
-    return gfx::Point(point.x, point.y);
-  NSRect frame = [view frame];
-  return gfx::Point(point.x, NSHeight(frame) - point.y);
-}
-
-gfx::Point GetPosInWindow(NSEvent* event, NSView* view) {
-  NSPoint point = [event locationInWindow];
-  if ([view isFlipped])
-    return gfx::Point(point.x, point.y);
-  NSWindow* window = [event window];
-  NSRect frame = [window contentRectForFrameRect:[window frame]];
-  return gfx::Point(point.x, NSHeight(frame) - point.y);
-}
-
 }  // namespace
-
-NativeEvent::NativeEvent(NATIVEEVENT event, NATIVEVIEW view)
-    : type(EventTypeFromNS(event)),
-      timestamp([event timestamp] * 1000),
-      native_event(event) {}
-
-NativeMouseEvent::NativeMouseEvent(NATIVEEVENT event, NATIVEVIEW view)
-    : NativeEvent(event, view),
-      button([event buttonNumber] + 1),
-      position_in_view(GetPosInView(event, view)),
-      position_in_window(GetPosInWindow(event, view)) {}
 
 void BaseView::CreateView() {
   if (!IsVibrant() && !IsBlurred())
-    SetNativeView([[ElectronNativeView alloc] init]);
+    SetView([[ElectronNativeView alloc] init]);
   else if (IsVibrant())
-    SetNativeView([[ElectronNativeVibrantView alloc] init]);
+    SetView([[ElectronNativeVibrantView alloc] init]);
   else
-    SetNativeView([[ElectronNativeBlurredView alloc] init]);
+    SetView([[ElectronNativeBlurredView alloc] init]);
 }
 
 void BaseView::SetClickThrough(bool click_through) {
@@ -405,6 +327,10 @@ void BaseView::EnableMouseEvents() {
   AddMouseEventHandlerToClass([nsview_ class]);
 }
 
+bool BaseView::AreMouseEventsEnabled() const {
+  return IsMouseEventHandlerAddedToClass([nsview_ class]);
+}
+
 void BaseView::SetMouseTrackingEnabled(bool enable) {
   if (enable) {
     // Install event tracking area.
@@ -668,7 +594,7 @@ void BaseView::RearrangeChildViews() {
   [CATransaction commit];
 }
 
-void BaseView::SetNativeView(NATIVEVIEW view) {
+void BaseView::SetView(NSView* view) {
   nsview_ = view;
 
   if (!IsNativeView(view))
@@ -734,31 +660,6 @@ void BaseView::RemoveChildViewImpl(BaseView* view) {
     [nsview setWantsLayer:[nsview nativeViewPrivate]->wants_layer];
   else
     [nsview setWantsLayer:NO];
-}
-
-bool BaseView::NotifyMouseDown(const NativeMouseEvent& event) {
-  return Emit("mouse-down", ConvertFromEventType(event.type), event.timestamp,
-              event.button, event.position_in_view, event.position_in_window);
-}
-
-bool BaseView::NotifyMouseUp(const NativeMouseEvent& event) {
-  return Emit("mouse-up", ConvertFromEventType(event.type), event.timestamp,
-              event.button, event.position_in_view, event.position_in_window);
-}
-
-void BaseView::NotifyMouseMove(const NativeMouseEvent& event) {
-  Emit("mouse-move", ConvertFromEventType(event.type), event.timestamp,
-       event.button, event.position_in_view, event.position_in_window);
-}
-
-void BaseView::NotifyMouseEnter(const NativeMouseEvent& event) {
-  Emit("mouse-enter", ConvertFromEventType(event.type), event.timestamp,
-       event.button, event.position_in_view, event.position_in_window);
-}
-
-void BaseView::NotifyMouseLeave(const NativeMouseEvent& event) {
-  Emit("mouse-leave", ConvertFromEventType(event.type), event.timestamp,
-       event.button, event.position_in_view, event.position_in_window);
 }
 
 void BaseView::NotifyCaptureLost() {

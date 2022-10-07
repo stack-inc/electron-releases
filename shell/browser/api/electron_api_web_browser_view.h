@@ -17,6 +17,15 @@
 #include "shell/common/api/api.mojom.h"
 #include "shell/common/gin_helper/pinnable.h"
 
+#if !BUILDFLAG(IS_MAC)
+#include "base/callback.h"
+#include "content/public/browser/render_widget_host.h"
+
+namespace blink {
+class WebMouseEvent;
+}
+#endif
+
 namespace gfx {
 class Image;
 }
@@ -60,8 +69,12 @@ class WebBrowserView : public BaseView,
 
   // content::WebContentsObserver:
   void WebContentsDestroyed() override;
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   void RenderViewReady() override;
+  void RenderFrameCreated(content::RenderFrameHost* host) override;
+  void RenderFrameDeleted(content::RenderFrameHost* host) override;
+  void RenderFrameHostChanged(content::RenderFrameHost* old_host,
+                              content::RenderFrameHost* new_host) override;
 #endif
 
   // ExtendedWebContentsObserver:
@@ -74,7 +87,7 @@ class WebBrowserView : public BaseView,
 #endif
   void SetBackgroundColorImpl(const SkColor& color) override;
   void SetWindowForChildren(BaseWindow* window) override;
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   void SetRoundedCorners(const RoundedCornersOptions& options) override;
   void UpdateClickThrough() override;
 #endif
@@ -88,6 +101,12 @@ class WebBrowserView : public BaseView,
 
   InspectableWebContentsView* GetInspectableWebContentsView();
 
+#if !BUILDFLAG(IS_MAC)
+  void AttachToHost(content::RenderFrameHost* host);
+  void DetachFromHost();
+  bool HandleMouseEvent(const blink::WebMouseEvent& event);
+#endif
+
  private:
   v8::Global<v8::Value> web_contents_;
   class WebContents* api_web_contents_ = nullptr;
@@ -95,6 +114,11 @@ class WebBrowserView : public BaseView,
   base::WeakPtr<BaseWindow> owner_window_;
 
   bool page_frozen_ = false;
+
+#if !BUILDFLAG(IS_MAC)
+  content::RenderWidgetHost::MouseEventCallback mouse_event_callback_;
+  content::RenderWidgetHost* host_ = nullptr;
+#endif
 };
 
 }  // namespace api
