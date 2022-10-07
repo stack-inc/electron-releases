@@ -12,10 +12,6 @@
 #include "shell/common/node_includes.h"
 #include "ui/base/ui_base_features.h"
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
-#include "ui/views/controls/scroll_view.h"
-#endif
-
 namespace electron {
 
 namespace api {
@@ -24,14 +20,14 @@ ScrollView::ScrollView(gin::Arguments* args,
                        const gin_helper::Dictionary& options) {
   CreateScrollView();
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
   bool smooth_scroll = false;
   if (options.Get("smoothScroll", &smooth_scroll))
     SetSmoothScroll(smooth_scroll);
   bool block_scroll_view_when_focus = false;
   if (options.Get("blockScrollViewWhenFocus", &block_scroll_view_when_focus))
     SetBlockScrollViewWhenFocus(block_scroll_view_when_focus);
-#endif  // defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#endif  // !BUILDFLAG(IS_MAC)
 
   InitWithArgs(args);
 }
@@ -164,7 +160,7 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setScrollWheelFactor", &ScrollView::SetScrollWheelFactor)
       .SetMethod("getScrollWheelFactor", &ScrollView::GetScrollWheelFactor)
 #endif
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
+#if !BUILDFLAG(IS_MAC)
       .SetMethod("clipHeightTo", &ScrollView::ClipHeightTo)
       .SetMethod("getMinHeight", &ScrollView::GetMinHeight)
       .SetMethod("getMaxHeight", &ScrollView::GetMaxHeight)

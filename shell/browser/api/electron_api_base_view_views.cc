@@ -24,8 +24,71 @@ namespace electron {
 
 namespace api {
 
+class BaseView::CustomView : public views::View {
+ public:
+  CustomView(BaseView* base_view) : base_view_(base_view) {}
+
+  uint32_t GetTimestamp(const ui::MouseEvent& event) const {
+    return static_cast<uint32_t>(
+        (event.time_stamp() - base::TimeTicks()).InMillisecondsF());
+  }
+
+  int GetButton(const ui::MouseEvent& event) {
+    if (event.IsOnlyLeftMouseButton())
+      return 1;
+    else if (event.IsOnlyRightMouseButton())
+      return 2;
+    else if (event.IsOnlyMiddleMouseButton())
+      return 3;
+    return 0;
+  }
+
+  bool OnMousePressed(const ui::MouseEvent& event) override {
+    if (!base_view_->AreMouseEventsEnabled())
+      return views::View::OnMousePressed(event);
+    return base_view_->NotifyMouseEvent(
+        BaseView::MouseEventType::kDown, GetTimestamp(event), GetButton(event),
+        event.location(), event.root_location());
+  }
+
+  void OnMouseReleased(const ui::MouseEvent& event) override {
+    if (!base_view_->AreMouseEventsEnabled())
+      return;
+    base_view_->NotifyMouseEvent(BaseView::MouseEventType::kUp,
+                                 GetTimestamp(event), GetButton(event),
+                                 event.location(), event.root_location());
+  }
+
+  void OnMouseMoved(const ui::MouseEvent& event) override {
+    if (!base_view_->IsMouseTrackingEnabled())
+      return;
+    base_view_->NotifyMouseEvent(BaseView::MouseEventType::kMove,
+                                 GetTimestamp(event), GetButton(event),
+                                 event.location(), event.root_location());
+  }
+
+  void OnMouseEntered(const ui::MouseEvent& event) override {
+    if (!base_view_->IsMouseTrackingEnabled())
+      return;
+    base_view_->NotifyMouseEvent(BaseView::MouseEventType::kEnter,
+                                 GetTimestamp(event), GetButton(event),
+                                 event.location(), event.root_location());
+  }
+
+  void OnMouseExited(const ui::MouseEvent& event) override {
+    if (!base_view_->IsMouseTrackingEnabled())
+      return;
+    base_view_->NotifyMouseEvent(BaseView::MouseEventType::kLeave,
+                                 GetTimestamp(event), GetButton(event),
+                                 event.location(), event.root_location());
+  }
+
+ private:
+  BaseView* base_view_;
+};
+
 void BaseView::CreateView() {
-  SetNativeView(new views::View());
+  SetView(new CustomView(this));
 }
 
 void BaseView::OnViewBoundsChanged(views::View* observed_view) {
@@ -182,6 +245,35 @@ void BaseView::SetBackgroundColor(const std::string& color_name) {
   SetBackgroundColorImpl(color);
 }
 
+void BaseView::EnableMouseEvents() {
+  mouse_events_enabled_ = true;
+}
+
+bool BaseView::AreMouseEventsEnabled() const {
+  if (mouse_events_enabled_)
+    return true;
+  else if (parent_)
+    return parent_->AreMouseEventsEnabled();
+  return false;
+}
+
+void BaseView::SetMouseTrackingEnabled(bool enable) {
+  if (enable) {
+    mouse_tracking_enabled_ = true;
+    EnableMouseEvents();
+  } else {
+    mouse_tracking_enabled_ = false;
+  }
+}
+
+bool BaseView::IsMouseTrackingEnabled() const {
+  if (mouse_tracking_enabled_)
+    return true;
+  else if (parent_)
+    return parent_->IsMouseTrackingEnabled();
+  return false;
+}
+
 void BaseView::SetRoundedCorners(const RoundedCornersOptions& options) {
   if (!view_)
     return;
@@ -257,7 +349,7 @@ void BaseView::RearrangeChildViews() {
   }
 }
 
-void BaseView::SetNativeView(NATIVEVIEW view) {
+void BaseView::SetView(views::View* view) {
   if (view_) {
     view_->RemoveObserver(this);
     if (delete_view_)

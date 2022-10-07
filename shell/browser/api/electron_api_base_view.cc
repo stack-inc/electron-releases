@@ -20,10 +20,6 @@
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
 
-#if defined(TOOLKIT_VIEWS) && !BUILDFLAG(IS_MAC)
-#include "ui/views/view.h"
-#endif
-
 namespace gin {
 
 namespace {
@@ -256,6 +252,24 @@ namespace electron {
 
 namespace api {
 
+namespace {
+
+std::string ConvertFromMouseEventType(BaseView::MouseEventType type) {
+  if (type == BaseView::MouseEventType::kDown)
+    return "mouse-down";
+  else if (type == BaseView::MouseEventType::kUp)
+    return "mouse-up";
+  else if (type == BaseView::MouseEventType::kMove)
+    return "mouse-move";
+  else if (type == BaseView::MouseEventType::kEnter)
+    return "mouse-enter";
+  else if (type == BaseView::MouseEventType::kLeave)
+    return "mouse-leave";
+  return "unknown";
+}
+
+}  // namespace
+
 BaseView::BaseView() = default;
 
 BaseView::BaseView(gin::Arguments* args, bool vibrant, bool blurred)
@@ -406,10 +420,6 @@ void BaseView::SetWindowForChildren(BaseWindow* window) {
     child->SetWindow(window);
 }
 
-void BaseView::NotifySizeChanged(gfx::Size old_size, gfx::Size new_size) {
-  Emit("size-changed", old_size, new_size);
-}
-
 void BaseView::NotifyViewIsDeleting() {
   RemoveFromWeakMap();
 
@@ -422,6 +432,21 @@ void BaseView::NotifyViewIsDeleting() {
 
   // Destroy the native class when window is closed.
   base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, GetDestroyClosure());
+}
+
+void BaseView::NotifySizeChanged(gfx::Size old_size, gfx::Size new_size) {
+  Emit("size-changed", old_size, new_size);
+}
+
+bool BaseView::NotifyMouseEvent(const MouseEventType type,
+                                const uint32_t timestamp,
+                                const int button,
+                                const gfx::Point& position_in_view,
+                                const gfx::Point& position_in_window) {
+  if (type == MouseEventType::kUnknown)
+    return false;
+  return Emit(ConvertFromMouseEventType(type), timestamp, button,
+              position_in_view, position_in_window);
 }
 
 // static
@@ -484,10 +509,11 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setCapture", &BaseView::SetCapture)
       .SetMethod("releaseCapture", &BaseView::ReleaseCapture)
       .SetMethod("hasCapture", &BaseView::HasCapture)
+#endif  // BUILDFLAG(IS_MAC)
       .SetMethod("enableMouseEvents", &BaseView::EnableMouseEvents)
+      .SetMethod("areMouseEventsEnabled", &BaseView::AreMouseEventsEnabled)
       .SetMethod("setMouseTrackingEnabled", &BaseView::SetMouseTrackingEnabled)
       .SetMethod("isMouseTrackingEnabled", &BaseView::IsMouseTrackingEnabled)
-#endif
       .SetMethod("setRoundedCorners", &BaseView::SetRoundedCorners)
       .SetMethod("setClippingInsets", &BaseView::SetClippingInsets)
       .SetMethod("resetScaling", &BaseView::ResetScaling)
