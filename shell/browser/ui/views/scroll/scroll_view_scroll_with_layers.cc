@@ -17,6 +17,10 @@ ScrollViewScrollWithLayers::ScrollViewScrollWithLayers()
       this->AddContentsLayerScrolledCallback(base::BindRepeating(
           &ScrollViewScrollWithLayers::ContentsLayerScrolled,
           base::Unretained(this)));
+  on_contents_scrolled_subscription_ =
+      this->AddContentsScrolledCallback(base::BindRepeating(
+          &ScrollViewScrollWithLayers::ContentsScrolled,
+          base::Unretained(this)));
 }
 
 ScrollViewScrollWithLayers::~ScrollViewScrollWithLayers() = default;
@@ -27,11 +31,20 @@ void ScrollViewScrollWithLayers::ContentsLayerScrolled() {
 
   ContentsLayerScrolledImpl(this);
   is_scrolling = true;
+  Layout();
+}
+
+void ScrollViewScrollWithLayers::ContentsScrolled() {
+  if(contents())
+    contents()->SchedulePaintInRect(contents()->GetVisibleBounds());
 }
 
 void ScrollViewScrollWithLayers::ContentsScrollEnded() {
   ContentsScrollEndedImpl(this);
   is_scrolling = false;
+  Layout();
+  if(contents())
+    contents()->SchedulePaintInRect(contents()->GetVisibleBounds());
 }
 
 void ScrollViewScrollWithLayers::ContentsLayerScrolledImpl(View* view) {
@@ -52,7 +65,6 @@ void ScrollViewScrollWithLayers::ContentsLayerScrolledImpl(View* view) {
     gfx::Rect vis_bounds = native_view_host->GetVisibleBounds();
     if (!vis_bounds.IsEmpty()) {
       native_view_host->SetForceVisibleLayout(true);
-      native_view_host->InvalidateLayout();
     }
   }
 
@@ -66,7 +78,6 @@ void ScrollViewScrollWithLayers::ContentsScrollEndedImpl(views::View* view) {
     NativeViewHostScrollWithLayers* native_view_host =
         static_cast<NativeViewHostScrollWithLayers*>(view);
     native_view_host->SetForceVisibleLayout(false);
-    native_view_host->InvalidateLayout();
 
     if (is_scrolling) {
       gfx::NativeView native_view = native_view_host->native_view();
