@@ -397,7 +397,7 @@ void ScrollView::SetScrollPositionImpl(
 
   std::move(callback).Run(std::string());
 
-  api_content_view_->GetView()->InvalidateLayout();
+  scroll->Layout();
 }
 
 }  // namespace api

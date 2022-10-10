@@ -107,7 +107,7 @@ void SmoothScrollAnimator::AnimationProgressed(
   }
 
   scroll_bar_->OnScroll(delta_x, delta_y);
-  scroll_bar_->InvalidateLayout();
+  scroll_bar_->Layout();
   if (std::fabs(delta_x) < kMinimumDelta &&
       std::fabs(delta_y) < kMinimumDelta) {
     Stop();
