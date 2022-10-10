@@ -24,12 +24,14 @@ class ScrollViewScrollWithLayers : public ScrollView {
 
  private:
   void ContentsLayerScrolled();
+  void ContentsScrolled();
   void ContentsScrollEnded();
 
   void ContentsLayerScrolledImpl(views::View* view);
   void ContentsScrollEndedImpl(views::View* view);
 
   base::CallbackListSubscription on_contents_layer_scrolled_subscription_;
+  base::CallbackListSubscription on_contents_scrolled_subscription_;
   base::RetainingOneShotTimer scroll_ended_timier_;
   bool is_scrolling = false;
 };
