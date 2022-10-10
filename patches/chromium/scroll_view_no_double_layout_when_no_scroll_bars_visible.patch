@@ -1,0 +1,39 @@
+diff --git a/ui/views/controls/scroll_view.cc b/ui/views/controls/scroll_view.cc
+index ba3e57ee5a827..553b694cce72b 100644
+--- a/ui/views/controls/scroll_view.cc
++++ b/ui/views/controls/scroll_view.cc
+@@ -526,10 +526,18 @@ void ScrollView::ClipHeightTo(int min_height, int max_height) {
+ }
+ 
+ int ScrollView::GetScrollBarLayoutWidth() const {
++  if (vertical_scroll_bar_mode_ == ScrollBarMode::kHiddenButEnabled ||
++      vertical_scroll_bar_mode_ == ScrollBarMode::kDisabled)
++    return 0;
++
+   return vert_sb_->OverlapsContent() ? 0 : vert_sb_->GetThickness();
+ }
+ 
+ int ScrollView::GetScrollBarLayoutHeight() const {
++  if (horizontal_scroll_bar_mode_ == ScrollBarMode::kHiddenButEnabled ||
++      horizontal_scroll_bar_mode_ == ScrollBarMode::kDisabled)
++    return 0;
++
+   return horiz_sb_->OverlapsContent() ? 0 : horiz_sb_->GetThickness();
+ }
+ 
+@@ -696,13 +704,13 @@ void ScrollView::Layout() {
+   SetControlVisibility(corner_view_.get(), corner_view_required);
+ 
+   // Default.
+-  if (!horiz_sb_required) {
++  if (!horiz_sb_required && horiz_sb_layout_height) {
+     viewport_bounds.set_height(viewport_bounds.height() +
+                                horiz_sb_layout_height);
+     should_layout_contents = true;
+   }
+   // Default.
+-  if (!vert_sb_required) {
++  if (!vert_sb_required && vert_sb_layout_width) {
+     viewport_bounds.set_width(viewport_bounds.width() + vert_sb_layout_width);
+     should_layout_contents = true;
+   }
