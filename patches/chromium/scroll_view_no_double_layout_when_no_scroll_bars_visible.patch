@@ -1,3 +1,9 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: olek.white.green@gmail.com
+Date: Mon, 10 Oct 2022 00:01:16 -0500
+Subject: ScrollView: Do not double layout calls when scroll-bars are hidden or disabled
+
+
 diff --git a/ui/views/controls/scroll_view.cc b/ui/views/controls/scroll_view.cc
 index ba3e57ee5a827..553b694cce72b 100644
 --- a/ui/views/controls/scroll_view.cc
