@@ -183,6 +183,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 #endif
 
   // BaseView APIs.
+  std::uintptr_t GetNativeID() const;
   void SetZIndex(int z_index);
   int GetZIndex() const;
   void SetClickThrough(bool click_through);
@@ -230,6 +231,8 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   virtual void RemoveChildView(gin::Handle<BaseView> base_view);
   void RearrangeChildViews();
   std::vector<v8::Local<v8::Value>> GetViews() const;
+  std::vector<v8::Local<v8::Value>> GetRearrangedViews() const;
+  std::vector<v8::Local<v8::Value>> GetNativelyRearrangedViews() const;
   v8::Local<v8::Value> GetParentView() const;
   v8::Local<v8::Value> GetParentWindow() const;
 

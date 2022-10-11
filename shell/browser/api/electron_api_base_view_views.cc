@@ -5,6 +5,7 @@
 #include "shell/browser/api/electron_api_base_view.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <queue>
 #include <utility>
 
@@ -122,6 +123,10 @@ void BaseView::OnViewHierarchyChanged(
   SetRoundedCorners(rounded_corners_options_);
   UpdateClickThrough();
   UpdateBlockScrollViewWhenFocus();
+}
+
+std::uintptr_t BaseView::GetNativeID() const {
+  return reinterpret_cast<std::uintptr_t>(view_);
 }
 
 void BaseView::SetClickThrough(bool click_through) {
@@ -347,6 +352,24 @@ void BaseView::RearrangeChildViews() {
 
     first = second;
   }
+}
+
+std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
+  std::vector<v8::Local<v8::Value>> ret;
+
+  for (auto* child : view_->children()) {
+    auto child_iter = std::find_if(api_children_.begin(), api_children_.end(),
+                                   [child](const auto* api_child) {
+                                     return child == api_child->GetView();
+                                   });
+    DCHECK(child_iter != api_children_.end());
+    if (child_iter != api_children_.end()) {
+      ret.push_back(
+          v8::Local<v8::Value>::New(isolate(), (*child_iter)->GetWrapper()));
+    }
+  }
+
+  return ret;
 }
 
 void BaseView::SetView(views::View* view) {
