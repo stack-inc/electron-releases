@@ -358,6 +358,17 @@ std::vector<v8::Local<v8::Value>> BaseView::GetViews() const {
   return ret;
 }
 
+std::vector<v8::Local<v8::Value>> BaseView::GetRearrangedViews() const {
+  std::vector<v8::Local<v8::Value>> ret;
+
+  for (auto* api_child : api_children_) {
+    ret.push_back(
+        v8::Local<v8::Value>::New(isolate(), api_child->GetWrapper()));
+  }
+
+  return ret;
+}
+
 v8::Local<v8::Value> BaseView::GetParentView() const {
   if (GetParent())
     return GetParent()->GetWrapper();
@@ -474,6 +485,7 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
   gin_helper::Destroyable::MakeDestroyable(isolate, prototype);
   gin_helper::ObjectTemplateBuilder(isolate, prototype->PrototypeTemplate())
       .SetProperty("id", &BaseView::GetID)
+      .SetProperty("nativeId", &BaseView::GetNativeID)
       .SetProperty("zIndex", &BaseView::GetZIndex, &BaseView::SetZIndex)
       .SetProperty("clickThrough", &BaseView::IsClickThrough,
                    &BaseView::SetClickThrough)
@@ -526,6 +538,9 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("removeChildView", &BaseView::RemoveChildView)
       .SetMethod("rearrangeChildViews", &BaseView::RearrangeChildViews)
       .SetMethod("getViews", &BaseView::GetViews)
+      .SetMethod("getRearrangedViews", &BaseView::GetRearrangedViews)
+      .SetMethod("getNativelyRearrangedViews",
+                 &BaseView::GetNativelyRearrangedViews)
       .SetMethod("getParentView", &BaseView::GetParentView)
       .SetMethod("getParentWindow", &BaseView::GetParentWindow)
       .Build();

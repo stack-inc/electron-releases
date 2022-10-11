@@ -124,6 +124,10 @@ Objects created with `new BaseView` have the following properties:
 
 A `Integer` property representing the unique ID of the view. Each ID is unique among all `BaseView` instances of the entire Electron application.
 
+#### `view.nativeId` _Readonly_ _Experimental_
+
+A `Integer` property representing the unique native ID of the view. The native ID is the integer reprezentation of the native view object in the memory (raw pointer cast to the integer).
+
 #### `view.zIndex` _Experimental_
 
 A `Integer` representing z-index to set. Has no effect until parent's `view.rearrangeChildViews()` is called.
@@ -441,6 +445,16 @@ Rearranges child views according to their z-indexes.
 
 Returns `BaseView[]` - an array of all BaseViews that have been attached
 with `addChildView`.
+
+#### `view.getRearrangedViews()` _Experimental_
+
+Returns `BaseView[]` - an array of all BaseViews that have been attached
+with `addChildView`, Rearranged according to their z-indexes.
+
+#### `view.getNativelyRearrangedViews()` _Experimental_
+
+Returns `BaseView[]` - an array of all BaseViews that have been attached
+with `addChildView`, Rearranged according to their z-indexes on the native layer.
 
 #### `view.getParentView()` _Experimental_
 

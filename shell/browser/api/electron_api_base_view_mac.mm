@@ -9,6 +9,7 @@
 #include <objc/objc-runtime.h>
 
 #include <algorithm>
+#include <cstdint>
 
 #include "base/cxx17_backports.h"
 #include "base/mac/foundation_util.h"
@@ -42,6 +43,10 @@ void BaseView::CreateView() {
     SetView([[ElectronNativeVibrantView alloc] init]);
   else
     SetView([[ElectronNativeBlurredView alloc] init]);
+}
+
+std::uintptr_t BaseView::GetNativeID() const {
+  return reinterpret_cast<std::uintptr_t>(nsview_);
 }
 
 void BaseView::SetClickThrough(bool click_through) {
@@ -592,6 +597,25 @@ void BaseView::RearrangeChildViews() {
   }
 
   [CATransaction commit];
+}
+
+std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
+  std::vector<v8::Local<v8::Value>> ret;
+
+  base::scoped_nsobject<NSArray> subviews([[nsview_ subviews] copy]);
+  for (NSView* child in subviews.get()) {
+    auto child_iter = std::find_if(api_children_.begin(), api_children_.end(),
+                                   [child](const auto* api_child) {
+                                     return child == api_child->GetNSView();
+                                   });
+    DCHECK(child_iter != api_children_.end());
+    if (child_iter != api_children_.end()) {
+      ret.push_back(
+          v8::Local<v8::Value>::New(isolate(), (*child_iter)->GetWrapper()));
+    }
+  }
+
+  return ret;
 }
 
 void BaseView::SetView(NSView* view) {
