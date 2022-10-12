@@ -127,7 +127,6 @@ filenames = {
     "shell/browser/animation_util_mac.mm",
     "shell/browser/api/electron_api_app_mac.mm",
     "shell/browser/api/electron_api_base_view_mac.mm",
-    "shell/browser/api/electron_api_browser_window_mac.mm",
     "shell/browser/api/electron_api_menu_mac.h",
     "shell/browser/api/electron_api_menu_mac.mm",
     "shell/browser/api/electron_api_native_theme_mac.mm",
@@ -250,7 +249,6 @@ filenames = {
   ]
 
   lib_sources_views = [
-    "shell/browser/api/electron_api_browser_window_views.cc",
     "shell/browser/api/electron_api_menu_views.cc",
     "shell/browser/api/electron_api_menu_views.h",
     "shell/browser/native_browser_view_views.cc",

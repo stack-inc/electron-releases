@@ -116,11 +116,6 @@ BrowserWindow::BrowserWindow(gin::Arguments* args,
   // Install the content view after BaseWindow's JS code is initialized.
   SetContentView(gin::CreateHandle<View>(isolate, web_contents_view.get()));
 
-#if BUILDFLAG(IS_MAC)
-  OverrideNSWindowContentView(
-      web_contents->inspectable_web_contents()->GetView());
-#endif
-
   // Init window after everything has been setup.
   window()->InitFromOptions(options);
 }
@@ -216,7 +211,10 @@ void BrowserWindow::OnRendererResponsive(content::RenderProcessHost*) {
 
 void BrowserWindow::OnDraggableRegionsUpdated(
     const std::vector<mojom::DraggableRegionPtr>& regions) {
-  UpdateDraggableRegions(regions);
+  if (window_->has_frame())
+    return;
+
+  window_->UpdateDraggableRegions(regions);
 }
 
 void BrowserWindow::OnSetContentBounds(const gfx::Rect& rect) {
@@ -320,18 +318,6 @@ void BrowserWindow::OnWindowIsKeyChanged(bool is_key) {
 #endif
 }
 
-void BrowserWindow::OnWindowResize() {
-#if BUILDFLAG(IS_MAC)
-  if (!draggable_regions_.empty()) {
-    UpdateDraggableRegions(draggable_regions_);
-  } else {
-    for (InspectableWebContentsView* view : window_->inspectable_views())
-      view->UpdateDraggableRegions(view->GetDraggableRegions());
-  }
-#endif
-  BaseWindow::OnWindowResize();
-}
-
 void BrowserWindow::OnWindowLeaveFullScreen() {
 #if BUILDFLAG(IS_MAC)
   if (web_contents()->IsFullscreen())
@@ -398,71 +384,6 @@ void BrowserWindow::SetBackgroundColor(const std::string& color_name) {
 void BrowserWindow::SetBrowserView(v8::Local<v8::Value> value) {
   BaseWindow::ResetBrowserViews();
   BaseWindow::AddBrowserView(value);
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::AddBrowserView(v8::Local<v8::Value> value) {
-  BaseWindow::AddBrowserView(value);
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::RemoveBrowserView(v8::Local<v8::Value> value) {
-  BaseWindow::RemoveBrowserView(value);
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::SetTopBrowserView(v8::Local<v8::Value> value,
-                                      gin_helper::Arguments* args) {
-  BaseWindow::SetTopBrowserView(value, args);
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::ResetBrowserViews() {
-  BaseWindow::ResetBrowserViews();
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::AddChildView(gin::Handle<BaseView> base_view) {
-  BaseWindow::AddChildView(base_view);
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
-  BaseWindow::RemoveChildView(base_view);
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::SetTopChildView(gin::Handle<BaseView> base_view,
-                                    gin_helper::Arguments* args) {
-  BaseWindow::SetTopChildView(base_view, args);
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::ResetBaseViews() {
-  BaseWindow::ResetBaseViews();
-#if BUILDFLAG(IS_MAC)
-  UpdateDraggableRegions(draggable_regions_);
-#endif
-}
-
-void BrowserWindow::OnDevToolsResized() {
-  UpdateDraggableRegions(draggable_regions_);
 }
 
 void BrowserWindow::SetVibrancy(v8::Isolate* isolate,
