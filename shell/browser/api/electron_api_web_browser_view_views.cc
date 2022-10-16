@@ -18,9 +18,7 @@
 #include "ui/gfx/geometry/rounded_corners_f.h"
 #include "ui/views/view.h"
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 void WebBrowserView::CreateWebBrowserView(
     InspectableWebContents* inspectable_web_contents) {
@@ -188,6 +186,4 @@ bool WebBrowserView::HandleMouseEvent(const blink::WebMouseEvent& event) {
                           position_in_window);
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api

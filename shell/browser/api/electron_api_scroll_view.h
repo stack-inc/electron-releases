@@ -16,9 +16,7 @@ namespace gin_helper {
 class Dictionary;
 }
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 class ScrollView : public BaseView {
  public:
@@ -151,8 +149,6 @@ class ScrollView : public BaseView {
   BaseView* api_content_view_ = nullptr;
 };
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api
 
 #endif  // ELECTRON_SHELL_BROWSER_API_ELECTRON_API_SCROLL_VIEW_H_
