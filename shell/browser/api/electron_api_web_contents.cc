@@ -3286,7 +3286,7 @@ v8::Local<v8::Promise> WebContents::CaptureScreenshot(gin::Arguments* args) {
   // If the view's renderer is suspended this may fail on Windows/Linux -
   // bail if so. See CopyFromSurface in
   // content/public/browser/render_widget_host_view.h.
-  auto* rfh = web_contents()->GetMainFrame();
+  auto* rfh = web_contents()->GetPrimaryMainFrame();
   if (rfh &&
       rfh->GetVisibilityState() == blink::mojom::PageVisibilityState::kHidden) {
     promise.Resolve(gfx::Image());
@@ -3419,7 +3419,7 @@ v8::Local<v8::Promise> WebContents::GetDominantColors(gin::Arguments* args) {
   // If the view's renderer is suspended this may fail on Windows/Linux -
   // bail if so. See CopyFromSurface in
   // content/public/browser/render_widget_host_view.h.
-  auto* rfh = web_contents()->GetMainFrame();
+  auto* rfh = web_contents()->GetPrimaryMainFrame();
   if (rfh &&
       rfh->GetVisibilityState() == blink::mojom::PageVisibilityState::kHidden) {
     promise.Resolve(std::vector<std::string>());
@@ -3700,7 +3700,7 @@ void WebContents::SetCursor(v8::Local<v8::Value> cursor_value,
     return;
   }
 
-  auto* rfh = web_contents()->GetMainFrame();
+  auto* rfh = web_contents()->GetPrimaryMainFrame();
   if (!rfh)
     return;
 

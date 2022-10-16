@@ -12,9 +12,7 @@
 #include "shell/common/node_includes.h"
 #include "ui/base/ui_base_features.h"
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 ScrollView::ScrollView(gin::Arguments* args,
                        const gin_helper::Dictionary& options) {
@@ -178,9 +176,7 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .Build();
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api
 
 namespace {
 

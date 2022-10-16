@@ -287,9 +287,7 @@ std::string phaseToString(NSEventPhase phase) {
 
 @end
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 void ScrollView::CreateScrollView() {
   auto* scroll = [[ElectronNativeScrollView alloc] initWithShell:this];
@@ -544,6 +542,4 @@ void ScrollView::NotifyScrollWheel(bool mouse_event,
        momentum_phase);
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api
