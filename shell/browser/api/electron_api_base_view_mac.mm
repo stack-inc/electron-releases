@@ -22,9 +22,7 @@
 #include "ui/gfx/geometry/rect_conversions.h"
 #include "ui/gfx/geometry/rect_f.h"
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 namespace {
 
@@ -690,6 +688,4 @@ void BaseView::NotifyCaptureLost() {
   Emit("capture-lost");
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api

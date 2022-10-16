@@ -248,9 +248,7 @@ bool Converter<electron::api::BaseView::ScaleAnimationOptions>::FromV8(
 
 }  // namespace gin
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 namespace {
 
@@ -546,9 +544,7 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .Build();
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api
 
 namespace {
 
