@@ -17,9 +17,7 @@
 #include "ui/views/controls/scroll_view.h"
 #include "ui/views/widget/widget.h"
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 namespace {
 
@@ -400,6 +398,4 @@ void ScrollView::SetScrollPositionImpl(
   scroll->Layout();
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api

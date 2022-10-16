@@ -13,9 +13,7 @@
 const NSAutoresizingMaskOptions kDefaultAutoResizingMask =
     NSViewMaxXMargin | NSViewMinYMargin;
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 void WebBrowserView::CreateWebBrowserView(
     InspectableWebContents* inspectable_web_contents) {
@@ -45,6 +43,4 @@ void WebBrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
   iwc_view->UpdateDraggableRegions(iwc_view->GetDraggableRegions());
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api

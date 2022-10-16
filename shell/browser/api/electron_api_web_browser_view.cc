@@ -23,9 +23,7 @@
 #include "shell/common/options_switches.h"
 #include "ui/gfx/image/image.h"
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 WebBrowserView::WebBrowserView(gin::Arguments* args,
                                gin::Handle<WebContents> web_contents) {
@@ -207,9 +205,7 @@ void WebBrowserView::BuildPrototype(v8::Isolate* isolate,
       .Build();
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api
 
 namespace {
 

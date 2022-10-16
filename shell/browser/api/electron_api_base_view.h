@@ -41,9 +41,7 @@ template <typename T>
 class Handle;
 }  // namespace gin
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 class BaseWindow;
 
@@ -338,9 +336,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   v8::Global<v8::Value> self_ref_;
 };
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api
 
 namespace gin {
 

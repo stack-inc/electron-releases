@@ -21,9 +21,7 @@
 
 #include "electron/shell/browser/ui/views/smooth_bounds_animator.h"
 
-namespace electron {
-
-namespace api {
+namespace electron::api {
 
 class BaseView::CustomView : public views::View {
  public:
@@ -345,10 +343,13 @@ void BaseView::RearrangeChildViews() {
   for (auto it = begin; it != api_children_.end(); it++) {
     auto* second = *it;
 
-    int index_of_first = view_->GetIndexOf(first->GetView());
-    int index_of_second = view_->GetIndexOf(second->GetView());
-    if (index_of_second != index_of_first + 1)
-      view_->ReorderChildView(second->GetView(), index_of_first + 1);
+    absl::optional<size_t> index_of_first = view_->GetIndexOf(first->GetView());
+    DCHECK(index_of_first.has_value());
+    absl::optional<size_t> index_of_second =
+        view_->GetIndexOf(second->GetView());
+    DCHECK(index_of_first.has_value());
+    if (*index_of_second != *index_of_first + 1)
+      view_->ReorderChildView(second->GetView(), *index_of_first + 1);
 
     first = second;
   }
@@ -452,6 +453,4 @@ void BaseView::UpdateBlockScrollViewWhenFocus() {
   }
 }
 
-}  // namespace api
-
-}  // namespace electron
+}  // namespace electron::api
