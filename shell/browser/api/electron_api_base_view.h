@@ -23,10 +23,8 @@
 
 #if BUILDFLAG(IS_MAC)
 #ifdef __OBJC__
-@class NSEvent;
 @class NSView;
 #else
-class NSEvent;
 struct NSView;
 #endif
 #else
@@ -151,7 +149,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 #endif
 
   int32_t GetID() const;
-  bool EnsureDetachFromParent();
+  void EnsureDetachFromParent();
   bool IsClickThrough() const;
 
  protected:
