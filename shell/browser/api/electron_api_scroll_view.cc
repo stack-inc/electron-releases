@@ -34,7 +34,7 @@ ScrollView::~ScrollView() = default;
 
 void ScrollView::RemoveChildView(gin::Handle<BaseView> base_view) {
   if (base_view.get() == api_content_view_) {
-    ResetContentViewImpl();
+    ResetCurrentContentViewImpl();
     api_content_view_->SetParent(nullptr);
     api_content_view_ = nullptr;
     content_view_.Reset();
@@ -47,6 +47,8 @@ void ScrollView::RemoveChildView(gin::Handle<BaseView> base_view) {
 void ScrollView::ResetChildViews() {
   BaseView::ResetChildViews();
 
+  if (api_content_view_)
+    api_content_view_->SetParent(nullptr);
   content_view_.Reset();
   api_content_view_ = nullptr;
 }
@@ -59,10 +61,11 @@ void ScrollView::SetWindowForChildren(BaseWindow* window) {
 }
 
 void ScrollView::SetContentView(gin::Handle<BaseView> base_view) {
-  if (!base_view->EnsureDetachFromParent())
-    return;
-  if (base_view.get() == this || base_view->GetParent() ||
+  if (base_view.IsEmpty() || base_view.get() == this ||
       base_view.get() == api_content_view_)
+    return;
+  base_view->EnsureDetachFromParent();
+  if (base_view->GetParent() || base_view->GetWindow())
     return;
   if (api_content_view_)
     api_content_view_->SetParent(nullptr);

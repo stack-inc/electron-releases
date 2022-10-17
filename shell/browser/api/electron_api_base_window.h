@@ -186,7 +186,7 @@ class BaseWindow : public gin_helper::TrackableObject<BaseWindow>,
   virtual std::vector<v8::Local<v8::Value>> GetBrowserViews() const;
   virtual void ResetBrowserViews();
   virtual void AddChildView(gin::Handle<BaseView> base_view);
-  virtual bool RemoveChildView(gin::Handle<BaseView> base_view);
+  virtual void RemoveChildView(gin::Handle<BaseView> base_view);
   virtual void SetTopChildView(gin::Handle<BaseView> base_view,
                                gin_helper::Arguments* args);
   virtual std::vector<v8::Local<v8::Value>> GetViews() const;
