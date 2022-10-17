@@ -324,10 +324,13 @@ void BaseWindow::SetContentView(gin::Handle<View> view) {
 }
 
 void BaseWindow::SetContentBaseView(gin::Handle<BaseView> view) {
+  if (view.IsEmpty())
+    return;
+  view->EnsureDetachFromParent();
+  if (view->GetParent() || view->GetWindow())
+    return;
   ResetBrowserViews();
   ResetBaseViews();
-  if (!view->EnsureDetachFromParent())
-    return;
   if (api_content_base_view_)
     api_content_base_view_->BecomeContentView(nullptr);
   window_->SetContentView(view.get());
@@ -827,9 +830,12 @@ void BaseWindow::SetTopBrowserView(v8::Local<v8::Value> value,
 }
 
 void BaseWindow::AddChildView(gin::Handle<BaseView> base_view) {
+  if (base_view.IsEmpty())
+    return;
   auto iter = base_views_.find(base_view->GetID());
   if (iter == base_views_.end()) {
-    if (!base_view->EnsureDetachFromParent())
+    base_view->EnsureDetachFromParent();
+    if (base_view->GetParent() || base_view->GetWindow())
       return;
     window_->AddChildView(base_view.get());
     base_view->SetWindow(this);
@@ -837,10 +843,9 @@ void BaseWindow::AddChildView(gin::Handle<BaseView> base_view) {
   }
 }
 
-bool BaseWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
-  if (base_view.get() == api_content_base_view_)
-    return false;
-
+void BaseWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
+  if (base_view.IsEmpty() || base_view.get() == api_content_base_view_)
+    return;
   auto iter = base_views_.find(base_view->GetID());
   if (iter != base_views_.end()) {
     window_->RemoveChildView(base_view.get());
@@ -848,12 +853,12 @@ bool BaseWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
     iter->second.Reset();
     base_views_.erase(iter);
   }
-
-  return true;
 }
 
 void BaseWindow::SetTopChildView(gin::Handle<BaseView> base_view,
                                  gin_helper::Arguments* args) {
+  if (base_view.IsEmpty())
+    return;
   BaseWindow* owner_window = base_view->GetWindow();
   auto iter = base_views_.find(base_view->GetID());
   if (iter == base_views_.end() || (owner_window && owner_window != this)) {

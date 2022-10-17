@@ -293,13 +293,12 @@ int32_t BaseView::GetID() const {
   return weak_map_id();
 }
 
-bool BaseView::EnsureDetachFromParent() {
+void BaseView::EnsureDetachFromParent() {
   if (GetParent()) {
     GetParent()->RemoveChildView(gin::CreateHandle(isolate(), this));
   } else if (GetWindow()) {
-    return GetWindow()->RemoveChildView(gin::CreateHandle(isolate(), this));
+    GetWindow()->RemoveChildView(gin::CreateHandle(isolate(), this));
   }
-  return true;
 }
 
 void BaseView::SetZIndex(int z_index) {
@@ -311,14 +310,12 @@ int BaseView::GetZIndex() const {
 }
 
 void BaseView::AddChildView(gin::Handle<BaseView> base_view) {
-  if (!IsView())
+  if (!IsView() || base_view.IsEmpty() || base_view.get() == this)
     return;
-
   auto iter = children_.find(base_view->GetID());
   if (iter == children_.end()) {
-    if (!base_view->EnsureDetachFromParent())
-      return;
-    if (base_view.get() == this || base_view->GetParent())
+    base_view->EnsureDetachFromParent();
+    if (base_view->GetParent() || base_view->GetWindow())
       return;
     AddChildViewImpl(base_view.get());
     base_view->SetParent(this);
@@ -329,9 +326,8 @@ void BaseView::AddChildView(gin::Handle<BaseView> base_view) {
 }
 
 void BaseView::RemoveChildView(gin::Handle<BaseView> base_view) {
-  if (!IsView())
+  if (!IsView() || base_view.IsEmpty())
     return;
-
   auto iter = children_.find(base_view->GetID());
   if (iter != children_.end()) {
     RemoveChildViewImpl(base_view.get());
@@ -393,9 +389,9 @@ void BaseView::ResetChildViews() {
         !base_view.IsEmpty()) {
       // There's a chance that the BaseView may have been reparented - only
       // reset if the owner view is *this* view.
-      auto* parent_view = base_view->GetParent();
-      if (parent_view && parent_view == this)
-        base_view->SetParent(nullptr);
+      BaseView* parent_view = base_view->GetParent();
+      DCHECK_EQ(parent_view, this);
+      base_view->SetParent(nullptr);
     }
 
     item.second.Reset();

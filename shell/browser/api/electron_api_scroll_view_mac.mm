@@ -504,7 +504,7 @@ void ScrollView::SetContentViewImpl(BaseView* view) {
   [scroll.documentView setAutoresizingMask:NSViewNotSizable];
 }
 
-void ScrollView::ResetContentViewImpl() {
+void ScrollView::ResetCurrentContentViewImpl() {
   auto* scroll = static_cast<NSScrollView*>(GetNSView());
   scroll.documentView = nil;
 }
