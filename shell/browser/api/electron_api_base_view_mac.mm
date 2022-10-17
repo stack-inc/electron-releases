@@ -282,25 +282,22 @@ void BaseView::SetBlurRadius(float radius) {
 }
 
 float BaseView::GetBlurRadius() const {
-  if (IsNativeView(nsview_) && blurred_) {
+  if (IsNativeView(nsview_) && blurred_)
     return [static_cast<ElectronNativeBlurredView*>(nsview_) blurRadius];
-  } else {
-    return 0.0;
-  }
+  return 0.0;
 }
 
 void BaseView::SetBlurSaturationFactor(float factor) {
-  if (IsNativeView(nsview_) && blurred_)
+  if (IsNativeView(nsview_) && blurred_) {
     [static_cast<ElectronNativeBlurredView*>(nsview_)
         setSaturationFactor:factor];
+  }
 }
 
 float BaseView::GetBlurSaturationFactor() const {
-  if (IsNativeView(nsview_) && blurred_) {
+  if (IsNativeView(nsview_) && blurred_)
     return [static_cast<ElectronNativeBlurredView*>(nsview_) saturationFactor];
-  } else {
-    return 0.0;
-  }
+  return 0.0;
 }
 
 void BaseView::SetCapture() {
@@ -648,6 +645,7 @@ void BaseView::DestroyView() {
     priv->shell = nullptr;
   }
   [nsview_ release];
+  nsview_ = nullptr;
 }
 
 void BaseView::SetWantsLayer(bool wants) {
@@ -676,8 +674,8 @@ void BaseView::AddChildViewImpl(BaseView* view) {
 }
 
 void BaseView::RemoveChildViewImpl(BaseView* view) {
-  [view->GetNSView() removeFromSuperview];
   NSView* nsview = view->GetNSView();
+  [nsview removeFromSuperview];
   if (IsNativeView(nsview))
     [nsview setWantsLayer:[nsview nativeViewPrivate]->wants_layer];
   else

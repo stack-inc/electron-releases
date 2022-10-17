@@ -390,12 +390,11 @@ void BrowserWindow::AddChildView(gin::Handle<BaseView> base_view) {
 #endif
 }
 
-bool BrowserWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
-  bool result = BaseWindow::RemoveChildView(base_view);
+void BrowserWindow::RemoveChildView(gin::Handle<BaseView> base_view) {
+  BaseWindow::RemoveChildView(base_view);
 #if BUILDFLAG(IS_MAC)
   UpdateDraggableRegions(draggable_regions_);
 #endif
-  return result;
 }
 
 void BrowserWindow::SetTopChildView(gin::Handle<BaseView> base_view,

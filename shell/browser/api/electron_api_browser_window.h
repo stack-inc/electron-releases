@@ -82,7 +82,7 @@ class BrowserWindow : public BaseWindow,
                          gin_helper::Arguments* args) override;
   void ResetBrowserViews() override;
   void AddChildView(gin::Handle<BaseView> base_view) override;
-  bool RemoveChildView(gin::Handle<BaseView> base_view) override;
+  void RemoveChildView(gin::Handle<BaseView> base_view) override;
   void SetTopChildView(gin::Handle<BaseView> base_view,
                        gin_helper::Arguments* args) override;
   void ResetBaseViews() override;
