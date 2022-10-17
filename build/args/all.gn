@@ -50,3 +50,5 @@ is_cfi = false
 use_qt = false
 
 v8_builtins_profiling_log_file = ""
+
+mac_sdk_min = "12.3"
