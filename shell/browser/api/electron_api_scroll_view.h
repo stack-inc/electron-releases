@@ -95,7 +95,7 @@ class ScrollView : public BaseView {
 #endif
 
   void SetContentViewImpl(BaseView* container);
-  void ResetContentViewImpl();
+  void ResetCurrentContentViewImpl();
 
   void SetScrollPositionImpl(gfx::Point point,
                              base::OnceCallback<void(std::string)> callback);

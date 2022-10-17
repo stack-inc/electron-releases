@@ -335,15 +335,18 @@ void ScrollView::SetContentViewImpl(BaseView* view) {
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
   UpdateScrollBars(scroll, smooth_scroll_);
+  view->set_delete_view(false);
   auto content_view = std::unique_ptr<views::View>(view->GetView());
   scroll->SetContents(std::move(content_view));
 }
 
-void ScrollView::ResetContentViewImpl() {
-  if (!GetView())
+void ScrollView::ResetCurrentContentViewImpl() {
+  if (!GetView() || !api_content_view_)
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
+  DCHECK_EQ(scroll->contents(), api_content_view_->GetView());
   scroll->SetContents(nullptr);
+  api_content_view_->set_delete_view(true);
 }
 
 void ScrollView::SetScrollPositionImpl(

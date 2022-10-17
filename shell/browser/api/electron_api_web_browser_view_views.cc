@@ -18,6 +18,10 @@
 #include "ui/gfx/geometry/rounded_corners_f.h"
 #include "ui/views/view.h"
 
+#if BUILDFLAG(IS_MAC)
+#include "shell/browser/ui/cocoa/delayed_native_view_host.h"
+#endif
+
 namespace electron {
 
 namespace api {
@@ -28,9 +32,15 @@ void WebBrowserView::CreateWebBrowserView(
       inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;
   views::View* view = nullptr;
   if (iwc_view) {
+#if BUILDFLAG(IS_MAC)
+    view = new DelayedNativeViewHost(iwc_view->GetNativeView());
+#else
     view = iwc_view->GetView();
-    // the View is created and managed by InspectableWebContents.
+    // On macOS the View is a newly-created |DelayedNativeViewHost| and it is
+    // our responsibility to delete it. On other platforms the View is created
+    // and managed by InspectableWebContents.
     set_delete_view(false);
+#endif
   } else {
     view = new views::View();
   }

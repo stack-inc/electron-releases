@@ -11,6 +11,7 @@
 
 #include "base/memory/ptr_util.h"
 #include "gin/handle.h"
+#include "shell/browser/ui/views/smooth_bounds_animator.h"
 #include "shell/common/color_util.h"
 #include "ui/compositor/layer.h"
 #include "ui/gfx/geometry/rect_conversions.h"
@@ -18,8 +19,6 @@
 #include "ui/views/background.h"
 #include "ui/views/view.h"
 #include "ui/views/view_class_properties.h"
-
-#include "electron/shell/browser/ui/views/smooth_bounds_animator.h"
 
 namespace electron {
 
