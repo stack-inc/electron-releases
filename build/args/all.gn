@@ -45,3 +45,5 @@ is_cfi = false
 
 # TODO: fix this once sysroots have been updated.
 use_qt = false
+
+mac_sdk_min = "12.3"
