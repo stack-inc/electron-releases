@@ -105,23 +105,6 @@ void ScrollView::CompositorObserver::OnCompositingDidCommit(
   point_.reset();
 }
 
-void ScrollView::CreateScrollView() {
-  views::ScrollView* scroll_view = nullptr;
-  if (base::FeatureList::IsEnabled(::features::kUiCompositorScrollWithLayers)) {
-    scroll_view = new ScrollViewScrollWithLayers();
-    set_scroll_position_after_commit_ = true;
-  } else {
-    scroll_view = new electron::ScrollView();
-  }
-
-  scroll_view->SetBackgroundColor(absl::optional<SkColor>());
-
-  on_contents_scrolled_subscription_ = scroll_view->AddContentsScrolledCallback(
-      base::BindRepeating(&ScrollView::OnDidScroll, base::Unretained(this)));
-
-  SetView(scroll_view);
-}
-
 void ScrollView::SetBackgroundColor(const std::string& color_name) {
   if (!GetView())
     return;
@@ -162,10 +145,9 @@ std::string ScrollView::GetHorizontalScrollBarMode() const {
   auto mode = scroll->GetHorizontalScrollBarMode();
   if (mode == views::ScrollView::ScrollBarMode::kDisabled)
     return "disabled";
-  if (mode == views::ScrollView::ScrollBarMode::kHiddenButEnabled)
+  else if (mode == views::ScrollView::ScrollBarMode::kHiddenButEnabled)
     return "enabled-but-hidden";
-  else
-    return "enabled";
+  return "enabled";
 }
 
 void ScrollView::SetVerticalScrollBarMode(std::string mode) {
@@ -188,10 +170,9 @@ std::string ScrollView::GetVerticalScrollBarMode() const {
   auto mode = scroll->GetVerticalScrollBarMode();
   if (mode == views::ScrollView::ScrollBarMode::kDisabled)
     return "disabled";
-  if (mode == views::ScrollView::ScrollBarMode::kHiddenButEnabled)
+  else if (mode == views::ScrollView::ScrollBarMode::kHiddenButEnabled)
     return "enabled-but-hidden";
-  else
-    return "enabled";
+  return "enabled";
 }
 
 void ScrollView::SetScrollWheelSwapped(bool swap) {
@@ -204,7 +185,6 @@ void ScrollView::SetScrollWheelSwapped(bool swap) {
 bool ScrollView::IsScrollWheelSwapped() const {
   if (!GetView())
     return false;
-
   auto* scroll = static_cast<views::ScrollView*>(GetView());
   return scroll->GetTreatAllScrollEventsAsHorizontal();
 }
@@ -313,6 +293,23 @@ bool ScrollView::GetDrawOverflowIndicator() const {
     return false;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
   return scroll->GetDrawOverflowIndicator();
+}
+
+void ScrollView::CreateScrollView() {
+  views::ScrollView* scroll_view = nullptr;
+  if (base::FeatureList::IsEnabled(::features::kUiCompositorScrollWithLayers)) {
+    scroll_view = new ScrollViewScrollWithLayers();
+    set_scroll_position_after_commit_ = true;
+  } else {
+    scroll_view = new electron::ScrollView();
+  }
+
+  scroll_view->SetBackgroundColor(absl::optional<SkColor>());
+
+  on_contents_scrolled_subscription_ = scroll_view->AddContentsScrolledCallback(
+      base::BindRepeating(&ScrollView::OnDidScroll, base::Unretained(this)));
+
+  SetView(scroll_view);
 }
 
 void ScrollView::SetSmoothScroll(bool enable) {

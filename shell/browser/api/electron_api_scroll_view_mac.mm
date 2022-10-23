@@ -289,18 +289,6 @@ std::string phaseToString(NSEventPhase phase) {
 
 namespace electron::api {
 
-void ScrollView::CreateScrollView() {
-  auto* scroll = [[ElectronNativeScrollView alloc] initWithShell:this];
-  scroll.drawsBackground = NO;
-  if (scroll.scrollerStyle == NSScrollerStyleOverlay) {
-    scroll.hasHorizontalScroller = YES;
-    scroll.hasVerticalScroller = YES;
-  }
-  [scroll.contentView setCopiesOnScroll:NO];
-  [scroll.contentView setAutoresizesSubviews:NO];
-  SetView(scroll);
-}
-
 void ScrollView::SetContentSize(const gfx::Size& size) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   NSSize content_size = size.ToCGSize();
@@ -496,6 +484,18 @@ void ScrollView::SetScrollWheelFactor(double factor) {
 double ScrollView::GetScrollWheelFactor() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   return [scroll scrollWheelFactor];
+}
+
+void ScrollView::CreateScrollView() {
+  auto* scroll = [[ElectronNativeScrollView alloc] initWithShell:this];
+  scroll.drawsBackground = NO;
+  if (scroll.scrollerStyle == NSScrollerStyleOverlay) {
+    scroll.hasHorizontalScroller = YES;
+    scroll.hasVerticalScroller = YES;
+  }
+  [scroll.contentView setCopiesOnScroll:NO];
+  [scroll.contentView setAutoresizesSubviews:NO];
+  SetView(scroll);
 }
 
 void ScrollView::SetContentViewImpl(BaseView* view) {

@@ -417,10 +417,6 @@ void BaseView::BecomeContentView(BaseWindow* window) {
 
 void BaseView::SetWindow(BaseWindow* window) {
   window_ = window;
-  SetWindowForChildren(window);
-}
-
-void BaseView::SetWindowForChildren(BaseWindow* window) {
   for (BaseView* child : api_children_)
     child->SetWindow(window);
 }

@@ -65,8 +65,6 @@ class WebBrowserView : public BaseView,
   WebBrowserView(gin::Arguments* args, gin::Handle<WebContents> web_contents);
   ~WebBrowserView() override;
 
-  void CreateWebBrowserView(InspectableWebContents* inspectable_web_contents);
-
   // content::WebContentsObserver:
   void WebContentsDestroyed() override;
 #if !BUILDFLAG(IS_MAC)
@@ -86,7 +84,7 @@ class WebBrowserView : public BaseView,
   void SetBounds(const gfx::Rect& bounds, gin::Arguments* args) override;
 #endif
   void SetBackgroundColorImpl(const SkColor& color) override;
-  void SetWindowForChildren(BaseWindow* window) override;
+  void SetWindow(BaseWindow* window) override;
 #if !BUILDFLAG(IS_MAC)
   void SetRoundedCorners(const RoundedCornersOptions& options) override;
   void UpdateClickThrough() override;
@@ -98,6 +96,8 @@ class WebBrowserView : public BaseView,
   v8::Local<v8::Value> GetWebContents(v8::Isolate*);
 
   // Helpers.
+
+  void CreateWebBrowserView(InspectableWebContents* inspectable_web_contents);
 
   InspectableWebContentsView* GetInspectableWebContentsView();
 
