@@ -25,14 +25,14 @@ index b625d439242ab..5cfcae6c95eae 100644
    for (ViewObserver& observer : observers_)
      observer.OnViewFocused(this);
 diff --git a/ui/views/view_class_properties.cc b/ui/views/view_class_properties.cc
-index e87704962d0dd..c834bdee12b79 100644
+index e87704962d0dd..69159cf4fadf8 100644
 --- a/ui/views/view_class_properties.cc
 +++ b/ui/views/view_class_properties.cc
 @@ -51,5 +51,6 @@ DEFINE_UI_CLASS_PROPERTY_KEY(bool, kViewIgnoredByLayoutKey, false)
  DEFINE_UI_CLASS_PROPERTY_KEY(ui::ElementIdentifier,
                               kElementIdentifierKey,
                               ui::ElementIdentifier())
-+DEFINE_UI_CLASS_PROPERTY_KEY(bool, kViewBlockScrollViewWhenFocus, false)
++DEFINE_UI_CLASS_PROPERTY_KEY(bool, kViewBlockScrollViewWhenFocus, true)
  
  }  // namespace views
 diff --git a/ui/views/view_class_properties.h b/ui/views/view_class_properties.h
