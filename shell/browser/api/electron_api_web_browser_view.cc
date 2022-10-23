@@ -92,8 +92,8 @@ void WebBrowserView::SetBackgroundColorImpl(const SkColor& color) {
   }
 }
 
-void WebBrowserView::SetWindowForChildren(BaseWindow* window) {
-  BaseView::SetWindowForChildren(window);
+void WebBrowserView::SetWindow(BaseWindow* window) {
+  BaseView::SetWindow(window);
 
   // Ensure WebContents and BrowserView owner windows are in sync.
   if (web_contents())
@@ -149,10 +149,8 @@ void WebBrowserView::Show() {
 }
 
 v8::Local<v8::Value> WebBrowserView::GetWebContents(v8::Isolate* isolate) {
-  if (web_contents_.IsEmpty()) {
+  if (web_contents_.IsEmpty())
     return v8::Null(isolate);
-  }
-
   return v8::Local<v8::Value>::New(isolate, web_contents_);
 }
 
