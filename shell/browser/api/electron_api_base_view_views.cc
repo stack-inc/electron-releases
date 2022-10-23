@@ -85,10 +85,6 @@ class BaseView::CustomView : public views::View {
   BaseView* base_view_;
 };
 
-void BaseView::CreateView() {
-  SetView(new CustomView(this));
-}
-
 void BaseView::OnViewBoundsChanged(views::View* observed_view) {
   if (!view_)
     return;
@@ -370,6 +366,10 @@ std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
   }
 
   return ret;
+}
+
+void BaseView::CreateView() {
+  SetView(new CustomView(this));
 }
 
 void BaseView::SetView(views::View* view) {

@@ -34,15 +34,6 @@ BaseView* g_captured_view = nullptr;
 
 }  // namespace
 
-void BaseView::CreateView() {
-  if (!IsVibrant() && !IsBlurred())
-    SetView([[ElectronNativeView alloc] init]);
-  else if (IsVibrant())
-    SetView([[ElectronNativeVibrantView alloc] init]);
-  else
-    SetView([[ElectronNativeBlurredView alloc] init]);
-}
-
 std::uintptr_t BaseView::GetNativeID() const {
   return reinterpret_cast<std::uintptr_t>(nsview_);
 }
@@ -611,6 +602,15 @@ std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
   }
 
   return ret;
+}
+
+void BaseView::CreateView() {
+  if (!IsVibrant() && !IsBlurred())
+    SetView([[ElectronNativeView alloc] init]);
+  else if (IsVibrant())
+    SetView([[ElectronNativeVibrantView alloc] init]);
+  else
+    SetView([[ElectronNativeBlurredView alloc] init]);
 }
 
 void BaseView::SetView(NSView* view) {

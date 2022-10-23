@@ -15,20 +15,6 @@ const NSAutoresizingMaskOptions kDefaultAutoResizingMask =
 
 namespace electron::api {
 
-void WebBrowserView::CreateWebBrowserView(
-    InspectableWebContents* inspectable_web_contents) {
-  SetView([[ElectronNativeView alloc] init]);
-
-  InspectableWebContentsView* iwc_view =
-      inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;
-  if (!iwc_view)
-    return;
-
-  auto* view = iwc_view->GetNativeView().GetNativeNSView();
-  view.autoresizingMask = kDefaultAutoResizingMask;
-  [GetNSView() addSubview:view];
-}
-
 void WebBrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
   BaseView::SetBounds(bounds, args);
 
@@ -41,6 +27,20 @@ void WebBrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
 
   // Ensure draggable regions are properly updated to reflect new bounds.
   iwc_view->UpdateDraggableRegions(iwc_view->GetDraggableRegions());
+}
+
+void WebBrowserView::CreateWebBrowserView(
+    InspectableWebContents* inspectable_web_contents) {
+  SetView([[ElectronNativeView alloc] init]);
+
+  InspectableWebContentsView* iwc_view =
+      inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;
+  if (!iwc_view)
+    return;
+
+  auto* view = iwc_view->GetNativeView().GetNativeNSView();
+  view.autoresizingMask = kDefaultAutoResizingMask;
+  [GetNSView() addSubview:view];
 }
 
 }  // namespace electron::api
