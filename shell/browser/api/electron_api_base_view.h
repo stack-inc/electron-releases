@@ -163,8 +163,6 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   BaseView(gin::Arguments* args, bool vibrant, bool blurred);
   ~BaseView() override;
 
-  void CreateView();
-
   // TrackableObject:
   void InitWith(v8::Isolate* isolate, v8::Local<v8::Object> wrapper) override;
 
@@ -251,6 +249,8 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   // Get window.
   BaseWindow* GetWindow() const { return window_; }
 
+  void CreateView();
+
 #if BUILDFLAG(IS_MAC)
   void SetView(NSView* view);
 #else
@@ -273,8 +273,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   void SetParent(BaseView* parent);
   void BecomeContentView(BaseWindow* window);
 
-  void SetWindow(BaseWindow* window);
-  virtual void SetWindowForChildren(BaseWindow* window);
+  virtual void SetWindow(BaseWindow* window);
 
 #if !BUILDFLAG(IS_MAC)
   virtual void UpdateClickThrough();

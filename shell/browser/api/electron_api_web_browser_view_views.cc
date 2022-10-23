@@ -24,28 +24,6 @@
 
 namespace electron::api {
 
-void WebBrowserView::CreateWebBrowserView(
-    InspectableWebContents* inspectable_web_contents) {
-  InspectableWebContentsView* iwc_view =
-      inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;
-  views::View* view = nullptr;
-  if (iwc_view) {
-#if BUILDFLAG(IS_MAC)
-    view = new DelayedNativeViewHost(iwc_view->GetNativeView());
-#else
-    view = iwc_view->GetView();
-    // On macOS the View is a newly-created |DelayedNativeViewHost| and it is
-    // our responsibility to delete it. On other platforms the View is created
-    // and managed by InspectableWebContents.
-    set_delete_view(false);
-#endif
-  } else {
-    view = new views::View();
-  }
-
-  SetView(view);
-}
-
 void WebBrowserView::RenderViewReady() {
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (iwc_view)
@@ -122,6 +100,28 @@ void WebBrowserView::UpdateClickThrough() {
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (iwc_view)
     iwc_view->SetClickThrough(click_through);
+}
+
+void WebBrowserView::CreateWebBrowserView(
+    InspectableWebContents* inspectable_web_contents) {
+  InspectableWebContentsView* iwc_view =
+      inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;
+  views::View* view = nullptr;
+  if (iwc_view) {
+#if BUILDFLAG(IS_MAC)
+    view = new DelayedNativeViewHost(iwc_view->GetNativeView());
+#else
+    view = iwc_view->GetView();
+    // On macOS the View is a newly-created |DelayedNativeViewHost| and it is
+    // our responsibility to delete it. On other platforms the View is created
+    // and managed by InspectableWebContents.
+    set_delete_view(false);
+#endif
+  } else {
+    view = new views::View();
+  }
+
+  SetView(view);
 }
 
 void WebBrowserView::AttachToHost(content::RenderFrameHost* frame_host) {

@@ -53,8 +53,8 @@ void ScrollView::ResetChildViews() {
   api_content_view_ = nullptr;
 }
 
-void ScrollView::SetWindowForChildren(BaseWindow* window) {
-  BaseView::SetWindowForChildren(window);
+void ScrollView::SetWindow(BaseWindow* window) {
+  BaseView::SetWindow(window);
 
   if (api_content_view_)
     api_content_view_->SetWindow(window);

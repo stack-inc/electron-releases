@@ -34,8 +34,6 @@ class ScrollView : public BaseView {
   ScrollView(gin::Arguments* args, const gin_helper::Dictionary& options);
   ~ScrollView() override;
 
-  void CreateScrollView();
-
   // BaseView:
 #if !BUILDFLAG(IS_MAC)
   void SetBackgroundColor(const std::string& color_name) override;
@@ -43,7 +41,7 @@ class ScrollView : public BaseView {
 #endif
   void RemoveChildView(gin::Handle<BaseView> base_view) override;
   void ResetChildViews() override;
-  void SetWindowForChildren(BaseWindow* window) override;
+  void SetWindow(BaseWindow* window) override;
 
   // ScrollView APIs.
   void SetContentView(gin::Handle<BaseView> base_view);
@@ -87,12 +85,14 @@ class ScrollView : public BaseView {
 
   // Helpers.
 
+  void CreateScrollView();
+
 #if !BUILDFLAG(IS_MAC)
   void SetSmoothScroll(bool enable);
   void OnDidScroll();
 #endif
 
-  void SetContentViewImpl(BaseView* container);
+  void SetContentViewImpl(BaseView* view);
   void ResetCurrentContentViewImpl();
 
   void SetScrollPositionImpl(gfx::Point point,
