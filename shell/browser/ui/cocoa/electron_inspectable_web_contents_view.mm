@@ -36,6 +36,7 @@
   devtools_docked_ = NO;
   devtools_is_first_responder_ = NO;
   attached_to_window_ = NO;
+  click_through_ = NO;
   thumbnail_visible_ = NO;
 
   if (inspectableWebContentsView_->inspectable_web_contents()->IsGuest()) {
@@ -68,6 +69,10 @@
   [self adjustSubviews];
 }
 
+- (void)setClickThrough:(BOOL)click_through {
+  click_through_ = click_through;
+}
+
 - (void)viewDidMoveToWindow {
   if (attached_to_window_ && !self.window) {
     attached_to_window_ = NO;
@@ -85,6 +90,12 @@
                name:NSWindowDidBecomeMainNotification
              object:nil];
   }
+}
+
+- (NSView*)hitTest:(NSPoint)aPoint {
+  if (click_through_)
+    return nil;
+  return [super hitTest:aPoint];
 }
 
 - (IBAction)showDevTools:(id)sender {

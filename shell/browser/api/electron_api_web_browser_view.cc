@@ -35,21 +35,29 @@ WebBrowserView::WebBrowserView(gin::Arguments* args,
   api_web_contents_->AddObserver(this);
   Observe(api_web_contents_->web_contents());
 
-#if !BUILDFLAG(IS_MAC)
-  mouse_event_callback_ = base::BindRepeating(&WebBrowserView::HandleMouseEvent,
-                                              base::Unretained(this));
-  if (api_web_contents_->GetWebContents()
-          ->GetPrimaryMainFrame()
-          ->IsRenderFrameLive())
-    AttachToHost(api_web_contents_->GetWebContents()->GetPrimaryMainFrame());
+#if BUILDFLAG(IS_MAC)
+  if (Browser::Get()->IsViewsUsage()) {
+#endif
+    mouse_event_callback_ = base::BindRepeating(
+        &WebBrowserView::HandleMouseEvent, base::Unretained(this));
+    if (api_web_contents_->GetWebContents()
+            ->GetPrimaryMainFrame()
+            ->IsRenderFrameLive())
+      AttachToHost(api_web_contents_->GetWebContents()->GetPrimaryMainFrame());
+#if BUILDFLAG(IS_MAC)
+  }
 #endif
 }
 
 WebBrowserView::~WebBrowserView() {
-#if !BUILDFLAG(IS_MAC)
-  if (host_) {
-    // If the renderer frame was destroyed already, we're already detached.
-    DetachFromHost();
+#if BUILDFLAG(IS_MAC)
+  if (Browser::Get()->IsViewsUsage()) {
+#endif
+    if (host_) {
+      // If the renderer frame was destroyed already, we're already detached.
+      DetachFromHost();
+    }
+#if BUILDFLAG(IS_MAC)
   }
 #endif
   if (web_contents()) {  // destroy() called without closing WebContents

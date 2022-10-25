@@ -23,6 +23,7 @@
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/desktop_media_id.h"
 #include "shell/browser/api/electron_api_base_view.h"
+#include "shell/browser/browser.h"
 #include "shell/browser/javascript_environment.h"
 #include "shell/browser/native_browser_view_mac.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
@@ -471,6 +472,10 @@ void NativeWindowMac::SetContentView(views::View* view) {
 }
 
 void NativeWindowMac::SetContentViewImpl(api::BaseView* view) {
+  if (Browser::Get()->IsViewsUsage()) {
+    SetContentView(view->GetView());
+    return;
+  }
   if (GetContentView()) {
     [GetContentView()->GetNSView() removeFromSuperview];
     if (IsNativeView(GetContentView()->GetNSView())) {
@@ -1303,6 +1308,17 @@ void NativeWindowMac::SetTopBrowserView(NativeBrowserView* view) {
 }
 
 void NativeWindowMac::AddChildView(api::BaseView* view) {
+  if (Browser::Get()->IsViewsUsage()) {
+    if (!content_view())
+      return;
+
+    if (!view)
+      return;
+
+    content_view()->AddChildView(view->GetView());
+    return;
+  }
+
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
 
@@ -1321,6 +1337,17 @@ void NativeWindowMac::AddChildView(api::BaseView* view) {
 }
 
 void NativeWindowMac::RemoveChildView(api::BaseView* view) {
+  if (Browser::Get()->IsViewsUsage()) {
+    if (!content_view())
+      return;
+
+    if (!view)
+      return;
+
+    content_view()->RemoveChildView(view->GetView());
+    return;
+  }
+
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
 
@@ -1335,6 +1362,17 @@ void NativeWindowMac::RemoveChildView(api::BaseView* view) {
 }
 
 void NativeWindowMac::SetTopChildView(api::BaseView* view) {
+  if (Browser::Get()->IsViewsUsage()) {
+    if (!content_view())
+      return;
+
+    if (!view)
+      return;
+
+    content_view()->ReorderChildView(view->GetView(), -1);
+    return;
+  }
+
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
 

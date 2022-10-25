@@ -15,11 +15,8 @@
 #include "ui/gfx/geometry/point.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/size.h"
-
-#if !BUILDFLAG(IS_MAC)
 #include "ui/views/animation/bounds_animator.h"
 #include "ui/views/view_observer.h"
-#endif
 
 #if BUILDFLAG(IS_MAC)
 #ifdef __OBJC__
@@ -27,11 +24,11 @@
 #else
 struct NSView;
 #endif
-#else
+#endif
+
 namespace views {
 class View;
 }
-#endif
 
 namespace gin {
 class Arguments;
@@ -43,12 +40,8 @@ namespace electron::api {
 
 class BaseWindow;
 
-class BaseView : public gin_helper::TrackableObject<BaseView>
-#if !BUILDFLAG(IS_MAC)
-    ,
-                 public views::ViewObserver
-#endif
-{
+class BaseView : public gin_helper::TrackableObject<BaseView>,
+                 public views::ViewObserver {
  public:
   // Supported mouse event types.
   enum class MouseEventType {
@@ -140,13 +133,11 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   BaseView(const BaseView&) = delete;
   BaseView& operator=(const BaseView&) = delete;
 
+  bool IsView() const;
 #if BUILDFLAG(IS_MAC)
-  bool IsView() { return !!nsview_; }
   NSView* GetNSView() const { return nsview_; }
-#else
-  bool IsView() { return !!view_; }
-  views::View* GetView() const { return view_; }
 #endif
+  views::View* GetView() const { return view_; }
 
   int32_t GetID() const;
   void EnsureDetachFromParent();
@@ -166,7 +157,6 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   // TrackableObject:
   void InitWith(v8::Isolate* isolate, v8::Local<v8::Object> wrapper) override;
 
-#if !BUILDFLAG(IS_MAC)
   // views::ViewObserver:
   void OnViewBoundsChanged(views::View* observed_view) override;
   void OnViewRemovedFromWidget(views::View* observed_view) override;
@@ -174,7 +164,6 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   void OnViewHierarchyChanged(
       views::View* observed_view,
       const views::ViewHierarchyChangedDetails& details) override;
-#endif
 
   // BaseView APIs.
   std::uintptr_t GetNativeID() const;
@@ -235,10 +224,8 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   bool IsVibrant() const { return vibrant_; }
   bool IsBlurred() const { return blurred_; }
 
-#if !BUILDFLAG(IS_MAC)
   // Should delete the |view_| in destructor.
   void set_delete_view(bool should) { delete_view_ = should; }
-#endif
 
   // Get children.
   int ChildCount() const { return static_cast<int>(api_children_.size()); }
@@ -253,9 +240,9 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
 #if BUILDFLAG(IS_MAC)
   void SetView(NSView* view);
-#else
-  void SetView(views::View* view);
 #endif
+  void SetView(views::View* view);
+
   void DestroyView();
 
 #if BUILDFLAG(IS_MAC)
@@ -275,12 +262,46 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
   virtual void SetWindow(BaseWindow* window);
 
-#if !BUILDFLAG(IS_MAC)
   virtual void UpdateClickThrough();
   void SetBlockScrollViewWhenFocus(bool block);
   bool IsBlockScrollViewWhenFocus() const;
   void UpdateBlockScrollViewWhenFocus();
-#endif
+
+#if BUILDFLAG(IS_MAC)
+  std::uintptr_t GetNativeIDMac() const;
+  void SetClickThroughMac(bool click_through);
+  bool IsClickThroughMac() const;
+  void SetBoundsMac(const gfx::Rect& bounds, gin::Arguments* args);
+  gfx::Rect GetBoundsMac() const;
+  gfx::Point OffsetFromViewMac(gin::Handle<BaseView> from) const;
+  gfx::Point OffsetFromWindowMac() const;
+  void SetVisibleMac(bool visible);
+  bool IsVisibleMac() const;
+  bool IsTreeVisibleMac() const;
+  void FocusMac();
+  bool HasFocusMac() const;
+  void SetFocusableMac(bool focusable);
+  bool IsFocusableMac() const;
+  void SetBackgroundColorMac(const std::string& color_name);
+  void EnableMouseEventsMac();
+  bool AreMouseEventsEnabledMac() const;
+  void SetMouseTrackingEnabledMac(bool enable);
+  bool IsMouseTrackingEnabledMac() const;
+  void SetRoundedCornersMac(const RoundedCornersOptions& options);
+  void SetClippingInsetsMac(const ClippingInsetOptions& options);
+  void ResetScalingMac();
+  void SetScaleMac(const ScaleAnimationOptions& options);
+  float GetScaleXMac() const;
+  float GetScaleYMac() const;
+  void SetOpacityMac(const double opacity, gin::Arguments* args);
+  double GetOpacityMac() const;
+  void RearrangeChildViewsMac();
+  std::vector<v8::Local<v8::Value>> GetNativelyRearrangedViewsMac() const;
+  void CreateViewMac();
+  void DestroyViewMac();
+  void AddChildViewImplMac(BaseView* view);
+  void RemoveChildViewImplMac(BaseView* view);
+#endif  // BUILDFLAG(IS_MAC)
 
  public:
   // Notify that native view is destroyed.
@@ -302,9 +323,8 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
  private:
 #if BUILDFLAG(IS_MAC)
   NSView* nsview_ = nullptr;
-#else
-  views::View* view_ = nullptr;
 #endif
+  views::View* view_ = nullptr;
 
   bool vibrant_ = false;
   bool blurred_ = false;
@@ -316,14 +336,12 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   bool is_click_through_ = false;
   RoundedCornersOptions rounded_corners_options_;
 
-#if !BUILDFLAG(IS_MAC)
   bool delete_view_ = true;
   gfx::Rect bounds_;
   std::unique_ptr<views::BoundsAnimator> bounds_animator_;
   bool block_scroll_view_when_focus = false;
   bool mouse_events_enabled_ = false;
   bool mouse_tracking_enabled_ = false;
-#endif
 
   // Relationships.
   BaseView* parent_ = nullptr;

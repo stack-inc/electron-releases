@@ -15,6 +15,7 @@
 #include "base/mac/foundation_util.h"
 #include "base/mac/scoped_cftyperef.h"
 #include "gin/handle.h"
+#include "shell/browser/browser.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
 #include "shell/browser/ui/cocoa/events_handler.h"
 #include "shell/common/color_util.h"
@@ -34,19 +35,19 @@ BaseView* g_captured_view = nullptr;
 
 }  // namespace
 
-std::uintptr_t BaseView::GetNativeID() const {
+std::uintptr_t BaseView::GetNativeIDMac() const {
   return reinterpret_cast<std::uintptr_t>(nsview_);
 }
 
-void BaseView::SetClickThrough(bool click_through) {
+void BaseView::SetClickThroughMac(bool click_through) {
   is_click_through_ = click_through;
 }
 
-bool BaseView::IsClickThrough() const {
+bool BaseView::IsClickThroughMac() const {
   return is_click_through_;
 }
 
-void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
+void BaseView::SetBoundsMac(const gfx::Rect& bounds, gin::Arguments* args) {
   BoundsAnimationOptions options;
   args->GetNext(&options);
 
@@ -125,7 +126,7 @@ void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
   [nsview_ setFrame:frame];
 }
 
-gfx::Rect BaseView::GetBounds() const {
+gfx::Rect BaseView::GetBoundsMac() const {
   auto* superview = nsview_.superview;
   if (superview && ![superview isFlipped]) {
     const int superview_height = superview.frame.size.height;
@@ -137,52 +138,52 @@ gfx::Rect BaseView::GetBounds() const {
   return ToNearestRect(gfx::RectF(nsview_.frame));
 }
 
-gfx::Point BaseView::OffsetFromView(gin::Handle<BaseView> from) const {
+gfx::Point BaseView::OffsetFromViewMac(gin::Handle<BaseView> from) const {
   NSPoint point = [nsview_ convertPoint:NSZeroPoint toView:from->GetNSView()];
   return gfx::Point(point.x, point.y);
 }
 
-gfx::Point BaseView::OffsetFromWindow() const {
+gfx::Point BaseView::OffsetFromWindowMac() const {
   NSPoint point = [nsview_ convertPoint:NSZeroPoint toView:nil];
   return gfx::Point(point.x, point.y);
 }
 
-void BaseView::SetVisible(bool visible) {
+void BaseView::SetVisibleMac(bool visible) {
   if (visible == IsVisible())
     return;
   [nsview_ setHidden:!visible];
 }
 
-bool BaseView::IsVisible() const {
+bool BaseView::IsVisibleMac() const {
   return ![nsview_ isHidden];
 }
 
-bool BaseView::IsTreeVisible() const {
+bool BaseView::IsTreeVisibleMac() const {
   return ![nsview_ isHiddenOrHasHiddenAncestor];
 }
 
-void BaseView::Focus() {
+void BaseView::FocusMac() {
   if (nsview_.window && IsFocusable())
     [nsview_.window makeFirstResponder:nsview_];
 }
 
-bool BaseView::HasFocus() const {
+bool BaseView::HasFocusMac() const {
   if (nsview_.window)
     return nsview_.window.firstResponder == nsview_;
   else
     return false;
 }
 
-void BaseView::SetFocusable(bool focusable) {
+void BaseView::SetFocusableMac(bool focusable) {
   NativeViewPrivate* priv = [nsview_ nativeViewPrivate];
   priv->focusable = focusable;
 }
 
-bool BaseView::IsFocusable() const {
+bool BaseView::IsFocusableMac() const {
   return [nsview_ acceptsFirstResponder];
 }
 
-void BaseView::SetBackgroundColor(const std::string& color_name) {
+void BaseView::SetBackgroundColorMac(const std::string& color_name) {
   const SkColor color = ParseCSSColor(color_name);
   if (IsNativeView(nsview_))
     [nsview_ setNativeBackgroundColor:color];
@@ -190,6 +191,8 @@ void BaseView::SetBackgroundColor(const std::string& color_name) {
 }
 
 void BaseView::SetVisualEffectMaterial(std::string material) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (!IsNativeView(nsview_) || !vibrant_)
     return;
   NSVisualEffectMaterial m = NSVisualEffectMaterialAppearanceBased;
@@ -205,6 +208,8 @@ void BaseView::SetVisualEffectMaterial(std::string material) {
 }
 
 std::string BaseView::GetVisualEffectMaterial() const {
+  if (Browser::Get()->IsViewsUsage())
+    return "";
   if (!IsNativeView(nsview_) || !vibrant_)
     return "appearanceBased";
   NSVisualEffectMaterial material =
@@ -221,6 +226,8 @@ std::string BaseView::GetVisualEffectMaterial() const {
 }
 
 void BaseView::SetVisualEffectBlendingMode(std::string mode) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (!IsNativeView(nsview_) || !vibrant_)
     return;
   NSVisualEffectBlendingMode m = NSVisualEffectBlendingModeBehindWindow;
@@ -234,6 +241,8 @@ void BaseView::SetVisualEffectBlendingMode(std::string mode) {
 }
 
 std::string BaseView::GetVisualEffectBlendingMode() const {
+  if (Browser::Get()->IsViewsUsage())
+    return "";
   if (!IsNativeView(nsview_) || !vibrant_)
     return "behindWindow";
   NSVisualEffectBlendingMode mode =
@@ -244,6 +253,8 @@ std::string BaseView::GetVisualEffectBlendingMode() const {
 }
 
 void BaseView::SetBlurTintColorWithSRGB(float r, float g, float b, float a) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (IsNativeView(nsview_) && blurred_) {
     NSColor* color = [NSColor colorWithSRGBRed:r green:g blue:b alpha:a];
     [static_cast<ElectronNativeBlurredView*>(nsview_) setTintColor:color];
@@ -252,6 +263,8 @@ void BaseView::SetBlurTintColorWithSRGB(float r, float g, float b, float a) {
 
 void BaseView::SetBlurTintColorWithCalibratedWhite(float white,
                                                    float alphaval) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (IsNativeView(nsview_) && blurred_) {
     NSColor* color = [NSColor colorWithCalibratedWhite:white alpha:alphaval];
     [static_cast<ElectronNativeBlurredView*>(nsview_) setTintColor:color];
@@ -260,6 +273,8 @@ void BaseView::SetBlurTintColorWithCalibratedWhite(float white,
 
 void BaseView::SetBlurTintColorWithGenericGamma22White(float white,
                                                        float alphaval) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (IsNativeView(nsview_) && blurred_) {
     NSColor* color = [NSColor colorWithGenericGamma22White:white
                                                      alpha:alphaval];
@@ -268,17 +283,23 @@ void BaseView::SetBlurTintColorWithGenericGamma22White(float white,
 }
 
 void BaseView::SetBlurRadius(float radius) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (IsNativeView(nsview_) && blurred_)
     [static_cast<ElectronNativeBlurredView*>(nsview_) setBlurRadius:radius];
 }
 
 float BaseView::GetBlurRadius() const {
+  if (Browser::Get()->IsViewsUsage())
+    return 0.0;
   if (IsNativeView(nsview_) && blurred_)
     return [static_cast<ElectronNativeBlurredView*>(nsview_) blurRadius];
   return 0.0;
 }
 
 void BaseView::SetBlurSaturationFactor(float factor) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (IsNativeView(nsview_) && blurred_) {
     [static_cast<ElectronNativeBlurredView*>(nsview_)
         setSaturationFactor:factor];
@@ -286,12 +307,16 @@ void BaseView::SetBlurSaturationFactor(float factor) {
 }
 
 float BaseView::GetBlurSaturationFactor() const {
+  if (Browser::Get()->IsViewsUsage())
+    return 0.0;
   if (IsNativeView(nsview_) && blurred_)
     return [static_cast<ElectronNativeBlurredView*>(nsview_) saturationFactor];
   return 0.0;
 }
 
 void BaseView::SetCapture() {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (g_captured_view)
     g_captured_view->ReleaseCapture();
 
@@ -301,6 +326,8 @@ void BaseView::SetCapture() {
 }
 
 void BaseView::ReleaseCapture() {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   if (g_captured_view != this)
     return;
 
@@ -311,18 +338,20 @@ void BaseView::ReleaseCapture() {
 }
 
 bool BaseView::HasCapture() const {
+  if (Browser::Get()->IsViewsUsage())
+    return false;
   return g_captured_view == this;
 }
 
-void BaseView::EnableMouseEvents() {
+void BaseView::EnableMouseEventsMac() {
   AddMouseEventHandlerToClass([nsview_ class]);
 }
 
-bool BaseView::AreMouseEventsEnabled() const {
+bool BaseView::AreMouseEventsEnabledMac() const {
   return IsMouseEventHandlerAddedToClass([nsview_ class]);
 }
 
-void BaseView::SetMouseTrackingEnabled(bool enable) {
+void BaseView::SetMouseTrackingEnabledMac(bool enable) {
   if (enable) {
     // Install event tracking area.
     [nsview_ enableTracking];
@@ -332,12 +361,12 @@ void BaseView::SetMouseTrackingEnabled(bool enable) {
   }
 }
 
-bool BaseView::IsMouseTrackingEnabled() const {
+bool BaseView::IsMouseTrackingEnabledMac() const {
   NativeViewPrivate* priv = [nsview_ nativeViewPrivate];
   return !!(priv->tracking_area);
 }
 
-void BaseView::SetRoundedCorners(const RoundedCornersOptions& options) {
+void BaseView::SetRoundedCornersMac(const RoundedCornersOptions& options) {
   if (@available(macOS 10.13, *)) {
     rounded_corners_options_ = options;
     SetWantsLayer(true);
@@ -357,7 +386,7 @@ void BaseView::SetRoundedCorners(const RoundedCornersOptions& options) {
   }
 }
 
-void BaseView::SetClippingInsets(const ClippingInsetOptions& options) {
+void BaseView::SetClippingInsetsMac(const ClippingInsetOptions& options) {
   if (@available(macOS 10.13, *)) {
     SetWantsLayer(true);
 
@@ -383,11 +412,11 @@ void BaseView::SetClippingInsets(const ClippingInsetOptions& options) {
   }
 }
 
-void BaseView::ResetScaling() {
+void BaseView::ResetScalingMac() {
   [nsview_ scaleUnitSquareToSize:[nsview_ convertSize:unitSize fromView:nil]];
 }
 
-void BaseView::SetScale(const ScaleAnimationOptions& options) {
+void BaseView::SetScaleMac(const ScaleAnimationOptions& options) {
   NSSize current_scale = [nsview_ convertSize:unitSize toView:nil];
   NSRect current_frame = [nsview_ frame];
 
@@ -499,17 +528,17 @@ void BaseView::SetScale(const ScaleAnimationOptions& options) {
   }
 }
 
-float BaseView::GetScaleX() const {
+float BaseView::GetScaleXMac() const {
   NSSize size = [nsview_ convertSize:unitSize toView:nil];
   return size.width;
 }
 
-float BaseView::GetScaleY() const {
+float BaseView::GetScaleYMac() const {
   NSSize size = [nsview_ convertSize:unitSize toView:nil];
   return size.height;
 }
 
-void BaseView::SetOpacity(const double opacity, gin::Arguments* args) {
+void BaseView::SetOpacityMac(const double opacity, gin::Arguments* args) {
   AnimationOptions options;
   args->GetNext(&options);
 
@@ -551,11 +580,11 @@ void BaseView::SetOpacity(const double opacity, gin::Arguments* args) {
       }];
 }
 
-double BaseView::GetOpacity() const {
+double BaseView::GetOpacityMac() const {
   return [nsview_ alphaValue];
 }
 
-void BaseView::RearrangeChildViews() {
+void BaseView::RearrangeChildViewsMac() {
   if (api_children_.size() == 0)
     return;
 
@@ -585,7 +614,8 @@ void BaseView::RearrangeChildViews() {
   [CATransaction commit];
 }
 
-std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
+std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViewsMac()
+    const {
   std::vector<v8::Local<v8::Value>> ret;
 
   base::scoped_nsobject<NSArray> subviews([[nsview_ subviews] copy]);
@@ -604,7 +634,7 @@ std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
   return ret;
 }
 
-void BaseView::CreateView() {
+void BaseView::CreateViewMac() {
   if (!IsVibrant() && !IsBlurred())
     SetView([[ElectronNativeView alloc] init]);
   else if (IsVibrant())
@@ -633,7 +663,7 @@ void BaseView::SetView(NSView* view) {
   priv->focusable = super_impl(view, cmd);
 }
 
-void BaseView::DestroyView() {
+void BaseView::DestroyViewMac() {
   if (!nsview_)
     return;
   if (IsNativeView(nsview_)) {
@@ -649,15 +679,19 @@ void BaseView::DestroyView() {
 }
 
 void BaseView::SetWantsLayer(bool wants) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   [nsview_ nativeViewPrivate]->wants_layer = wants;
   [nsview_ setWantsLayer:wants];
 }
 
 bool BaseView::WantsLayer() const {
+  if (Browser::Get()->IsViewsUsage())
+    return false;
   return [nsview_ wantsLayer];
 }
 
-void BaseView::AddChildViewImpl(BaseView* view) {
+void BaseView::AddChildViewImplMac(BaseView* view) {
   [nsview_ addSubview:view->GetNSView()];
   NativeViewPrivate* priv = [nsview_ nativeViewPrivate];
   if (priv->wants_layer_infected) {
@@ -673,7 +707,7 @@ void BaseView::AddChildViewImpl(BaseView* view) {
   }
 }
 
-void BaseView::RemoveChildViewImpl(BaseView* view) {
+void BaseView::RemoveChildViewImplMac(BaseView* view) {
   NSView* nsview = view->GetNSView();
   [nsview removeFromSuperview];
   if (IsNativeView(nsview))

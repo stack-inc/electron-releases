@@ -11,6 +11,7 @@
 
 #include "base/memory/ptr_util.h"
 #include "gin/handle.h"
+#include "shell/browser/browser.h"
 #include "shell/browser/ui/views/smooth_bounds_animator.h"
 #include "shell/common/color_util.h"
 #include "ui/compositor/layer.h"
@@ -19,6 +20,10 @@
 #include "ui/views/background.h"
 #include "ui/views/view.h"
 #include "ui/views/view_class_properties.h"
+
+#if BUILDFLAG(IS_MAC)
+#include "shell/browser/animation_util.h"
+#endif
 
 namespace electron::api {
 
@@ -85,7 +90,19 @@ class BaseView::CustomView : public views::View {
   BaseView* base_view_;
 };
 
+bool BaseView::IsView() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return !!nsview_;
+#endif
+  return !!view_;
+}
+
 void BaseView::OnViewBoundsChanged(views::View* observed_view) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (!view_)
     return;
   gfx::Rect bounds = view_->bounds();
@@ -97,6 +114,10 @@ void BaseView::OnViewBoundsChanged(views::View* observed_view) {
 }
 
 void BaseView::OnViewRemovedFromWidget(views::View* observed_view) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (bounds_animator_.get()) {
     bounds_animator_->Cancel();
     bounds_animator_.reset();
@@ -104,6 +125,10 @@ void BaseView::OnViewRemovedFromWidget(views::View* observed_view) {
 }
 
 void BaseView::OnViewIsDeleting(views::View* observed_view) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (view_)
     view_->RemoveObserver(this);
   view_ = nullptr;
@@ -113,21 +138,39 @@ void BaseView::OnViewIsDeleting(views::View* observed_view) {
 void BaseView::OnViewHierarchyChanged(
     views::View* observed_view,
     const views::ViewHierarchyChangedDetails& details) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   SetRoundedCorners(rounded_corners_options_);
   UpdateClickThrough();
   UpdateBlockScrollViewWhenFocus();
 }
 
 std::uintptr_t BaseView::GetNativeID() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetNativeIDMac();
+#endif
   return reinterpret_cast<std::uintptr_t>(view_);
 }
 
 void BaseView::SetClickThrough(bool click_through) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetClickThroughMac(click_through);
+    return;
+  }
+#endif
   is_click_through_ = click_through;
   UpdateClickThrough();
 }
 
 bool BaseView::IsClickThrough() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return IsClickThroughMac();
+#endif
   if (is_click_through_)
     return true;
   else if (parent_)
@@ -136,6 +179,12 @@ bool BaseView::IsClickThrough() const {
 }
 
 void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetBoundsMac(bounds, args);
+    return;
+  }
+#endif
   BoundsAnimationOptions options;
   args->GetNext(&options);
   if (!view_)
@@ -177,12 +226,20 @@ void BaseView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
 }
 
 gfx::Rect BaseView::GetBounds() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetBoundsMac();
+#endif
   if (view_)
     return view_->bounds();
   return gfx::Rect();
 }
 
 gfx::Point BaseView::OffsetFromView(gin::Handle<BaseView> from) const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return OffsetFromViewMac(from);
+#endif
   if (!view_)
     return gfx::Point();
   gfx::Point point;
@@ -191,6 +248,10 @@ gfx::Point BaseView::OffsetFromView(gin::Handle<BaseView> from) const {
 }
 
 gfx::Point BaseView::OffsetFromWindow() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return OffsetFromWindowMac();
+#endif
   if (!view_)
     return gfx::Point();
   gfx::Point point;
@@ -199,6 +260,12 @@ gfx::Point BaseView::OffsetFromWindow() const {
 }
 
 void BaseView::SetVisible(bool visible) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetVisibleMac(visible);
+    return;
+  }
+#endif
   if (visible == IsVisible())
     return;
   if (view_)
@@ -206,35 +273,68 @@ void BaseView::SetVisible(bool visible) {
 }
 
 bool BaseView::IsVisible() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return IsVisibleMac();
+#endif
   if (view_)
     return view_->GetVisible();
   return false;
 }
 
 bool BaseView::IsTreeVisible() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return IsTreeVisibleMac();
+#endif
   return IsVisible();
 }
 
 void BaseView::Focus() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    FocusMac();
+    return;
+  }
+#endif
   if (view_)
     view_->RequestFocus();
 }
 
 bool BaseView::HasFocus() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return HasFocusMac();
+#endif
   if (view_)
     return view_->HasFocus();
   return false;
 }
 
-void BaseView::SetFocusable(bool focusable) {}
+void BaseView::SetFocusable(bool focusable) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    SetFocusableMac(focusable);
+#endif
+}
 
 bool BaseView::IsFocusable() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return IsFocusableMac();
+#endif
   if (view_)
     return view_->IsFocusable();
   return false;
 }
 
 void BaseView::SetBackgroundColor(const std::string& color_name) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetBackgroundColorMac(color_name);
+    return;
+  }
+#endif
   const SkColor color = ParseCSSColor(color_name);
   if (view_) {
     view_->SetBackground(views::CreateSolidBackground(color));
@@ -244,10 +344,20 @@ void BaseView::SetBackgroundColor(const std::string& color_name) {
 }
 
 void BaseView::EnableMouseEvents() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    EnableMouseEventsMac();
+    return;
+  }
+#endif
   mouse_events_enabled_ = true;
 }
 
 bool BaseView::AreMouseEventsEnabled() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return AreMouseEventsEnabledMac();
+#endif
   if (mouse_events_enabled_)
     return true;
   else if (parent_)
@@ -256,6 +366,12 @@ bool BaseView::AreMouseEventsEnabled() const {
 }
 
 void BaseView::SetMouseTrackingEnabled(bool enable) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetMouseTrackingEnabledMac(enable);
+    return;
+  }
+#endif
   if (enable) {
     mouse_tracking_enabled_ = true;
     EnableMouseEvents();
@@ -265,6 +381,10 @@ void BaseView::SetMouseTrackingEnabled(bool enable) {
 }
 
 bool BaseView::IsMouseTrackingEnabled() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return IsMouseTrackingEnabledMac();
+#endif
   if (mouse_tracking_enabled_)
     return true;
   else if (parent_)
@@ -273,6 +393,12 @@ bool BaseView::IsMouseTrackingEnabled() const {
 }
 
 void BaseView::SetRoundedCorners(const RoundedCornersOptions& options) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetRoundedCornersMac(options);
+    return;
+  }
+#endif
   if (!view_)
     return;
 
@@ -290,6 +416,12 @@ void BaseView::SetRoundedCorners(const RoundedCornersOptions& options) {
 }
 
 void BaseView::SetClippingInsets(const ClippingInsetOptions& options) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetClippingInsetsMac(options);
+    return;
+  }
+#endif
   if (!view_)
     return;
 
@@ -303,28 +435,62 @@ void BaseView::SetClippingInsets(const ClippingInsetOptions& options) {
   view_->layer()->SetClipRect(clip_rect);
 }
 
-void BaseView::ResetScaling() {}
+void BaseView::ResetScaling() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    ResetScalingMac();
+#endif
+}
 
-void BaseView::SetScale(const ScaleAnimationOptions& options) {}
+void BaseView::SetScale(const ScaleAnimationOptions& options) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    SetScaleMac(options);
+#endif
+}
 
 float BaseView::GetScaleX() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetScaleXMac();
+#endif
   return 1.0;
 }
 
 float BaseView::GetScaleY() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetScaleYMac();
+#endif
   return 1.0;
 }
 
 void BaseView::SetOpacity(const double opacity, gin::Arguments* args) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetOpacityMac(opacity, args);
+    return;
+  }
+#endif
   AnimationOptions options;
   args->GetNext(&options);
 }
 
 double BaseView::GetOpacity() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetOpacityMac();
+#endif
   return 1.0;
 }
 
 void BaseView::RearrangeChildViews() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    RearrangeChildViewsMac();
+    return;
+  }
+#endif
   if (api_children_.size() == 0)
     return;
 
@@ -351,6 +517,10 @@ void BaseView::RearrangeChildViews() {
 }
 
 std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetNativelyRearrangedViewsMac();
+#endif
   std::vector<v8::Local<v8::Value>> ret;
 
   for (auto* child : view_->children()) {
@@ -369,10 +539,20 @@ std::vector<v8::Local<v8::Value>> BaseView::GetNativelyRearrangedViews() const {
 }
 
 void BaseView::CreateView() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    CreateViewMac();
+    return;
+  }
+#endif
   SetView(new CustomView(this));
 }
 
 void BaseView::SetView(views::View* view) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (view_) {
     view_->RemoveObserver(this);
     if (delete_view_)
@@ -384,6 +564,12 @@ void BaseView::SetView(views::View* view) {
 }
 
 void BaseView::DestroyView() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    DestroyViewMac();
+    return;
+  }
+#endif
   if (!view_)
     return;
   view_->RemoveObserver(this);
@@ -393,15 +579,42 @@ void BaseView::DestroyView() {
 }
 
 void BaseView::AddChildViewImpl(BaseView* view) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    AddChildViewImplMac(view);
+    return;
+  }
+#endif
   if (!view_)
     return;
   view->GetView()->set_owned_by_client();
+#if BUILDFLAG(IS_MAC)
+  // Disable the implicit CALayer animations that happen by default when adding
+  // or removing sublayers.
+  // See
+  // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/CoreAnimation_guide/ReactingtoLayerChanges/ReactingtoLayerChanges.html
+  // and https://github.com/electron/electron/pull/14911
+  // TODO(nornagon): Disabling these CALayer animations (which are specific to
+  // WebContentsView, I think) seems like this is something that remote_cocoa
+  // or views should be taking care of, but isn't. This should be pushed
+  // upstream.
+  ScopedCAActionDisabler disable_animations;
+#endif
   view_->AddChildView(view->GetView());
 }
 
 void BaseView::RemoveChildViewImpl(BaseView* view) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    RemoveChildViewImplMac(view);
+    return;
+  }
+#endif
   if (!view_)
     return;
+#if BUILDFLAG(IS_MAC)
+  ScopedCAActionDisabler disable_animations;
+#endif
   view_->RemoveChildView(view->GetView());
 }
 

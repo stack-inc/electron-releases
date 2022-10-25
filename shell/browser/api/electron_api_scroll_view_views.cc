@@ -6,9 +6,8 @@
 
 #include "base/cxx17_backports.h"
 #include "cc/layers/layer.h"
+#include "shell/browser/browser.h"
 #include "shell/browser/ui/views/scroll/scroll_bar_views.h"
-#include "shell/browser/ui/views/scroll/scroll_view.h"
-#include "shell/browser/ui/views/scroll/scroll_view_scroll_with_layers.h"
 #include "shell/common/color_util.h"
 #include "ui/base/ui_base_features.h"
 #include "ui/compositor/compositor.h"
@@ -16,6 +15,11 @@
 #include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/scroll_view.h"
 #include "ui/views/widget/widget.h"
+
+#if !BUILDFLAG(IS_MAC)
+#include "shell/browser/ui/views/scroll/scroll_view.h"
+#include "shell/browser/ui/views/scroll/scroll_view_scroll_with_layers.h"
+#endif
 
 namespace electron::api {
 
@@ -106,6 +110,12 @@ void ScrollView::CompositorObserver::OnCompositingDidCommit(
 }
 
 void ScrollView::SetBackgroundColor(const std::string& color_name) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    BaseView::SetBackgroundColorMac(color_name);
+    return;
+  }
+#endif
   if (!GetView())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -120,12 +130,24 @@ void ScrollView::UpdateClickThrough() {
 }
 
 void ScrollView::SetContentSize(const gfx::Size& size) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetContentSizeMac(size);
+    return;
+  }
+#endif
   if (!api_content_view_)
     return;
   api_content_view_->GetView()->SetSize(size);
 }
 
 void ScrollView::SetHorizontalScrollBarMode(std::string mode) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetHorizontalScrollBarModeMac(mode);
+    return;
+  }
+#endif
   if (!GetView())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -139,6 +161,10 @@ void ScrollView::SetHorizontalScrollBarMode(std::string mode) {
 }
 
 std::string ScrollView::GetHorizontalScrollBarMode() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetHorizontalScrollBarModeMac();
+#endif
   if (!GetView())
     return "disabled";
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -151,6 +177,12 @@ std::string ScrollView::GetHorizontalScrollBarMode() const {
 }
 
 void ScrollView::SetVerticalScrollBarMode(std::string mode) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetVerticalScrollBarModeMac(mode);
+    return;
+  }
+#endif
   if (!GetView())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -164,6 +196,10 @@ void ScrollView::SetVerticalScrollBarMode(std::string mode) {
 }
 
 std::string ScrollView::GetVerticalScrollBarMode() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetVerticalScrollBarModeMac();
+#endif
   if (!GetView())
     return "disabled";
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -176,6 +212,12 @@ std::string ScrollView::GetVerticalScrollBarMode() const {
 }
 
 void ScrollView::SetScrollWheelSwapped(bool swap) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetScrollWheelSwappedMac(swap);
+    return;
+  }
+#endif
   if (!GetView())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -183,6 +225,10 @@ void ScrollView::SetScrollWheelSwapped(bool swap) {
 }
 
 bool ScrollView::IsScrollWheelSwapped() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return IsScrollWheelSwappedMac();
+#endif
   if (!GetView())
     return false;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -190,26 +236,58 @@ bool ScrollView::IsScrollWheelSwapped() const {
 }
 
 void ScrollView::SetScrollEventsEnabled(bool enable) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetScrollEventsEnabledMac(enable);
+    return;
+  }
+#endif
   scroll_events_ = enable;
 }
 
 bool ScrollView::IsScrollEventsEnabled() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return IsScrollEventsEnabledMac();
+#endif
   return scroll_events_;
 }
 
-void ScrollView::SetHorizontalScrollElasticity(std::string elasticity) {}
+void ScrollView::SetHorizontalScrollElasticity(std::string elasticity) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    SetHorizontalScrollElasticityMac(elasticity);
+#endif
+}
 
 std::string ScrollView::GetHorizontalScrollElasticity() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetHorizontalScrollElasticityMac();
+#endif
   return "none";
 }
 
-void ScrollView::SetVerticalScrollElasticity(std::string elasticity) {}
+void ScrollView::SetVerticalScrollElasticity(std::string elasticity) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    SetVerticalScrollElasticityMac(elasticity);
+#endif
+}
 
 std::string ScrollView::GetVerticalScrollElasticity() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetVerticalScrollElasticityMac();
+#endif
   return "none";
 }
 
 gfx::Point ScrollView::GetScrollPosition() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetScrollPositionMac();
+#endif
   if (!GetView())
     return gfx::Point();
 
@@ -223,6 +301,10 @@ gfx::Point ScrollView::GetScrollPosition() const {
 }
 
 gfx::Point ScrollView::GetMaximumScrollPosition() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return GetMaximumScrollPositionMac();
+#endif
   if (!GetView())
     return gfx::Point();
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -234,6 +316,10 @@ gfx::Point ScrollView::GetMaximumScrollPosition() const {
 }
 
 void ScrollView::ClipHeightTo(int min_height, int max_height) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (!GetView())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -241,6 +327,10 @@ void ScrollView::ClipHeightTo(int min_height, int max_height) {
 }
 
 int ScrollView::GetMinHeight() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return 0;
+#endif
   if (!GetView())
     return 0;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -248,6 +338,10 @@ int ScrollView::GetMinHeight() const {
 }
 
 int ScrollView::GetMaxHeight() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return 0;
+#endif
   if (!GetView())
     return 0;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -255,12 +349,20 @@ int ScrollView::GetMaxHeight() const {
 }
 
 void ScrollView::ScrollRectToVisible(const gfx::Rect& rect) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (!api_content_view_)
     return;
   api_content_view_->GetView()->ScrollRectToVisible(rect);
 }
 
 gfx::Rect ScrollView::GetVisibleRect() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return gfx::Rect();
+#endif
   if (!GetView())
     return gfx::Rect();
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -268,6 +370,10 @@ gfx::Rect ScrollView::GetVisibleRect() const {
 }
 
 void ScrollView::SetAllowKeyboardScrolling(bool allow) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (!GetView())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -275,6 +381,10 @@ void ScrollView::SetAllowKeyboardScrolling(bool allow) {
 }
 
 bool ScrollView::GetAllowKeyboardScrolling() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return false;
+#endif
   if (!GetView())
     return false;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -282,6 +392,10 @@ bool ScrollView::GetAllowKeyboardScrolling() const {
 }
 
 void ScrollView::SetDrawOverflowIndicator(bool indicator) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   if (!GetView())
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -289,6 +403,10 @@ void ScrollView::SetDrawOverflowIndicator(bool indicator) {
 }
 
 bool ScrollView::GetDrawOverflowIndicator() const {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return false;
+#endif
   if (!GetView())
     return false;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -296,13 +414,23 @@ bool ScrollView::GetDrawOverflowIndicator() const {
 }
 
 void ScrollView::CreateScrollView() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    CreateScrollViewMac();
+    return;
+  }
+#endif
   views::ScrollView* scroll_view = nullptr;
+#if BUILDFLAG(IS_MAC)
+  scroll_view = new views::ScrollView();
+#else
   if (base::FeatureList::IsEnabled(::features::kUiCompositorScrollWithLayers)) {
     scroll_view = new ScrollViewScrollWithLayers();
     set_scroll_position_after_commit_ = true;
   } else {
     scroll_view = new electron::ScrollView();
   }
+#endif
 
   scroll_view->SetBackgroundColor(absl::optional<SkColor>());
 
@@ -326,6 +454,12 @@ void ScrollView::OnDidScroll() {
 }
 
 void ScrollView::SetContentViewImpl(BaseView* view) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetContentViewImplMac(view);
+    return;
+  }
+#endif
   if (!GetView() || !view)
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -336,6 +470,12 @@ void ScrollView::SetContentViewImpl(BaseView* view) {
 }
 
 void ScrollView::ResetCurrentContentViewImpl() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    ResetCurrentContentViewImplMac();
+    return;
+  }
+#endif
   if (!GetView() || !api_content_view_)
     return;
   auto* scroll = static_cast<views::ScrollView*>(GetView());
@@ -347,6 +487,12 @@ void ScrollView::ResetCurrentContentViewImpl() {
 void ScrollView::SetScrollPositionImpl(
     gfx::Point point,
     base::OnceCallback<void(std::string)> callback) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    SetScrollPositionImplMac(point, std::move(callback));
+    return;
+  }
+#endif
   if (!GetView() || !api_content_view_) {
     std::move(callback).Run(std::string("Error"));
     return;

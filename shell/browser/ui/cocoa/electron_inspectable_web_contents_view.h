@@ -35,6 +35,7 @@ using electron::InspectableWebContentsViewMac;
   BOOL devtools_docked_;
   BOOL devtools_is_first_responder_;
   BOOL attached_to_window_;
+  BOOL click_through_;
   base::scoped_nsobject<NSImageView> thumbnail_;
   BOOL thumbnail_visible_;
 

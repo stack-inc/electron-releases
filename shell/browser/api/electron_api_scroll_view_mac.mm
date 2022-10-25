@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "base/strings/string_util.h"
+#include "shell/browser/browser.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
 
 namespace {
@@ -289,14 +290,14 @@ std::string phaseToString(NSEventPhase phase) {
 
 namespace electron::api {
 
-void ScrollView::SetContentSize(const gfx::Size& size) {
+void ScrollView::SetContentSizeMac(const gfx::Size& size) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   NSSize content_size = size.ToCGSize();
   [scroll setContentSize:content_size];
   [scroll.documentView setFrameSize:content_size];
 }
 
-void ScrollView::SetHorizontalScrollBarMode(std::string mode) {
+void ScrollView::SetHorizontalScrollBarModeMac(std::string mode) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   if (mode == "disabled") {
     [scroll setHasHorizontalScroller:NO];
@@ -308,7 +309,7 @@ void ScrollView::SetHorizontalScrollBarMode(std::string mode) {
   }
 }
 
-std::string ScrollView::GetHorizontalScrollBarMode() const {
+std::string ScrollView::GetHorizontalScrollBarModeMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   if (scroll.hasHorizontalScroller) {
     if ([[scroll horizontalScroller] alphaValue] != 0.0)
@@ -319,7 +320,7 @@ std::string ScrollView::GetHorizontalScrollBarMode() const {
   return "disabled";
 }
 
-void ScrollView::SetVerticalScrollBarMode(std::string mode) {
+void ScrollView::SetVerticalScrollBarModeMac(std::string mode) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   if (mode == "disabled") {
     [scroll setHasVerticalScroller:NO];
@@ -331,7 +332,7 @@ void ScrollView::SetVerticalScrollBarMode(std::string mode) {
   }
 }
 
-std::string ScrollView::GetVerticalScrollBarMode() const {
+std::string ScrollView::GetVerticalScrollBarModeMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   if (scroll.hasVerticalScroller) {
     if ([[scroll verticalScroller] alphaValue] != 0.0)
@@ -342,27 +343,27 @@ std::string ScrollView::GetVerticalScrollBarMode() const {
   return "disabled";
 }
 
-void ScrollView::SetScrollWheelSwapped(bool swap) {
+void ScrollView::SetScrollWheelSwappedMac(bool swap) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   [scroll setScrollWheelSwapped:swap ? YES : NO];
 }
 
-bool ScrollView::IsScrollWheelSwapped() const {
+bool ScrollView::IsScrollWheelSwappedMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   return [scroll scrollWheelSwapped];
 }
 
-void ScrollView::SetScrollEventsEnabled(bool enable) {
+void ScrollView::SetScrollEventsEnabledMac(bool enable) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   [scroll setScrollEventsEnabled:enable ? YES : NO];
 }
 
-bool ScrollView::IsScrollEventsEnabled() const {
+bool ScrollView::IsScrollEventsEnabledMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   return [scroll scrollEventsEnabled];
 }
 
-void ScrollView::SetHorizontalScrollElasticity(std::string elasticity) {
+void ScrollView::SetHorizontalScrollElasticityMac(std::string elasticity) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   if (elasticity == "none")
     scroll.horizontalScrollElasticity = NSScrollElasticityNone;
@@ -372,7 +373,7 @@ void ScrollView::SetHorizontalScrollElasticity(std::string elasticity) {
     scroll.horizontalScrollElasticity = NSScrollElasticityAutomatic;
 }
 
-std::string ScrollView::GetHorizontalScrollElasticity() const {
+std::string ScrollView::GetHorizontalScrollElasticityMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   switch (scroll.horizontalScrollElasticity) {
     case NSScrollElasticityNone:
@@ -384,7 +385,7 @@ std::string ScrollView::GetHorizontalScrollElasticity() const {
   }
 }
 
-void ScrollView::SetVerticalScrollElasticity(std::string elasticity) {
+void ScrollView::SetVerticalScrollElasticityMac(std::string elasticity) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   if (elasticity == "none")
     scroll.verticalScrollElasticity = NSScrollElasticityNone;
@@ -394,7 +395,7 @@ void ScrollView::SetVerticalScrollElasticity(std::string elasticity) {
     scroll.verticalScrollElasticity = NSScrollElasticityAutomatic;
 }
 
-std::string ScrollView::GetVerticalScrollElasticity() const {
+std::string ScrollView::GetVerticalScrollElasticityMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   switch (scroll.verticalScrollElasticity) {
     case NSScrollElasticityNone:
@@ -406,7 +407,7 @@ std::string ScrollView::GetVerticalScrollElasticity() const {
   }
 }
 
-gfx::Point ScrollView::GetScrollPosition() const {
+gfx::Point ScrollView::GetScrollPositionMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   NSPoint point = scroll.contentView.bounds.origin;
   if (![scroll.documentView isFlipped]) {
@@ -416,7 +417,7 @@ gfx::Point ScrollView::GetScrollPosition() const {
   return gfx::Point(point.x, point.y);
 }
 
-gfx::Point ScrollView::GetMaximumScrollPosition() const {
+gfx::Point ScrollView::GetMaximumScrollPositionMac() const {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   NSRect docBounds = scroll.documentView.bounds;
   NSRect clipBounds = scroll.contentView.bounds;
@@ -426,6 +427,8 @@ gfx::Point ScrollView::GetMaximumScrollPosition() const {
 
 void ScrollView::ScrollToPoint(gfx::Point point,
                                const AnimationOptions& options) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
 
   NSAnimationCurve animation_curve = NSAnimationEaseInOut;
@@ -446,6 +449,8 @@ void ScrollView::ScrollToPoint(gfx::Point point,
 
 void ScrollView::ScrollPointToCenter(gfx::Point point,
                                      const AnimationOptions& options) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
 
   NSAnimationCurve animation_curve = NSAnimationEaseInOut;
@@ -466,27 +471,35 @@ void ScrollView::ScrollPointToCenter(gfx::Point point,
 }
 
 void ScrollView::SetOverlayScrollbar(bool overlay) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   scroll.scrollerStyle =
       overlay ? NSScrollerStyleOverlay : NSScrollerStyleLegacy;
 }
 
 bool ScrollView::IsOverlayScrollbar() const {
+  if (Browser::Get()->IsViewsUsage())
+    return false;
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   return scroll.scrollerStyle == NSScrollerStyleOverlay;
 }
 
 void ScrollView::SetScrollWheelFactor(double factor) {
+  if (Browser::Get()->IsViewsUsage())
+    return;
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   [scroll setScrollWheelFactor:factor];
 }
 
 double ScrollView::GetScrollWheelFactor() const {
+  if (Browser::Get()->IsViewsUsage())
+    return 1.0;
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   return [scroll scrollWheelFactor];
 }
 
-void ScrollView::CreateScrollView() {
+void ScrollView::CreateScrollViewMac() {
   auto* scroll = [[ElectronNativeScrollView alloc] initWithShell:this];
   scroll.drawsBackground = NO;
   if (scroll.scrollerStyle == NSScrollerStyleOverlay) {
@@ -498,18 +511,18 @@ void ScrollView::CreateScrollView() {
   SetView(scroll);
 }
 
-void ScrollView::SetContentViewImpl(BaseView* view) {
+void ScrollView::SetContentViewImplMac(BaseView* view) {
   auto* scroll = static_cast<NSScrollView*>(GetNSView());
   scroll.documentView = view->GetNSView();
   [scroll.documentView setAutoresizingMask:NSViewNotSizable];
 }
 
-void ScrollView::ResetCurrentContentViewImpl() {
+void ScrollView::ResetCurrentContentViewImplMac() {
   auto* scroll = static_cast<NSScrollView*>(GetNSView());
   scroll.documentView = nil;
 }
 
-void ScrollView::SetScrollPositionImpl(
+void ScrollView::SetScrollPositionImplMac(
     gfx::Point point,
     base::OnceCallback<void(std::string)> callback) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());

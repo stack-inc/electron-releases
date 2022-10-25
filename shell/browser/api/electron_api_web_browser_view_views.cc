@@ -9,6 +9,7 @@
 #include "content/public/browser/render_widget_host_view.h"
 #include "shell/browser/api/electron_api_base_window.h"
 #include "shell/browser/api/electron_api_web_contents.h"
+#include "shell/browser/browser.h"
 #include "shell/browser/native_window.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
@@ -25,12 +26,22 @@
 namespace electron::api {
 
 void WebBrowserView::RenderViewReady() {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+  GetView()->Layout();
+#else
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (iwc_view)
     iwc_view->GetView()->Layout();
+#endif
 }
 
 void WebBrowserView::RenderFrameCreated(content::RenderFrameHost* frame_host) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   // Only handle the initial main frame, not speculative ones.
   if (frame_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
     return;
@@ -40,6 +51,10 @@ void WebBrowserView::RenderFrameCreated(content::RenderFrameHost* frame_host) {
 }
 
 void WebBrowserView::RenderFrameDeleted(content::RenderFrameHost* frame_host) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   // Only handle the active main frame, not speculative ones.
   if (frame_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
     return;
@@ -52,6 +67,10 @@ void WebBrowserView::RenderFrameDeleted(content::RenderFrameHost* frame_host) {
 void WebBrowserView::RenderFrameHostChanged(
     content::RenderFrameHost* old_host,
     content::RenderFrameHost* new_host) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage())
+    return;
+#endif
   // Since we skipped speculative main frames in RenderFrameCreated, we must
   // watch for them being swapped in by watching for RenderFrameHostChanged().
   if (new_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
@@ -75,7 +94,12 @@ void WebBrowserView::RenderFrameHostChanged(
 
 void WebBrowserView::SetRoundedCorners(const RoundedCornersOptions& options) {
   BaseView::SetRoundedCorners(options);
-
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    WebBrowserView::SetRoundedCornersMac(options);
+    return;
+  }
+#else
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (!iwc_view)
     return;
@@ -90,6 +114,7 @@ void WebBrowserView::SetRoundedCorners(const RoundedCornersOptions& options) {
   view->layer()->SetRoundedCornerRadius(corner_radii);
   view->layer()->SetIsFastRoundedCorner(true);
   iwc_view->SetCornerRadii(corner_radii);
+#endif  // else BUILDFLAG(IS_MAC)
 }
 
 void WebBrowserView::UpdateClickThrough() {
@@ -97,13 +122,23 @@ void WebBrowserView::UpdateClickThrough() {
   if (GetView())
     GetView()->SetCanProcessEventsWithinSubtree(!click_through);
 
+#if BUILDFLAG(IS_MAC)
+  WebBrowserView::SetClickThroughMac(click_through);
+#else
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
   if (iwc_view)
     iwc_view->SetClickThrough(click_through);
+#endif
 }
 
 void WebBrowserView::CreateWebBrowserView(
     InspectableWebContents* inspectable_web_contents) {
+#if BUILDFLAG(IS_MAC)
+  if (!Browser::Get()->IsViewsUsage()) {
+    CreateWebBrowserViewMac(inspectable_web_contents);
+    return;
+  }
+#endif
   InspectableWebContentsView* iwc_view =
       inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;
   views::View* view = nullptr;

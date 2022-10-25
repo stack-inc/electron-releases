@@ -522,4 +522,8 @@ void Browser::ResetCape() {
   resetAllCursors();
 }
 
+bool Browser::IsViewsUsage() const {
+  return true;
+}
+
 }  // namespace electron

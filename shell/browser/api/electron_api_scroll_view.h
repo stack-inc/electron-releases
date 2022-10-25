@@ -5,12 +5,9 @@
 #ifndef ELECTRON_SHELL_BROWSER_API_ELECTRON_API_SCROLL_VIEW_H_
 #define ELECTRON_SHELL_BROWSER_API_ELECTRON_API_SCROLL_VIEW_H_
 
-#include "shell/browser/api/electron_api_base_view.h"
-
-#if !BUILDFLAG(IS_MAC)
 #include "base/callback_list.h"
+#include "shell/browser/api/electron_api_base_view.h"
 #include "ui/compositor/compositor_observer.h"
-#endif  // !BUILDFLAG(IS_MAC)
 
 namespace gin_helper {
 class Dictionary;
@@ -35,10 +32,8 @@ class ScrollView : public BaseView {
   ~ScrollView() override;
 
   // BaseView:
-#if !BUILDFLAG(IS_MAC)
   void SetBackgroundColor(const std::string& color_name) override;
   void UpdateClickThrough() override;
-#endif
   void RemoveChildView(gin::Handle<BaseView> base_view) override;
   void ResetChildViews() override;
   void SetWindow(BaseWindow* window) override;
@@ -71,7 +66,6 @@ class ScrollView : public BaseView {
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor() const;
 #endif
-#if !BUILDFLAG(IS_MAC)
   void ClipHeightTo(int min_height, int max_height);
   int GetMinHeight() const;
   int GetMaxHeight() const;
@@ -81,22 +75,42 @@ class ScrollView : public BaseView {
   bool GetAllowKeyboardScrolling() const;
   void SetDrawOverflowIndicator(bool indicator);
   bool GetDrawOverflowIndicator() const;
-#endif
 
   // Helpers.
 
   void CreateScrollView();
 
-#if !BUILDFLAG(IS_MAC)
   void SetSmoothScroll(bool enable);
   void OnDidScroll();
-#endif
 
   void SetContentViewImpl(BaseView* view);
   void ResetCurrentContentViewImpl();
 
   void SetScrollPositionImpl(gfx::Point point,
                              base::OnceCallback<void(std::string)> callback);
+
+#if BUILDFLAG(IS_MAC)
+  void SetContentSizeMac(const gfx::Size& size);
+  void SetHorizontalScrollBarModeMac(std::string mode);
+  std::string GetHorizontalScrollBarModeMac() const;
+  void SetVerticalScrollBarModeMac(std::string mode);
+  std::string GetVerticalScrollBarModeMac() const;
+  void SetScrollWheelSwappedMac(bool swap);
+  bool IsScrollWheelSwappedMac() const;
+  void SetScrollEventsEnabledMac(bool enable);
+  bool IsScrollEventsEnabledMac() const;
+  void SetHorizontalScrollElasticityMac(std::string elasticity);
+  std::string GetHorizontalScrollElasticityMac() const;
+  void SetVerticalScrollElasticityMac(std::string elasticity);
+  std::string GetVerticalScrollElasticityMac() const;
+  gfx::Point GetScrollPositionMac() const;
+  gfx::Point GetMaximumScrollPositionMac() const;
+  void CreateScrollViewMac();
+  void SetContentViewImplMac(BaseView* view);
+  void ResetCurrentContentViewImplMac();
+  void SetScrollPositionImplMac(gfx::Point point,
+                                base::OnceCallback<void(std::string)> callback);
+#endif  // BUILDFLAG(IS_MAC)
 
  public:
 #if BUILDFLAG(IS_MAC)
@@ -113,7 +127,6 @@ class ScrollView : public BaseView {
   void NotifyDidScroll();
 
  private:
-#if !BUILDFLAG(IS_MAC)
   class CompositorObserver : public ui::CompositorObserver {
    public:
     CompositorObserver(ScrollView* scroll_view);
@@ -143,7 +156,6 @@ class ScrollView : public BaseView {
   bool smooth_scroll_ = false;
   bool scroll_events_ = false;
   base::CallbackListSubscription on_contents_scrolled_subscription_;
-#endif  // !BUILDFLAG(IS_MAC)
 
   v8::Global<v8::Value> content_view_;
   BaseView* api_content_view_ = nullptr;

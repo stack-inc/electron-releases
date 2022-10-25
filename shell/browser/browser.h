@@ -329,6 +329,7 @@ class Browser : public WindowListObserver {
 #if BUILDFLAG(IS_MAC)
   void SetCape(base::FilePath cape_path);
   void ResetCape();
+  bool IsViewsUsage() const;
 #endif
 
  protected:
