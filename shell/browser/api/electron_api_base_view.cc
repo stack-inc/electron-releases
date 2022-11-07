@@ -270,6 +270,9 @@ std::string ConvertFromMouseEventType(BaseView::MouseEventType type) {
 
 BaseView::BaseView() = default;
 
+BaseView::BaseView(bool vibrant, bool blurred)
+    : vibrant_(vibrant), blurred_(blurred) {}
+
 BaseView::BaseView(gin::Arguments* args, bool vibrant, bool blurred)
     : vibrant_(vibrant), blurred_(blurred) {
   CreateView();

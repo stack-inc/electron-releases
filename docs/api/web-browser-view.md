@@ -16,6 +16,7 @@ module is emitted.
 ### `new WebBrowserView([options])` _Experimental_
 
 * `options` Object (optional)
+  * `blurred` boolean (optional) - Enables the blurred visual effect. Default is `false`.
   * `webPreferences` [WebPreferences](structures/web-preferences.md) (optional) - Settings of web page's features.
 
 ### Instance Properties

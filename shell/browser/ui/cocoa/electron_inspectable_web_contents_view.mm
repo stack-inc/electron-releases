@@ -4,6 +4,10 @@
 
 #include "shell/browser/ui/cocoa/electron_inspectable_web_contents_view.h"
 
+#import <Cocoa/Cocoa.h>
+#include <objc/objc-runtime.h>
+#import <QuartzCore/QuartzCore.h>
+
 #include "content/public/browser/render_widget_host_view.h"
 #include "shell/browser/ui/cocoa/event_dispatching_window.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
@@ -23,13 +27,23 @@
 
 @end
 
+#define kRMBlurredViewDefaultTintColor \
+  [NSColor colorWithCalibratedWhite:1.0 alpha:0.7]
+#define kRMBlurredViewDefaultSaturationFactor 2.0
+#define kRMBlurredViewDefaultBlurRadius 20.0
+
 @implementation ElectronInspectableWebContentsView
+
+@synthesize _tintColor;
+@synthesize _saturationFactor;
+@synthesize _blurRadius;
 
 - (instancetype)initWithInspectableWebContentsViewMac:
     (InspectableWebContentsViewMac*)view {
   self = [super init];
   if (!self)
     return nil;
+  [self setUp];
 
   inspectableWebContentsView_ = view;
   devtools_visible_ = NO;
@@ -360,6 +374,91 @@
   content::RenderWidgetHostView* rwhv = web_contents->GetRenderWidgetHostView();
   if (rwhv)
     rwhv->SetActive(false);
+}
+
+- (void)setTintColor:(NSColor*)color {
+  _tintColor = color;
+
+  // Since we need a CGColor reference, store it for the drawing of the layer.
+  if (_tintColor) {
+    [self.layer setBackgroundColor:_tintColor.CGColor];
+  }
+
+  // Trigger a re-drawing of the layer
+  [self.layer setNeedsDisplay];
+}
+
+- (void)setBlurRadius:(float)radius {
+  // Setting the blur radius requires a resetting of the filters
+  _blurRadius = radius;
+  [self resetFilters];
+}
+
+- (float)blurRadius {
+  return _blurRadius;
+}
+
+- (void)setSaturationFactor:(float)factor {
+  // Setting the saturation factor also requires a resetting of the filters
+  _saturationFactor = factor;
+  [self resetFilters];
+}
+
+- (float)saturationFactor {
+  return _saturationFactor;
+}
+
+- (void)setUp {
+  // Instantiate a new CALayer and set it as the NSView's layer (layer-hosting)
+  _hostedLayer = [CALayer layer];
+  [self setWantsLayer:YES];
+  [self setLayer:_hostedLayer];
+
+  // Set up the default parameters
+  _blurRadius = kRMBlurredViewDefaultBlurRadius;
+  _saturationFactor = kRMBlurredViewDefaultSaturationFactor;
+  [self setTintColor:kRMBlurredViewDefaultTintColor];
+
+  // It's important to set the layer to mask to its bounds, otherwise the whole
+  // parent view might get blurred
+  [self.layer setMasksToBounds:YES];
+
+  // To apply CIFilters on OS X 10.9, we need to set the property accordingly:
+  if ([self respondsToSelector:@selector(setLayerUsesCoreImageFilters:)]) {
+    BOOL flag = YES;
+    NSInvocation* inv = [NSInvocation
+        invocationWithMethodSignature:[self methodSignatureForSelector:@selector
+                                            (setLayerUsesCoreImageFilters:)]];
+    [inv setSelector:@selector(setLayerUsesCoreImageFilters:)];
+    [inv setArgument:&flag atIndex:2];
+    [inv invokeWithTarget:self];
+  }
+
+  // Set the layer to redraw itself once it's size is changed
+  [self.layer setNeedsDisplayOnBoundsChange:YES];
+
+  // Initially create the filter instances
+  [self resetFilters];
+}
+
+- (void)resetFilters {
+  // To get a higher color saturation, we create a ColorControls filter
+  _saturationFilter = [CIFilter filterWithName:@"CIColorControls"];
+  [_saturationFilter setDefaults];
+  [_saturationFilter setValue:[NSNumber numberWithFloat:_saturationFactor]
+                       forKey:@"inputSaturation"];
+
+  // Next, we create the blur filter
+  _blurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
+  [_blurFilter setDefaults];
+  [_blurFilter setValue:[NSNumber numberWithFloat:_blurRadius]
+                 forKey:@"inputRadius"];
+
+  // Now we apply the two filters as the layer's background filters
+  [self.layer setBackgroundFilters:@[ _saturationFilter, _blurFilter ]];
+
+  // ... and trigger a refresh
+  [self.layer setNeedsDisplay];
 }
 
 @end
