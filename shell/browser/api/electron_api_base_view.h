@@ -162,6 +162,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   friend class ScrollView;
 
   BaseView();
+  BaseView(bool vibrant, bool blurred);
   BaseView(gin::Arguments* args, bool vibrant, bool blurred);
   ~BaseView() override;
 
@@ -202,12 +203,13 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   std::string GetVisualEffectMaterial() const;
   void SetVisualEffectBlendingMode(std::string mode);
   std::string GetVisualEffectBlendingMode() const;
-  void SetBlurTintColorWithSRGB(float r, float g, float b, float a);
-  void SetBlurTintColorWithCalibratedWhite(float white, float alphaval);
-  void SetBlurTintColorWithGenericGamma22White(float white, float alphaval);
-  void SetBlurRadius(float radius);
+  virtual void SetBlurTintColorWithSRGB(float r, float g, float b, float a);
+  virtual void SetBlurTintColorWithCalibratedWhite(float white, float alphaval);
+  virtual void SetBlurTintColorWithGenericGamma22White(float white,
+                                                       float alphaval);
+  virtual void SetBlurRadius(float radius);
   float GetBlurRadius() const;
-  void SetBlurSaturationFactor(float factor);
+  virtual void SetBlurSaturationFactor(float factor);
   float GetBlurSaturationFactor() const;
   void SetCapture();
   void ReleaseCapture();

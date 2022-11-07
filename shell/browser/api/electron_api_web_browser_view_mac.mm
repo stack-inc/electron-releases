@@ -4,6 +4,7 @@
 
 #include "shell/browser/api/electron_api_web_browser_view.h"
 
+#import "shell/browser/ui/cocoa/electron_inspectable_web_contents_view.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
 #include "shell/browser/ui/inspectable_web_contents.h"
 #include "shell/browser/ui/inspectable_web_contents_view.h"
@@ -17,9 +18,80 @@ namespace electron {
 
 namespace api {
 
+void WebBrowserView::SetBlurTintColorWithSRGB(float r,
+                                              float g,
+                                              float b,
+                                              float a) {
+  BaseView::SetBlurTintColorWithSRGB(r, g, b, a);
+  if (!IsBlurred())
+    return;
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  NSView* iwc_nsview = iwc_view->GetNativeView().GetNativeNSView();
+  NSColor* color = [NSColor colorWithSRGBRed:r green:g blue:b alpha:a];
+  [static_cast<ElectronInspectableWebContentsView*>(iwc_nsview)
+      setTintColor:color];
+}
+
+void WebBrowserView::SetBlurTintColorWithCalibratedWhite(float white,
+                                                         float alphaval) {
+  BaseView::SetBlurTintColorWithCalibratedWhite(white, alphaval);
+  if (!IsBlurred())
+    return;
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  NSView* iwc_nsview = iwc_view->GetNativeView().GetNativeNSView();
+  NSColor* color = [NSColor colorWithCalibratedWhite:white alpha:alphaval];
+  [static_cast<ElectronInspectableWebContentsView*>(iwc_nsview)
+      setTintColor:color];
+}
+
+void WebBrowserView::SetBlurTintColorWithGenericGamma22White(float white,
+                                                             float alphaval) {
+  BaseView::SetBlurTintColorWithGenericGamma22White(white, alphaval);
+  if (!IsBlurred())
+    return;
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  NSView* iwc_nsview = iwc_view->GetNativeView().GetNativeNSView();
+  NSColor* color = [NSColor colorWithGenericGamma22White:white alpha:alphaval];
+  [static_cast<ElectronInspectableWebContentsView*>(iwc_nsview)
+      setTintColor:color];
+}
+
+void WebBrowserView::SetBlurRadius(float radius) {
+  BaseView::SetBlurRadius(radius);
+  if (!IsBlurred())
+    return;
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  NSView* iwc_nsview = iwc_view->GetNativeView().GetNativeNSView();
+  [static_cast<ElectronInspectableWebContentsView*>(iwc_nsview)
+      setBlurRadius:radius];
+}
+
+void WebBrowserView::SetBlurSaturationFactor(float factor) {
+  BaseView::SetBlurSaturationFactor(factor);
+  if (!IsBlurred())
+    return;
+  auto* iwc_view = GetInspectableWebContentsView();
+  if (!iwc_view)
+    return;
+  NSView* iwc_nsview = iwc_view->GetNativeView().GetNativeNSView();
+  [static_cast<ElectronInspectableWebContentsView*>(iwc_nsview)
+      setSaturationFactor:factor];
+}
+
 void WebBrowserView::CreateWebBrowserView(
     InspectableWebContents* inspectable_web_contents) {
-  SetView([[ElectronNativeView alloc] init]);
+  if (!IsBlurred())
+    SetView([[ElectronNativeView alloc] init]);
+  else
+    SetView([[ElectronNativeBlurredView alloc] init]);
 
   InspectableWebContentsView* iwc_view =
       inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;

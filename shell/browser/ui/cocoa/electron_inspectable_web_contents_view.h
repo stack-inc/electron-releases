@@ -39,6 +39,10 @@ using electron::InspectableWebContentsViewMac;
   BOOL thumbnail_visible_;
 
   DevToolsContentsResizingStrategy strategy_;
+
+  // Keep a reference to the filters for later modification
+  CIFilter *_blurFilter, *_saturationFilter;
+  CALayer* _hostedLayer;
 }
 
 - (instancetype)initWithInspectableWebContentsViewMac:
@@ -53,6 +57,24 @@ using electron::InspectableWebContentsViewMac;
 - (void)setTitle:(NSString*)title;
 - (void)showThumbnail:(NSImage*)thumbnail;
 - (void)hideThumbnail;
+
+- (void)setTintColor:(NSColor*)color;
+- (void)setBlurRadius:(float)radius;
+- (float)blurRadius;
+- (void)setSaturationFactor:(float)factor;
+- (float)saturationFactor;
+
+// The layer will be tinted using the tint color. By default it is a 70% White
+// Color.
+@property(strong, nonatomic) NSColor* _tintColor;
+
+//* To get more vibrant colors, a filter to increase the saturation of the
+// colors can be applied. The default value is 2.5.
+@property(assign, nonatomic) float _saturationFactor;
+
+//* The blur radius defines the strength of the Gaussian Blur filter. The
+// default value is 20.0.
+@property(assign, nonatomic) float _blurRadius;
 
 @end
 

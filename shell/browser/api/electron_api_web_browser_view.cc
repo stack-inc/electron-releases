@@ -28,7 +28,9 @@ namespace electron {
 namespace api {
 
 WebBrowserView::WebBrowserView(gin::Arguments* args,
-                               gin::Handle<WebContents> web_contents) {
+                               bool blurred,
+                               gin::Handle<WebContents> web_contents)
+    : BaseView(false, blurred) {
   CreateWebBrowserView(web_contents->inspectable_web_contents());
   InitWithArgs(args);
 
@@ -176,6 +178,9 @@ gin_helper::WrappableBase* WebBrowserView::New(gin_helper::ErrorThrower thrower,
   gin::Dictionary options = gin::Dictionary::CreateEmpty(isolate);
   args->GetNext(&options);
 
+  bool blurred = false;
+  options.Get("blurred", &blurred);
+
   gin_helper::Dictionary web_preferences =
       gin::Dictionary::CreateEmpty(isolate);
   options.Get(options::kWebPreferences, &web_preferences);
@@ -191,7 +196,7 @@ gin_helper::WrappableBase* WebBrowserView::New(gin_helper::ErrorThrower thrower,
   auto web_contents =
       WebContents::CreateFromWebPreferences(isolate, web_preferences);
 
-  auto* web_browser_view = new WebBrowserView(args, web_contents);
+  auto* web_browser_view = new WebBrowserView(args, blurred, web_contents);
   web_browser_view->Pin(isolate);
   return web_browser_view;
 }

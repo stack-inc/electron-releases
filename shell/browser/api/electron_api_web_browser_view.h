@@ -62,7 +62,9 @@ class WebBrowserView : public BaseView,
   WebContents* web_contents() const { return api_web_contents_; }
 
  protected:
-  WebBrowserView(gin::Arguments* args, gin::Handle<WebContents> web_contents);
+  WebBrowserView(gin::Arguments* args,
+                 bool blurred,
+                 gin::Handle<WebContents> web_contents);
   ~WebBrowserView() override;
 
   void CreateWebBrowserView(InspectableWebContents* inspectable_web_contents);
@@ -84,6 +86,13 @@ class WebBrowserView : public BaseView,
   // BaseView:
 #if BUILDFLAG(IS_MAC)
   void SetBounds(const gfx::Rect& bounds, gin::Arguments* args) override;
+  void SetBlurTintColorWithSRGB(float r, float g, float b, float a) override;
+  void SetBlurTintColorWithCalibratedWhite(float white,
+                                           float alphaval) override;
+  void SetBlurTintColorWithGenericGamma22White(float white,
+                                               float alphaval) override;
+  void SetBlurRadius(float radius) override;
+  void SetBlurSaturationFactor(float factor) override;
 #endif
   void SetBackgroundColorImpl(const SkColor& color) override;
   void SetWindowForChildren(BaseWindow* window) override;
