@@ -110,6 +110,10 @@ class WebBrowserView : public BaseView,
 
   InspectableWebContentsView* GetInspectableWebContentsView();
 
+#if BUILDFLAG(IS_MAC)
+  void resetFilters();
+#endif
+
 #if !BUILDFLAG(IS_MAC)
   void AttachToHost(content::RenderFrameHost* host);
   void DetachFromHost();
@@ -123,6 +127,16 @@ class WebBrowserView : public BaseView,
   base::WeakPtr<BaseWindow> owner_window_;
 
   bool page_frozen_ = false;
+
+#if BUILDFLAG(IS_MAC)
+  //* To get more vibrant colors, a filter to increase the saturation of the
+  // colors can be applied. The default value is 2.5.
+  float _saturationFactor;
+
+  //* The blur radius defines the strength of the Gaussian Blur filter. The
+  // default value is 20.0.
+  float _blurRadius;
+#endif
 
 #if !BUILDFLAG(IS_MAC)
   content::RenderWidgetHost::MouseEventCallback mouse_event_callback_;
