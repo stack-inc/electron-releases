@@ -43,7 +43,9 @@
   self = [super init];
   if (!self)
     return nil;
+#if 0
   [self setUp];
+#endif
 
   inspectableWebContentsView_ = view;
   devtools_visible_ = NO;

@@ -141,6 +141,7 @@ void WebBrowserView::CreateWebBrowserView(
   view.autoresizingMask = kDefaultAutoResizingMask;
   [GetNSView() addSubview:view];
 
+#if 0
   auto* web_contents = inspectable_web_contents->GetWebContents();
   NSView* web_nsview = web_contents->GetNativeView().GetNativeNSView();
 
@@ -176,6 +177,7 @@ void WebBrowserView::CreateWebBrowserView(
 
   // Initially create the filter instances
   resetFilters();
+#endif
 }
 
 void WebBrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
