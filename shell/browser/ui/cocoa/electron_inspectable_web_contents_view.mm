@@ -5,8 +5,8 @@
 #include "shell/browser/ui/cocoa/electron_inspectable_web_contents_view.h"
 
 #import <Cocoa/Cocoa.h>
-#include <objc/objc-runtime.h>
 #import <QuartzCore/QuartzCore.h>
+#include <objc/objc-runtime.h>
 
 #include "content/public/browser/render_widget_host_view.h"
 #include "shell/browser/ui/cocoa/event_dispatching_window.h"
@@ -292,9 +292,10 @@
 - (void)showThumbnail:(NSImage*)thumbnail {
   if (!thumbnail_visible_) {
     thumbnail_visible_ = YES;
-    thumbnail_.reset([[[NSImageView alloc] init] autorelease]);
-    [self addSubview:thumbnail_.get() positioned:NSWindowAbove relativeTo:nil];
-    [self adjustSubviews];
+    thumbnail_.reset([[NSImageView alloc] init]);
+    [thumbnail_ setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+    [self addSubview:thumbnail_ positioned:NSWindowAbove relativeTo:nil];
+    [thumbnail_ setFrame:[self bounds]];
   }
   [thumbnail_ setImage:thumbnail];
 }
@@ -303,8 +304,6 @@
   if (thumbnail_visible_) {
     thumbnail_visible_ = NO;
     [thumbnail_ removeFromSuperview];
-    // thumbnail_.reset();
-    [self adjustSubviews];
   }
 }
 

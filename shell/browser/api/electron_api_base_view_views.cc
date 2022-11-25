@@ -188,6 +188,19 @@ gfx::Rect BaseView::GetBounds() const {
   return gfx::Rect();
 }
 
+void BaseView::SetViewBounds(const gfx::Rect& bounds) {
+  if (!view_)
+    return;
+
+  view_->SetBoundsRect(bounds);
+}
+
+gfx::Rect BaseView::GetViewBounds() const {
+  if (view_)
+    return view_->bounds();
+  return gfx::Rect();
+}
+
 gfx::Point BaseView::OffsetFromView(gin::Handle<BaseView> from) const {
   if (!view_)
     return gfx::Point();

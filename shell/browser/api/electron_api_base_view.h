@@ -188,6 +188,8 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   void SetClickThrough(bool click_through);
   virtual void SetBounds(const gfx::Rect& bounds, gin::Arguments* args);
   gfx::Rect GetBounds() const;
+  void SetViewBounds(const gfx::Rect& bounds);
+  gfx::Rect GetViewBounds() const;
   gfx::Point OffsetFromView(gin::Handle<BaseView> from) const;
   gfx::Point OffsetFromWindow() const;
   void SetVisible(bool visible);

@@ -490,6 +490,8 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
                    &BaseView::SetClickThrough)
       .SetMethod("setBounds", &BaseView::SetBounds)
       .SetMethod("getBounds", &BaseView::GetBounds)
+      .SetMethod("setViewBounds", &BaseView::SetViewBounds)
+      .SetMethod("getViewBounds", &BaseView::GetViewBounds)
       .SetMethod("offsetFromView", &BaseView::OffsetFromView)
       .SetMethod("offsetFromWindow", &BaseView::OffsetFromWindow)
       .SetMethod("setVisible", &BaseView::SetVisible)
