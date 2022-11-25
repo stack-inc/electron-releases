@@ -14,6 +14,7 @@
 #include "base/cxx17_backports.h"
 #include "base/mac/foundation_util.h"
 #include "base/mac/scoped_cftyperef.h"
+#include "base/numerics/safe_conversions.h"
 #include "gin/handle.h"
 #include "shell/browser/ui/cocoa/electron_native_view.h"
 #include "shell/browser/ui/cocoa/events_handler.h"
@@ -130,11 +131,40 @@ gfx::Rect BaseView::GetBounds() const {
   if (superview && ![superview isFlipped]) {
     const int superview_height = superview.frame.size.height;
     return gfx::Rect(
-        nsview_.frame.origin.x,
-        superview_height - nsview_.frame.origin.y - nsview_.frame.size.height,
-        nsview_.frame.size.width, nsview_.frame.size.height);
+        base::ClampRound(nsview_.frame.origin.x),
+        base::ClampRound(superview_height - nsview_.frame.origin.y -
+                         nsview_.frame.size.height),
+        base::ClampRound(nsview_.frame.size.width),
+        base::ClampRound(nsview_.frame.size.height));
   }
   return ToNearestRect(gfx::RectF(nsview_.frame));
+}
+
+void BaseView::SetViewBounds(const gfx::Rect& bounds) {
+  NSRect vbounds = bounds.ToCGRect();
+  auto* superview = nsview_.superview;
+  if (superview && ![superview isFlipped]) {
+    const auto superview_height = superview.bounds.size.height;
+    vbounds.origin.y = superview_height - bounds.y() - bounds.height();
+  }
+
+  [nsview_ setBounds:vbounds];
+  [nsview_ setNeedsDisplay:YES];
+  [nsview_ resizeSubviewsWithOldSize:vbounds.size];
+}
+
+gfx::Rect BaseView::GetViewBounds() const {
+  auto* superview = nsview_.superview;
+  if (superview && ![superview isFlipped]) {
+    const int superview_height = superview.bounds.size.height;
+    return gfx::Rect(
+        base::ClampRound(nsview_.bounds.origin.x),
+        base::ClampRound(superview_height - nsview_.bounds.origin.y -
+                         nsview_.bounds.size.height),
+        base::ClampRound(nsview_.bounds.size.width),
+        base::ClampRound(nsview_.bounds.size.height));
+  }
+  return ToNearestRect(gfx::RectF(nsview_.bounds));
 }
 
 gfx::Point BaseView::OffsetFromView(gin::Handle<BaseView> from) const {
