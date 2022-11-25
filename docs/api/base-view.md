@@ -177,6 +177,18 @@ Returns [`Rectangle`](structures/rectangle.md)
 
 Returns the position and size of the view, relative to its parent.
 
+#### `view.setViewBounds(bounds)` _Experimental_
+
+* `bounds` [Rectangle](structures/rectangle.md) - The target position and size of the view, relative to its parent.
+
+Resizes and moves the view to the supplied bounds relative to its parent.
+
+#### `view.getViewBounds()` _Experimental_
+
+Returns [`Rectangle`](structures/rectangle.md)
+
+Returns the position and size of the view, relative to its parent.
+
 #### `view.offsetFromView(from)` _Experimental_
 
 * `from` `BaseView`
