@@ -33,24 +33,55 @@ global.webBrowserViews = Array(APPS.length);
 function showWebBrowserViews() {
   for (var i = 0; i < APPS.length; i++)
     webBrowserViews[i].show();
+  for (var i = 0; i < APPS.length; i++) {
+    const bounds = webBrowserViews[i].getBounds()
+    console.log("bounds for " + i + " after showing: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
+    const   viewBounds = webBrowserViews[i].getViewBounds()
+    console.log("viewBounds for " + i + " after showing: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+    const scaleX = webBrowserViews[i].getScaleX()
+    const scaleY = webBrowserViews[i].getScaleY()
+    console.log("scale for " + i + " after showing: (" + scaleX + ", " + scaleY + ")")
+  }
 }
 
 function finishZoomIn(view) {
-  bounds = view.getBounds()
+  let bounds = view.getBounds()
   console.log("bounds after zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
-  const scaleX = view.getScaleX()
-  const scaleY = view.getScaleY()
+  let viewBounds = view.getViewBounds()
+  console.log("viewBounds after zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+  let scaleX = view.getScaleX()
+  let scaleY = view.getScaleY()
   console.log("scale after zooming in: (" + scaleX + ", " + scaleY + ")")
+  for (var i = 0; i < APPS.length; i++) {
+    bounds = webBrowserViews[i].getBounds()
+    console.log("bounds for " + i + " after zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
+    viewBounds = webBrowserViews[i].getViewBounds()
+    console.log("viewBounds for " + i + " after zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+    scaleX = webBrowserViews[i].getScaleX()
+    scaleY = webBrowserViews[i].getScaleY()
+    console.log("scale for " + i + " after zooming in: (" + scaleX + ", " + scaleY + ")")
+  }
 
   setTimeout(showWebBrowserViews, 10000)
 }
 
 function startZoomIn(view) {
-  bounds = view.getBounds()
+  let bounds = view.getBounds()
   console.log("bounds before zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
-  const scaleX = view.getScaleX()
-  const scaleY = view.getScaleY()
+  let viewBounds = view.getViewBounds()
+  console.log("viewBounds before zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+  let scaleX = view.getScaleX()
+  let scaleY = view.getScaleY()
   console.log("scale before zooming in: (" + scaleX + ", " + scaleY + ")")
+  for (var i = 0; i < APPS.length; i++) {
+    bounds = webBrowserViews[i].getBounds()
+    console.log("bounds for " + i + " before zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
+    viewBounds = webBrowserViews[i].getViewBounds()
+    console.log("viewBounds for " + i + " before zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+    scaleX = webBrowserViews[i].getScaleX()
+    scaleY = webBrowserViews[i].getScaleY()
+    console.log("scale for " + i + " before zooming in: (" + scaleX + ", " + scaleY + ")")
+  }
 
   view.setScale({"scaleX": 0.2, "scaleY": 0.2, "adjustFrame": true, "animation": {"duration": 5, timingFunction: "easeIn"}, "anchorX": "left", "anchorY": "top"})
   setTimeout(finishZoomIn, 6000, view)
