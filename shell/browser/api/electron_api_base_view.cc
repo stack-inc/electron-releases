@@ -275,8 +275,8 @@ BaseView::BaseView() = default;
 BaseView::BaseView(bool vibrant, bool blurred)
     : vibrant_(vibrant), blurred_(blurred) {}
 
-BaseView::BaseView(gin::Arguments* args, bool vibrant, bool blurred)
-    : vibrant_(vibrant), blurred_(blurred) {
+BaseView::BaseView(gin::Arguments* args, bool vibrant, bool blurred, bool scaled)
+    : vibrant_(vibrant), blurred_(blurred), scaled_(scaled) {
   CreateView();
   InitWithArgs(args);
 }
@@ -473,8 +473,32 @@ gin_helper::WrappableBase* BaseView::New(gin_helper::ErrorThrower thrower,
   options.Get("vibrant", &vibrant);
   bool blurred = false;
   options.Get("blurred", &blurred);
+  bool scaled = false;
+  options.Get("scaled", &scaled);
 
-  return new BaseView(args, vibrant, blurred);
+  return new BaseView(args, vibrant, blurred, scaled);
+}
+
+// static
+v8::Local<v8::Function> BaseView::GetConstructor(v8::Isolate* isolate) {
+  static base::NoDestructor<v8::Global<v8::Function>> constructor;
+  if (constructor.get()->IsEmpty()) {
+    constructor->Reset(isolate, gin_helper::CreateConstructor<BaseView>(
+                                    isolate, base::BindRepeating(&BaseView::New)));
+  }
+  return v8::Local<v8::Function>::New(isolate, *constructor.get());
+}
+
+// static
+gin::Handle<BaseView> BaseView::Create(v8::Isolate* isolate) {
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  v8::Local<v8::Object> obj;
+  if (GetConstructor(isolate)->NewInstance(context, 0, nullptr).ToLocal(&obj)) {
+    gin::Handle<BaseView> view;
+    if (gin::ConvertFromV8(isolate, obj, &view))
+      return view;
+  }
+  return gin::Handle<BaseView>();
 }
 
 // static
@@ -560,16 +584,11 @@ void Initialize(v8::Local<v8::Object> exports,
                 v8::Local<v8::Context> context,
                 void* priv) {
   v8::Isolate* isolate = context->GetIsolate();
-  BaseView::SetConstructor(isolate, base::BindRepeating(&BaseView::New));
-
-  gin_helper::Dictionary constructor(
-      isolate,
-      BaseView::GetConstructor(isolate)->GetFunction(context).ToLocalChecked());
-  constructor.SetMethod("fromId", &BaseView::FromWeakMapID);
-  constructor.SetMethod("getAllViews", &BaseView::GetAll);
 
   gin_helper::Dictionary dict(isolate, exports);
-  dict.Set("BaseView", constructor);
+  dict.Set("BaseView", BaseView::GetConstructor(isolate));
+  dict.SetMethod("fromId", &BaseView::FromWeakMapID);
+  dict.SetMethod("getAllViews", &BaseView::GetAll);
 }
 
 }  // namespace

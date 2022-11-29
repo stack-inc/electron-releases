@@ -12,6 +12,7 @@
 #include <cstdint>
 
 #include "base/cxx17_backports.h"
+#include "base/logging.h"
 #include "base/mac/foundation_util.h"
 #include "base/mac/scoped_cftyperef.h"
 #include "base/numerics/safe_conversions.h"
@@ -38,12 +39,20 @@ BaseView* g_captured_view = nullptr;
 }  // namespace
 
 void BaseView::CreateView() {
-  if (!IsVibrant() && !IsBlurred())
-    SetView([[ElectronNativeView alloc] init]);
-  else if (IsVibrant())
+  if (IsVibrant()) {
     SetView([[ElectronNativeVibrantView alloc] init]);
-  else
+  } else if (IsBlurred()) {
     SetView([[ElectronNativeBlurredView alloc] init]);
+  } else if (IsScaled()) {
+LOG(ERROR) << "@@creating scaled view";
+    ElectronScaleRotateFlipView* view = [[ElectronScaleRotateFlipView alloc] init];
+    SetView(view);
+    [view setFlipped:YES];
+    [view setScaleValue:1.0];
+LOG(ERROR) << "@@created scaled view";
+  } else {
+    SetView([[ElectronNativeView alloc] init]);
+  }
 }
 
 std::uintptr_t BaseView::GetNativeID() const {
@@ -690,7 +699,12 @@ bool BaseView::WantsLayer() const {
 }
 
 void BaseView::AddChildViewImpl(BaseView* view) {
-  [nsview_ addSubview:view->GetNSView()];
+  if (IsScaled() && [[nsview_ subviews] count] == 0) {
+LOG(ERROR) << "@@if (IsScaled() && [[nsview_ subviews] count] == 0) {";
+    [(ElectronScaleRotateFlipView *) nsview_ setContentView:view->GetNSView()];
+  } else {
+    [nsview_ addSubview:view->GetNSView()];
+  }
   NativeViewPrivate* priv = [nsview_ nativeViewPrivate];
   if (priv->wants_layer_infected) {
     [view->GetNSView() setWantsLayer:YES];

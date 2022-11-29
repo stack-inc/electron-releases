@@ -74,6 +74,8 @@ class ScrollView : public BaseView {
   bool IsOverlayScrollbar() const;
   void SetScrollWheelFactor(double factor);
   double GetScrollWheelFactor() const;
+  void SetZoomFactor(float factor);
+  float GetZoomFactor() const;
 #endif
 #if !BUILDFLAG(IS_MAC)
   void ClipHeightTo(int min_height, int max_height);
@@ -149,6 +151,12 @@ class ScrollView : public BaseView {
 
   v8::Global<v8::Value> content_view_;
   BaseView* api_content_view_ = nullptr;
+
+#if BUILDFLAG(IS_MAC)
+  bool scaled_content_ = false;
+  gfx::Rect initial_bounds_;
+  NSView* _rotationView;
+#endif
 };
 
 }  // namespace api

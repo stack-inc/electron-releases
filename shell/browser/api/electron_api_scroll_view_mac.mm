@@ -293,13 +293,24 @@ namespace api {
 
 void ScrollView::CreateScrollView() {
   auto* scroll = [[ElectronNativeScrollView alloc] initWithShell:this];
+  //NSRect frame = initial_bounds_.ToCGRect();
+  //@[scroll setFrame:frame];
   scroll.drawsBackground = NO;
+  //if (scaled_content_) {
+//NSClipView *cv=[[[NSClipView alloc] initWithFrame:frame] autorelease];
+//_rotationView=[[[NSScaleRotateFlipView alloc] initWithFrame:frame] autorelease];
+//_rotationView=[[[NSView alloc] initWithFrame:frame] autorelease];
+//[scroll setContentView:cv];
+//[scroll setDocumentView:_rotationView];
+//[scroll.documentView setAutoresizingMask:NSViewNotSizable];//@
+  //} else {
   if (scroll.scrollerStyle == NSScrollerStyleOverlay) {
     scroll.hasHorizontalScroller = YES;
     scroll.hasVerticalScroller = YES;
   }
   [scroll.contentView setCopiesOnScroll:NO];
   [scroll.contentView setAutoresizesSubviews:NO];
+  //}
   SetView(scroll);
 }
 
@@ -308,6 +319,8 @@ void ScrollView::SetContentSize(const gfx::Size& size) {
   NSSize content_size = size.ToCGSize();
   [scroll setContentSize:content_size];
   [scroll.documentView setFrameSize:content_size];
+//if (scaled_content_ && api_content_view_)
+//[api_content_view_->GetNSView() setFrameSize:content_size];
 }
 
 void ScrollView::SetHorizontalScrollBarMode(std::string mode) {
@@ -500,15 +513,36 @@ double ScrollView::GetScrollWheelFactor() const {
   return [scroll scrollWheelFactor];
 }
 
+void ScrollView::SetZoomFactor(float factor) {
+  if (api_content_view_->IsScaled())
+    [(ElectronScaleRotateFlipView *) api_content_view_->GetNSView() setScale:factor];
+}
+
+float ScrollView::GetZoomFactor() const {
+  if (api_content_view_->IsScaled())
+    return [(ElectronScaleRotateFlipView *) api_content_view_->GetNSView() scale];
+  return 1.0;
+}
+
 void ScrollView::SetContentViewImpl(BaseView* view) {
+  //if (!scaled_content_) {
   auto* scroll = static_cast<NSScrollView*>(GetNSView());
   scroll.documentView = view->GetNSView();
   [scroll.documentView setAutoresizingMask:NSViewNotSizable];
+//} else {
+//[(NSScaleRotateFlipView *) _rotationView setContentView:view->GetNSView()];
+//[_rotationView addSubview:view->GetNSView()];
+//[_rotationView setAutoresizingMask:NSViewNotSizable];//@
+//}
 }
 
 void ScrollView::ResetCurrentContentViewImpl() {
+  //if (!scaled_content_) {
   auto* scroll = static_cast<NSScrollView*>(GetNSView());
   scroll.documentView = nil;
+//} else {
+//[api_content_view_->GetNSView() removeFromSuperview];
+//}
 }
 
 void ScrollView::SetScrollPositionImpl(
@@ -518,7 +552,12 @@ void ScrollView::SetScrollPositionImpl(
   int vertical = point.y();
   if (![scroll.documentView isFlipped])
     vertical = NSHeight(scroll.documentView.bounds) - vertical;
+//if (!scaled_content_) {
   [scroll.documentView scrollPoint:NSMakePoint(point.x(), vertical)];
+//} else {
+//[[scroll contentView] scrollToPoint:NSMakePoint(point.x(), vertical)];
+//[scroll reflectScrolledClipView:[scroll contentView]];
+//}
 
   std::move(callback).Run(std::string());
 }

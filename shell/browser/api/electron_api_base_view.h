@@ -134,6 +134,10 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
   static gin_helper::WrappableBase* New(gin_helper::ErrorThrower thrower,
                                         gin::Arguments* args);
+  static gin::Handle<BaseView> Create(v8::Isolate* isolate);
+
+  // Return the cached constructor function.
+  static v8::Local<v8::Function> GetConstructor(v8::Isolate* isolate);
 
   static void BuildPrototype(v8::Isolate* isolate,
                              v8::Local<v8::FunctionTemplate> prototype);
@@ -163,7 +167,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
   BaseView();
   BaseView(bool vibrant, bool blurred);
-  BaseView(gin::Arguments* args, bool vibrant, bool blurred);
+  BaseView(gin::Arguments* args, bool vibrant, bool blurred, bool scaled);
   ~BaseView() override;
 
   void CreateView();
@@ -242,6 +246,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
   bool IsVibrant() const { return vibrant_; }
   bool IsBlurred() const { return blurred_; }
+  bool IsScaled() const { return scaled_; }
 
 #if !BUILDFLAG(IS_MAC)
   // Should delete the |view_| in destructor.
@@ -315,6 +320,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
   bool vibrant_ = false;
   bool blurred_ = false;
+  bool scaled_ = false;
 
   std::map<int32_t, v8::Global<v8::Value>> children_;
   std::vector<BaseView*> api_children_;
