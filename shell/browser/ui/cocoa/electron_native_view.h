@@ -93,19 +93,18 @@ struct NativeViewPrivate {
   int _rotationAngle;
   BOOL _isHorizontallyFlipped;
   BOOL _isVerticallyFlipped;
-  BOOL _boundsAreFlipped;
   BOOL _autoMagnifyOnResize;
   NSPoint _center;
   NSRect _prev;
 }
 
+- (void)initView;
 - (NSView*)contentView;
 - (void)setContentView:(NSView*)object;
 - (NSRect)contentFrame;             // frame or activeFrame of contentView
 - (NSPoint)center;                  // get center
 - (void)setCenter:(NSPoint)center;  // set center
 - (float)scale;
-- (void)setScaleValue:(float)scale;
 - (void)setScale:(float)scale;
 - (void)setScaleForRect:(NSRect)area;
 - (BOOL)isHorizontallyFlipped;

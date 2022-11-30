@@ -289,6 +289,14 @@ typedef struct CGContext* CGContextRef;
   }
 }
 
+- (void)initView {
+  _scale = 1.0;
+  _rotationAngle = 0.0;
+  _isHorizontallyFlipped = NO;
+  _isVerticallyFlipped = YES;
+  _autoMagnifyOnResize = NO;
+}
+
 - (id)initWithFrame:(NSRect)frame {
   if ((self = [super initWithFrame:frame])) {
     _scale = 1.0;  // initialize
@@ -339,15 +347,16 @@ typedef struct CGContext* CGContextRef;
   if ((contentView = [self contentView])) {
     //		[self setPostsBoundsChangedNotifications:NO];
     //		[self setPostsFrameChangedNotifications:NO];
-    NSPoint center = [self center];  // will be restored/kept stable
+    //@NSPoint center = [self center];  // will be restored/kept stable
     NSRect frame = [contentView frame];
-    float angle = _rotationAngle, scale = _scale, factor;
+    //@float angle = _rotationAngle, scale = _scale, factor;
+    float scale = _scale, factor;
     //	[super setPostsFrameChangedNotifications:YES];	- already set; with NO
     //there are no scrollers
     //	[super setPostsBoundsChangedNotifications:NO];	- no influence
     frame.origin = NSZeroPoint;
-    factor = M_SQRT2 - ((M_SQRT2 - 1.0) * cos(M_PI / 45.0 * _rotationAngle));
-    factor = 1 + (M_SQRT2 / 2) * fabs(sin(M_PI / 45.0 * _rotationAngle));
+    //@factor = M_SQRT2 - ((M_SQRT2 - 1.0) * cos(M_PI / 45.0 * _rotationAngle));
+    //@factor = 1 + (M_SQRT2 / 2) * fabs(sin(M_PI / 45.0 * _rotationAngle));
     factor = 1;
     NSLog(@"factor=%lf", factor);
     scale *= factor;  // scale up if rotated
@@ -361,26 +370,26 @@ typedef struct CGContext* CGContextRef;
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
     // we have to undo rotation and flipping before setBounds since the result
     // seems to depend on the current internal matrix
-    [super setBoundsRotation:0];  // unrotate before setting bounds
+    //[super setBoundsRotation:0];  // unrotate before setting bounds
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    if (_boundsAreFlipped)
+    if ([self isFlipped])
       [super scaleUnitSquareToSize:NSMakeSize(1.0, -1.0)];  // undo flipping
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
     [super setBounds:frame];  // make the same as contentView
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    [super translateOriginToPoint:NSMakePoint(
-                                      NSMidX(frame),
-                                      NSMidY(frame))];  // rotate around center
+    //@[super translateOriginToPoint:NSMakePoint(
+                                      //@NSMidX(frame),
+                                      //@NSMidY(frame))];  // rotate around center
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    if ((_boundsAreFlipped = [self isFlipped])) {
-      angle = -angle;
+    if ([self isFlipped]) {
+      //@angle = -angle;
       [super scaleUnitSquareToSize:NSMakeSize(1.0, -1.0)];
     }
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
     //		BOOL bn=[self postsBoundsChangedNotifications];
     //		BOOL fn=[self postsFrameChangedNotifications];
-    [super setBoundsRotation:angle];
-    [super setFrameRotation:0];  // this sometimes also resets
+    //@[super setBoundsRotation:angle];
+    //@[super setFrameRotation:0];  // this sometimes also resets
                                  // clipview.bounds.origin to 0 removing any
                                  // scrolling position
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
@@ -388,11 +397,11 @@ typedef struct CGContext* CGContextRef;
     //		NSClipView *clipView=[scrollView contentView];
     //		[clipView scrollToPoint:b.origin];	// restore
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    [super translateOriginToPoint:NSMakePoint(
-                                      -NSMidX(frame),
-                                      -NSMidY(frame))];  // rotate around center
+    //@[super translateOriginToPoint:NSMakePoint(
+                                      //@-NSMidX(frame),
+                                      //@-NSMidY(frame))];  // rotate around center
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    [self setCenter:center];  // do all scaling and rotation around saved center
+    //@[self setCenter:center];  // do all scaling and rotation around saved center
                               // of NSClipView
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
     //		[self setPostsFrameChangedNotifications:fn];	// this alone posts the
@@ -404,9 +413,9 @@ typedef struct CGContext* CGContextRef;
 #if 0
 - (void) setFrameSize:(NSSize) frame
 { // here we apply scaling and rotation to contentView and self
-	NSPoint center=[self center];
+	//@NSPoint center=[self center];
 	[super setFrameSize:frame];
-	[self setCenter:center];	// do all scaling and rotation around center of NSClipView
+	//@[self setCenter:center];	// do all scaling and rotation around center of NSClipView
 }
 #endif
 
@@ -561,10 +570,6 @@ typedef struct CGContext* CGContextRef;
 
 - (float)scale {
   return _scale;
-}
-
-- (void)setScaleValue:(float)scale {
-  _scale = scale;
 }
 
 - (void)setScale:(float)scale {

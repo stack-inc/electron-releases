@@ -45,8 +45,7 @@ void BaseView::CreateView() {
   } else if (IsScaled()) {
     ElectronScaleRotateFlipView* view = [[ElectronScaleRotateFlipView alloc] init];
     SetView(view);
-    [view setFlipped:YES];
-    [view setScaleValue:1.0];
+    [view initView];
   } else {
     SetView([[ElectronNativeView alloc] init]);
   }
