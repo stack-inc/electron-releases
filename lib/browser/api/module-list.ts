@@ -25,7 +25,6 @@ export const browserModuleList: ElectronInternal.ModuleEntry[] = [
   { name: 'powerSaveBlocker', loader: () => require('./power-save-blocker') },
   { name: 'protocol', loader: () => require('./protocol') },
   { name: 'safeStorage', loader: () => require('./safe-storage') },
-  { name: 'ScaledView', loader: () => require('./scaled-view') },
   { name: 'screen', loader: () => require('./screen') },
   { name: 'ScrollView', loader: () => require('./scroll-view') },
   { name: 'session', loader: () => require('./session') },

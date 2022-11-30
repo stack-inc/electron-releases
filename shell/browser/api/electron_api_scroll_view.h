@@ -151,12 +151,6 @@ class ScrollView : public BaseView {
 
   v8::Global<v8::Value> content_view_;
   BaseView* api_content_view_ = nullptr;
-
-#if BUILDFLAG(IS_MAC)
-  bool scaled_content_ = false;
-  gfx::Rect initial_bounds_;
-  NSView* _rotationView;
-#endif
 };
 
 }  // namespace api

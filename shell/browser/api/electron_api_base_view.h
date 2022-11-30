@@ -134,10 +134,6 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
 
   static gin_helper::WrappableBase* New(gin_helper::ErrorThrower thrower,
                                         gin::Arguments* args);
-  static gin::Handle<BaseView> Create(v8::Isolate* isolate);
-
-  // Return the cached constructor function.
-  static v8::Local<v8::Function> GetConstructor(v8::Isolate* isolate);
 
   static void BuildPrototype(v8::Isolate* isolate,
                              v8::Local<v8::FunctionTemplate> prototype);

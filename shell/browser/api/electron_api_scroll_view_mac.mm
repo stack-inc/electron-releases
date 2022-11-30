@@ -319,8 +319,6 @@ void ScrollView::SetContentSize(const gfx::Size& size) {
   NSSize content_size = size.ToCGSize();
   [scroll setContentSize:content_size];
   [scroll.documentView setFrameSize:content_size];
-//if (scaled_content_ && api_content_view_)
-//[api_content_view_->GetNSView() setFrameSize:content_size];
 }
 
 void ScrollView::SetHorizontalScrollBarMode(std::string mode) {
@@ -531,18 +529,13 @@ void ScrollView::SetContentViewImpl(BaseView* view) {
   [scroll.documentView setAutoresizingMask:NSViewNotSizable];
 //} else {
 //[(NSScaleRotateFlipView *) _rotationView setContentView:view->GetNSView()];
-//[_rotationView addSubview:view->GetNSView()];
 //[_rotationView setAutoresizingMask:NSViewNotSizable];//@
 //}
 }
 
 void ScrollView::ResetCurrentContentViewImpl() {
-  //if (!scaled_content_) {
   auto* scroll = static_cast<NSScrollView*>(GetNSView());
   scroll.documentView = nil;
-//} else {
-//[api_content_view_->GetNSView() removeFromSuperview];
-//}
 }
 
 void ScrollView::SetScrollPositionImpl(

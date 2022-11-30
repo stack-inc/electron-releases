@@ -12,7 +12,6 @@
 #include <cstdint>
 
 #include "base/cxx17_backports.h"
-#include "base/logging.h"
 #include "base/mac/foundation_util.h"
 #include "base/mac/scoped_cftyperef.h"
 #include "base/numerics/safe_conversions.h"
@@ -44,12 +43,10 @@ void BaseView::CreateView() {
   } else if (IsBlurred()) {
     SetView([[ElectronNativeBlurredView alloc] init]);
   } else if (IsScaled()) {
-LOG(ERROR) << "@@creating scaled view";
     ElectronScaleRotateFlipView* view = [[ElectronScaleRotateFlipView alloc] init];
     SetView(view);
     [view setFlipped:YES];
     [view setScaleValue:1.0];
-LOG(ERROR) << "@@created scaled view";
   } else {
     SetView([[ElectronNativeView alloc] init]);
   }
@@ -700,7 +697,6 @@ bool BaseView::WantsLayer() const {
 
 void BaseView::AddChildViewImpl(BaseView* view) {
   if (IsScaled() && [[nsview_ subviews] count] == 0) {
-LOG(ERROR) << "@@if (IsScaled() && [[nsview_ subviews] count] == 0) {";
     [(ElectronScaleRotateFlipView *) nsview_ setContentView:view->GetNSView()];
   } else {
     [nsview_ addSubview:view->GetNSView()];

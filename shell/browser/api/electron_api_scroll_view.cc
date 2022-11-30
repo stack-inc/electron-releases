@@ -5,7 +5,6 @@
 #include "shell/browser/api/electron_api_scroll_view.h"
 
 #include "gin/handle.h"
-#include "shell/browser/api/electron_api_scaled_view.h"
 #include "shell/browser/browser.h"
 #include "shell/common/gin_converters/gfx_converter.h"
 #include "shell/common/gin_helper/dictionary.h"
@@ -20,7 +19,6 @@ namespace api {
 ScrollView::ScrollView(gin::Arguments* args,
                        const gin_helper::Dictionary& options) {
   CreateScrollView();
-  InitWithArgs(args);
 
 #if !BUILDFLAG(IS_MAC)
   bool smooth_scroll = false;
@@ -31,26 +29,7 @@ ScrollView::ScrollView(gin::Arguments* args,
     SetBlockScrollViewWhenFocus(block_scroll_view_when_focus);
 #endif  // !BUILDFLAG(IS_MAC)
 
-#if BUILDFLAG(IS_MAC)
-  options.Get("scaledContent", &scaled_content_);
-  options.Get("initialBounds", &initial_bounds_);
-#endif
-
-  bool create_content = false;
-  options.Get("createContent", &create_content);
-
-  if (create_content) {
-    if (scaled_content_) {
-      gin::Handle<ScaledView> content_view = ScaledView::Create(args->isolate());
-  SetContentViewImpl(content_view.get());
-  content_view->SetParent(this);
-  content_view_.Reset(isolate(), content_view.ToV8());
-  api_content_view_ = content_view.get();
-    } else {
-      gin::Handle<BaseView> content_view = BaseView::Create(args->isolate());
-      SetContentView(content_view);
-    }
-  }
+  InitWithArgs(args);
 }
 
 ScrollView::~ScrollView() = default;
@@ -99,9 +78,9 @@ void ScrollView::SetContentView(gin::Handle<BaseView> base_view) {
 }
 
 v8::Local<v8::Value> ScrollView::GetContentView() const {
-  if (content_view_.IsEmpty()) {
+  if (content_view_.IsEmpty())
     return v8::Null(isolate());
-}
+
   return v8::Local<v8::Value>::New(isolate(), content_view_);
 }
 
@@ -201,8 +180,6 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("getDrawOverflowIndicator",
                  &ScrollView::GetDrawOverflowIndicator)
 #endif
-      .SetProperty("contentView", &ScrollView::GetContentView,
-                   &ScrollView::SetContentView)
       .Build();
 }
 
