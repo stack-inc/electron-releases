@@ -695,11 +695,11 @@ bool BaseView::WantsLayer() const {
 }
 
 void BaseView::AddChildViewImpl(BaseView* view) {
-  if (IsScaled() && [[nsview_ subviews] count] == 0) {
-    [(ElectronScaleRotateFlipView *) nsview_ setContentView:view->GetNSView()];
-  } else {
+  //@if (IsScaled() && [[nsview_ subviews] count] == 0) {
+    //@[(ElectronScaleRotateFlipView *) nsview_ setContentView:view->GetNSView()];
+  //@} else {
     [nsview_ addSubview:view->GetNSView()];
-  }
+  //@}
   NativeViewPrivate* priv = [nsview_ nativeViewPrivate];
   if (priv->wants_layer_infected) {
     [view->GetNSView() setWantsLayer:YES];

@@ -348,7 +348,8 @@ typedef struct CGContext* CGContextRef;
     //		[self setPostsBoundsChangedNotifications:NO];
     //		[self setPostsFrameChangedNotifications:NO];
     //@NSPoint center = [self center];  // will be restored/kept stable
-    NSRect frame = [contentView frame];
+    //@NSRect frame = [contentView frame];
+    NSRect frame = [self frame];
     //@float angle = _rotationAngle, scale = _scale, factor;
     float scale = _scale, factor;
     //	[super setPostsFrameChangedNotifications:YES];	- already set; with NO
@@ -366,14 +367,14 @@ typedef struct CGContext* CGContextRef;
         setFrameSize:NSMakeSize(scale * frame.size.width,
                                 scale * frame.size.height)];  // apply scaling
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    [contentView setFrameOrigin:frame.origin];  // align with our (0, 0)
+    //@[contentView setFrameOrigin:frame.origin];  // align with our (0, 0)
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
     // we have to undo rotation and flipping before setBounds since the result
     // seems to depend on the current internal matrix
     //[super setBoundsRotation:0];  // unrotate before setting bounds
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    if ([self isFlipped])
-      [super scaleUnitSquareToSize:NSMakeSize(1.0, -1.0)];  // undo flipping
+    //@@if ([self isFlipped])
+      //@@[super scaleUnitSquareToSize:NSMakeSize(1.0, -1.0)];  // undo flipping
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
     [super setBounds:frame];  // make the same as contentView
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
@@ -381,10 +382,10 @@ typedef struct CGContext* CGContextRef;
                                       //@NSMidX(frame),
                                       //@NSMidY(frame))];  // rotate around center
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
-    if ([self isFlipped]) {
+    //@@if ([self isFlipped]) {
       //@angle = -angle;
-      [super scaleUnitSquareToSize:NSMakeSize(1.0, -1.0)];
-    }
+      //@@[super scaleUnitSquareToSize:NSMakeSize(1.0, -1.0)];
+    //@@}
     //		NSLog(@"%@", NSStringFromRect([[self superview] bounds]));
     //		BOOL bn=[self postsBoundsChangedNotifications];
     //		BOOL fn=[self postsFrameChangedNotifications];
