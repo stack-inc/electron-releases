@@ -127,10 +127,15 @@ void WebBrowserView::SetBlurSaturationFactor(float factor) {
 
 void WebBrowserView::CreateWebBrowserView(
     InspectableWebContents* inspectable_web_contents) {
-  if (!IsBlurred())
+  if (!IsBlurred()) {
     SetView([[ElectronNativeView alloc] init]);
-  else
+    SetBlockResizing(false);
+  } else {
     SetView([[ElectronNativeBlurredView alloc] init]);
+  }
+
+  [GetNSView() setAutoresizesSubviews:NO];
+  [GetNSView() setAutoresizingMask:NSViewNotSizable];
 
   InspectableWebContentsView* iwc_view =
       inspectable_web_contents ? inspectable_web_contents->GetView() : nullptr;

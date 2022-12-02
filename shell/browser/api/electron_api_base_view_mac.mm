@@ -48,6 +48,7 @@ void BaseView::CreateView() {
     [view initView];
   } else {
     SetView([[ElectronNativeView alloc] init]);
+    SetBlockResizing(false);
   }
 }
 
@@ -358,6 +359,11 @@ void BaseView::ReleaseCapture() {
 
 bool BaseView::HasCapture() const {
   return g_captured_view == this;
+}
+
+void BaseView::SetBlockResizing(bool block) {
+  auto* nsview = static_cast<ElectronNativeView*>(nsview_);
+  [nsview setBlockResizing:(block ? YES : NO)];
 }
 
 void BaseView::EnableMouseEvents() {

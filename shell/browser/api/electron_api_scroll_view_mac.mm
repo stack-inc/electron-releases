@@ -310,6 +310,7 @@ void ScrollView::CreateScrollView() {
   }
   [scroll.contentView setCopiesOnScroll:NO];
   [scroll.contentView setAutoresizesSubviews:NO];
+  [scroll.documentView setAutoresizesSubviews:NO];
   //}
   SetView(scroll);
 }

@@ -46,7 +46,10 @@ struct NativeViewPrivate {
  @private
   electron::NativeViewPrivate private_;
   absl::optional<SkColor> background_color_;
+  BOOL block_resizing_;
 }
+
+- (void) setBlockResizing: (BOOL)block;
 @end
 
 @interface ElectronNativeVibrantView
@@ -90,44 +93,18 @@ struct NativeViewPrivate {
   absl::optional<SkColor> background_color_;
 
   float _scale;
-  int _rotationAngle;
-  BOOL _isHorizontallyFlipped;
-  BOOL _isVerticallyFlipped;
-  BOOL _autoMagnifyOnResize;
-  NSPoint _center;
-  NSRect _prev;
 }
 
 - (void)initView;
-- (NSView*)contentView;
-- (void)setContentView:(NSView*)object;
-- (NSRect)contentFrame;             // frame or activeFrame of contentView
-- (NSPoint)center;                  // get center
-- (void)setCenter:(NSPoint)center;  // set center
 - (float)scale;
 - (void)setScale:(float)scale;
-- (void)setScaleForRect:(NSRect)area;
-- (BOOL)isHorizontallyFlipped;
 - (BOOL)isFlipped;
-- (void)setFlipped:(BOOL)flag;
-- (int)rotationAngle;
-- (void)setRotationAngle:(int)angle;
 
 /* menu actions */
 
-- (IBAction)center:(id)sender;  // center contentFrame
 - (IBAction)zoomIn:(id)sender;
 - (IBAction)zoomOut:(id)sender;
-- (IBAction)zoomFit:(id)sender;  // zoom to fit contentFrame
 - (IBAction)zoomUnity:(id)sender;
-- (IBAction)flipHorizontal:(id)sender;
-- (IBAction)flipVertical:(id)sender;
-- (IBAction)unflip:(id)sender;
-- (IBAction)rotateImageLeft:(id)sender;
-- (IBAction)rotateImageRight:(id)sender;
-- (IBAction)rotateImageLeft90:(id)sender;
-- (IBAction)rotateImageRight90:(id)sender;
-- (IBAction)rotateImageUpright:(id)sender;
 
 @end
 

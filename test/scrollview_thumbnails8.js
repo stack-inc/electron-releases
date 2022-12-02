@@ -26,34 +26,21 @@ const APPS = [
   "https://maps.google.com/",
   "https://sheets.google.com/",
 ];
+
 const MIDDLE = APPS.length / 2;
 
 global.win = null;
 global.webBrowserViews = Array(APPS.length);
+global.webContentViews = Array(APPS.length);
 
-function zoomOut(scroll, scrollContent) {
-  scroll.setZoomFactor(0.2);
+function addMoreWebContentViews(view, view2) {
+  console.log("@@addMoreWebContentViews");
+  for (var i = MIDDLE; i < MIDDLE+1; i++)
+    addWebview(view2, APPS[i], i);
+  setTimeout(showWebBrowserViews, 10000, view, view2)
 }
 
-function showMoreWebBrowserViews(scroll, scrollContent) {
-  for (var i = MIDDLE; i < APPS.length; i++)
-    addWebview(scrollContent, APPS[i], i);
-  setTimeout(zoomOut, 10000, scroll, scrollContent)
-}
-
-function zoomIn(scroll, scrollContent) {
-  scroll.setZoomFactor(1.0);
-  setTimeout(showMoreWebBrowserViews, 10000, scroll, scrollContent)
-}
-
-function showWebBrowserViews(scroll, scrollContent) {
-  let bounds = scrollContent.getBounds()
-  console.log("bounds after showing: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
-  let viewBounds = scrollContent.getViewBounds()
-  console.log("viewBounds before after showing: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
-  let scaleX = scrollContent.getScaleX()
-  let scaleY = scrollContent.getScaleY()
-  console.log("scale after showing: (" + scaleX + ", " + scaleY + ")")
+function showWebBrowserViews(view, view2) {
   for (var i = 0; i < MIDDLE; i++)
     webBrowserViews[i].show();
   for (var i = 0; i < MIDDLE; i++) {
@@ -65,57 +52,80 @@ function showWebBrowserViews(scroll, scrollContent) {
     const scaleY = webBrowserViews[i].getScaleY()
     console.log("scale for " + i + " after showing: (" + scaleX + ", " + scaleY + ")")
   }
-
-  setTimeout(zoomIn, 10000, scroll, scrollContent)
+  //setTimeout(addMoreWebContentViews, 10000, view, view2)
 }
 
-function startZoomOut(scroll, scrollContent) {
-  let bounds = scrollContent.getBounds()
-  console.log("bounds before zooming out: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
-  let viewBounds = scrollContent.getViewBounds()
-  console.log("viewBounds before zooming out: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
-  let scaleX = scrollContent.getScaleX()
-  let scaleY = scrollContent.getScaleY()
-  console.log("scale before zooming out: (" + scaleX + ", " + scaleY + ")")
+function finishZoomIn(view, view2) {
+  let bounds = view.getBounds()
+  console.log("bounds after zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
+  let viewBounds = view.getViewBounds()
+  console.log("viewBounds after zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+  let scaleX = view.getScaleX()
+  let scaleY = view.getScaleY()
+  console.log("scale after zooming in: (" + scaleX + ", " + scaleY + ")")
   for (var i = 0; i < MIDDLE; i++) {
     bounds = webBrowserViews[i].getBounds()
-    console.log("bounds for " + i + " before zooming out: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
+    console.log("bounds for " + i + " after zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
     viewBounds = webBrowserViews[i].getViewBounds()
-    console.log("viewBounds for " + i + " before zooming out: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+    console.log("viewBounds for " + i + " after zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
     scaleX = webBrowserViews[i].getScaleX()
     scaleY = webBrowserViews[i].getScaleY()
-    console.log("scale for " + i + " before zooming out: (" + scaleX + ", " + scaleY + ")")
+    console.log("scale for " + i + " after zooming in: (" + scaleX + ", " + scaleY + ")")
   }
 
-  scroll.setZoomFactor(0.2);
-  setTimeout(showWebBrowserViews, 10000, scroll, scrollContent)
+  setTimeout(addMoreWebContentViews, 10000, view, view2)
 }
 
-function addWebview(scrollContent, url, i) {
-  //chrome.setStyle({ flex: 1 });
-  //const webContentView = gui.Container.create();
-  //webContentView.setStyle({
-    //width: APP_WIDTH,
-    //height: "100%",
-    //backgroundColor: "#ffffff",
-    //marginRight: GAP,
-  //});
-  //webContentView.addChildView(chrome);
-  const webBrowserView = new WebBrowserView({
-    webPreferences: {
-      optimizeForScroll : true,
-      "show": false,
-    }
-  });
-  webBrowserViews[i] = webBrowserView;
-  webBrowserView.webContents.loadURL(url);
-  webBrowserView.setBackgroundColor("#ffffff");
-  webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
-  const webContentView = new BaseView();
-  webContentView.setBounds({x: i*(APP_WIDTH + GAP)+GAP, y: 30, width: 600, height: 540});
-  webContentView.addChildView(webBrowserView);
-  scrollContent.addChildView(webContentView);
+function startZoomIn(view, view2) {
+  let bounds = view.getBounds()
+  console.log("bounds before zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
+  let viewBounds = view.getViewBounds()
+  console.log("viewBounds before zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+  let scaleX = view.getScaleX()
+  let scaleY = view.getScaleY()
+  console.log("scale before zooming in: (" + scaleX + ", " + scaleY + ")")
+  for (var i = 0; i < MIDDLE; i++) {
+    bounds = webBrowserViews[i].getBounds()
+    console.log("bounds for " + i + " before zooming in: (" + bounds.x + ", " + bounds.y + ", " + bounds.width + ", " + bounds.height + ")")
+    viewBounds = webBrowserViews[i].getViewBounds()
+    console.log("viewBounds for " + i + " before zooming in: (" + viewBounds.x + ", " + viewBounds.y + ", " + viewBounds.width + ", " + viewBounds.height + ")")
+    scaleX = webBrowserViews[i].getScaleX()
+    scaleY = webBrowserViews[i].getScaleY()
+    console.log("scale for " + i + " before zooming in: (" + scaleX + ", " + scaleY + ")")
+  }
+
+  view.setScale({"scaleX": 0.2, "scaleY": 0.2, "adjustFrame": true, "animation": {"duration": 5, timingFunction: "easeIn"}, "anchorX": "left", "anchorY": "top"})
+  setTimeout(finishZoomIn, 6000, view, view2)
 }
+
+  function addWebview(scrollContent, url, i) {
+    //chrome.setStyle({ flex: 1 });
+    //const webContentView = gui.Container.create();
+    //webContentView.setStyle({
+      //width: APP_WIDTH,
+      //height: "100%",
+      //backgroundColor: "#ffffff",
+      //marginRight: GAP,
+    //});
+    //webContentView.addChildView(chrome);
+    const webBrowserView = new WebBrowserView({
+      webPreferences: {
+        optimizeForScroll : true,
+        "show": false,
+      }
+    });
+    console.log("@creating " + webBrowserView.id + " webBrowserView");
+    webBrowserViews[i] = webBrowserView;
+    webBrowserView.webContents.loadURL(url);
+    webBrowserView.setBackgroundColor("#ffffff");
+    webBrowserView.setBounds({x: 0, y: 0, width: 600, height: 540});
+    webBrowserView.setBlockResizing(true);
+    const webContentView = new BaseView();
+    webContentView.setBounds({x: i*(APP_WIDTH + GAP)+GAP, y: 30, width: 600, height: 540});
+    webContentView.addChildView(webBrowserView);
+    webContentViews[i] = webContentView;
+    scrollContent.addChildView(webContentView);
+  }
 
 function createWindow () {
   // Create window.
@@ -141,7 +151,7 @@ function createWindow () {
   contentView.addChildView(scroll);
 
   // Scroll content
-  const scrollContent = new BaseView({ scaled: true });
+  const scrollContent = new BaseView();
   //scrollContent.setStyle({
     //flexDirection: "row",
     //flex: 1,
@@ -152,13 +162,17 @@ function createWindow () {
   scroll.setContentView(scrollContent);
   scroll.setContentSize({ width: APPS.length * (APP_WIDTH + GAP), height: 600 });
 
+  const scrollContent2 = new BaseView();
+  scrollContent2.setBounds({x: 0, y: 0, width: APPS.length * (APP_WIDTH + GAP), height: 600});
+  scrollContent.addChildView(scrollContent2);
+
   for (var i = 0; i < MIDDLE; i++)
-    addWebview(scrollContent, APPS[i], i);
+    addWebview(scrollContent2, APPS[i], i);
 
   for (var i = 0; i < MIDDLE; i++)
     captureScreenshotForApp(i);
 
-  setTimeout(startZoomOut, 10000, scroll, scrollContent)
+  setTimeout(startZoomIn, 10000, scrollContent, scrollContent2)
 }
 
 function captureScreenshotForApp(index) {

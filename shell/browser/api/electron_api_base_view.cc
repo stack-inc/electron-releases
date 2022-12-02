@@ -524,6 +524,7 @@ void BaseView::BuildPrototype(v8::Isolate* isolate,
       .SetMethod("setCapture", &BaseView::SetCapture)
       .SetMethod("releaseCapture", &BaseView::ReleaseCapture)
       .SetMethod("hasCapture", &BaseView::HasCapture)
+      .SetMethod("setBlockResizing", &BaseView::SetBlockResizing)
 #endif  // BUILDFLAG(IS_MAC)
       .SetMethod("enableMouseEvents", &BaseView::EnableMouseEvents)
       .SetMethod("areMouseEventsEnabled", &BaseView::AreMouseEventsEnabled)

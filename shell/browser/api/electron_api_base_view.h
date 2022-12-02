@@ -216,6 +216,7 @@ class BaseView : public gin_helper::TrackableObject<BaseView>
   void SetCapture();
   void ReleaseCapture();
   bool HasCapture() const;
+void SetBlockResizing(bool block);
 #endif  // BUILDFLAG(IS_MAC)
   void EnableMouseEvents();
   bool AreMouseEventsEnabled() const;
