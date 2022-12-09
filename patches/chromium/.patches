@@ -132,3 +132,4 @@ add_cubic_bezier.patch
 fix_gesture_scrolling_and_optimization.patch
 added_block_scroll_view_when_focus.patch
 scroll_view_no_double_layout_when_no_scroll_bars_visible.patch
+fix_cocoa_scaling.patch
