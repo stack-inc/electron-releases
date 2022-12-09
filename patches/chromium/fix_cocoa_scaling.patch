@@ -1,0 +1,172 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin <martin@getstack.app>
+Date: Thu, 18 Nov 2021 23:32:23 -0500
+Subject: Fixed Cocoa for scaling
+
+
+diff --git a/content/app_shim_remote_cocoa/render_widget_host_view_cocoa.mm b/content/app_shim_remote_cocoa/render_widget_host_view_cocoa.mm
+index 6ce9f338bb923..71ea975dc6d1b 100644
+--- a/content/app_shim_remote_cocoa/render_widget_host_view_cocoa.mm
++++ b/content/app_shim_remote_cocoa/render_widget_host_view_cocoa.mm
+@@ -218,6 +218,8 @@ void ExtractUnderlines(NSAttributedString* string,
+ @synthesize textInputFlags = _textInputFlags;
+ @synthesize spellCheckerForTesting = _spellCheckerForTesting;
+ 
++static NSAffineTransform	*flip = nil;
++
+ + (void)initialize {
+   RenderWidgetHostViewMacEditCommandHelper::AddEditingSelectorsToClass(self);
+ }
+@@ -268,13 +270,151 @@ void ExtractUnderlines(NSAttributedString* string,
+     return;
+   }
+ 
+-  NSRect viewBoundsInWindow = [self convertRect:viewBoundsInView toView:nil];
++  // NSRect viewBoundsInWindow = [self convertRect:viewBoundsInView toView:nil];
++  NSRect viewBoundsInWindow = [self convertRectFromWindow:viewBoundsInView];
+   gfx::Rect gfxViewBoundsInWindow(viewBoundsInWindow);
+   gfxViewBoundsInWindow.set_y(NSHeight([enclosingWindow frame]) -
+                               NSMaxY(viewBoundsInWindow));
+   _host->OnBoundsInWindowChanged(gfxViewBoundsInWindow, true);
+ }
+ 
++static NSAffineTransform*
++get_matrix_to_window(NSView* aView)
++{
++NSAffineTransform* matrixToWindow = [NSAffineTransform alloc];
++
++      if (![aView window])
++        {
++          [matrixToWindow init];
++        }
++      if (![aView superview])
++        {
++          [matrixToWindow init];
++        }
++      else
++        {
++          BOOL wasFlipped = [[aView superview] isFlipped];
++          NSAffineTransform* pMatrix = get_matrix_to_window([aView superview]);
++          NSAffineTransformStruct     ts = [pMatrix transformStruct];
++ [pMatrix release];
++
++          /* prepend translation */
++          ts.tX = NSMinX([aView frame]) * ts.m11 + NSMinY([aView frame]) * ts.m21 + ts.tX;
++          ts.tY = NSMinX([aView frame]) * ts.m12 + NSMinY([aView frame]) * ts.m22 + ts.tY;
++          [matrixToWindow setTransformStruct: ts];
++  
++          if ([aView isFlipped] != wasFlipped)
++            {
++              /*
++               * The flipping process must result in a coordinate system that
++               * exactly overlays the original. To do that, we must translate
++               * the origin by the height of the view.
++               */
++if (flip == nil) {
++Class matrixClass = [NSAffineTransform class];
++flip = [matrixClass alloc];
++NSAffineTransformStruct	ats = { 1, 0, 0, -1, 0, 1 };
++[flip setTransformStruct: ats];
++}
++
++              ts = [flip transformStruct];
++              ts.tY = [aView frame].size.height;
++              [flip setTransformStruct: ts];
++              // (*preImp)(matrixToWindow, preSel, flip);
++[matrixToWindow prependTransform: flip];
++            }
++#if 0
++          if (_boundsMatrix != nil)
++            {
++              (*preImp)(matrixToWindow, preSel, _boundsMatrix);
++            }
++#endif
++    }
++
++  return matrixToWindow;
++}
++
++static NSAffineTransform*
++get_matrix_from_window(NSView* aView)
++{
++NSAffineTransform* matrixFromWindow = [NSAffineTransform alloc];
++
++      if (![aView window])
++        {
++          [matrixFromWindow init];
++        }
++      if (![aView superview])
++        {
++          [matrixFromWindow init];
++        }
++      else
++        {
++NSAffineTransform* matrixToWindow = get_matrix_to_window(aView);
++          NSAffineTransformStruct ts = [matrixToWindow transformStruct];
++[matrixToWindow release];
++          [matrixFromWindow setTransformStruct: ts];
++          [matrixFromWindow invert];
++        }
++
++    return matrixFromWindow;
++}
++
++- (NSRect) convertRectFromWindow: (NSRect)aRect
++{
++    NSWindow* window = [self window];
++    if (window == nil) {
++        return aRect;
++    }
++    NSView* aContentView = [window contentView];
++    if (aContentView == nil) {
++      return aRect;
++    }
++      NSView* aView = [aContentView superview];
++  if (aView == self || aView == nil) {
++      return aRect;
++  }
++
++  NSAffineTransform * matrix1 = get_matrix_to_window(aView);
++      NSAffineTransform * matrix2 = get_matrix_from_window(self);
++
++  NSRect r;
++  NSPoint p[4], min, max;
++  int i;
++
++  for (i = 0; i < 4; i++)
++    p[i] = aRect.origin;
++  p[1].x += aRect.size.width;
++  p[2].y += aRect.size.height;
++  p[3].x += aRect.size.width;
++  p[3].y += aRect.size.height;
++
++  for (i = 0; i < 4; i++)
++    p[i] = [matrix1 transformPoint: p[i]];
++
++  min = max = p[0] = [matrix2 transformPoint: p[0]];
++  for (i = 1; i < 4; i++)
++    {
++      p[i] = [matrix2 transformPoint: p[i]];
++      min.x = MIN(min.x, p[i].x);
++      min.y = MIN(min.y, p[i].y);
++      max.x = MAX(max.x, p[i].x);
++      max.y = MAX(max.y, p[i].y);
++    }
++
++  r.origin = min;
++  r.size.width = max.x - min.x;
++  r.size.height = max.y - min.y;
++
++// TODO: why it is needed?
++r.origin.x = fabs(r.origin.x);
++r.origin.y = fabs(r.origin.y);
++
++[matrix1 release];
++[matrix2 release];
++
++  return r;
++}
++
+ - (NSSpellChecker*)spellChecker {
+   if (_spellCheckerForTesting)
+     return _spellCheckerForTesting;
