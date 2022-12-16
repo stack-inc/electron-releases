@@ -169,7 +169,9 @@ std::string phaseToString(NSEventPhase phase) {
 #endif
 
 - (void)scrollWheel:(NSEvent*)event {
-  if (scroll_wheel_swapped_ && event.subtype == NSEventSubtypeMouseEvent) {
+  if (!scroll_wheel_swapped_) {
+    [super scrollWheel:event];
+  } else if (event.subtype == NSEventSubtypeMouseEvent) {
     CGEventRef cgEvent = CGEventCreateCopy(event.CGEvent);
     if (cgEvent) {
       CGEventSetDoubleValueField(cgEvent, kCGScrollWheelEventDeltaAxis1, 0.0);
@@ -183,8 +185,8 @@ std::string phaseToString(NSEventPhase phase) {
     } else {
       [super scrollWheel:event];
     }
-  } else if (scroll_wheel_swapped_ && std::abs(event.scrollingDeltaY) >
-                                          std::abs(event.scrollingDeltaX)) {
+  } else if (std::abs(event.scrollingDeltaY) >
+             std::abs(event.scrollingDeltaX)) {
     CGEventRef cgEvent = CGEventCreateCopy(event.CGEvent);
     if (cgEvent) {
       CGEventSetDoubleValueField(cgEvent, kCGScrollWheelEventDeltaAxis1, 0.0);
@@ -199,7 +201,19 @@ std::string phaseToString(NSEventPhase phase) {
       [super scrollWheel:event];
     }
   } else {
-    [super scrollWheel:event];
+    CGEventRef cgEvent = CGEventCreateCopy(event.CGEvent);
+    if (cgEvent) {
+      CGEventSetDoubleValueField(cgEvent, kCGScrollWheelEventDeltaAxis1, 0.0);
+      CGEventSetDoubleValueField(
+          cgEvent, kCGScrollWheelEventDeltaAxis2,
+          static_cast<double>(event.scrollingDeltaX) * scroll_wheel_factor_);
+      NSEvent* newEvent = [NSEvent eventWithCGEvent:cgEvent];
+      if (newEvent) {
+        [super scrollWheel:newEvent];
+      }
+    } else {
+      [super scrollWheel:event];
+    }
   }
 
   if (scroll_events_enabled_) {
