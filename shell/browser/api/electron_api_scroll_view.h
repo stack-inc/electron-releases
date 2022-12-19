@@ -6,6 +6,7 @@
 #define ELECTRON_SHELL_BROWSER_API_ELECTRON_API_SCROLL_VIEW_H_
 
 #include "shell/browser/api/electron_api_base_view.h"
+#include "ui/gfx/geometry/insets.h"
 
 #if !BUILDFLAG(IS_MAC)
 #include "base/callback_list.h"
@@ -52,6 +53,7 @@ class ScrollView : public BaseView {
   std::string GetHorizontalScrollBarMode() const;
   void SetVerticalScrollBarMode(std::string mode);
   std::string GetVerticalScrollBarMode() const;
+  void SetScrollerInsets(const gfx::Insets& insets);
   void SetScrollWheelSwapped(bool swap);
   bool IsScrollWheelSwapped() const;
   void SetScrollEventsEnabled(bool enable);

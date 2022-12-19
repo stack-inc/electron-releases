@@ -243,6 +243,10 @@ Controls how the vertical scroll bar appears and functions.
 
 Returns `string` - vertical scrollbar mode.
 
+#### `view.setScrollerInsets(insets)` _Experimental_
+
+* `insets` [Insets](structures/insets.md) - The insets for the scrollers.
+
 #### `view.setHorizontalScrollElasticity(elasticity)` _Experimental_
 
 * `elasticity` string - Can be `automatic`, `none`, `allowed`. Default is `automatic`.

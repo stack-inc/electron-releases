@@ -356,6 +356,12 @@ std::string ScrollView::GetVerticalScrollBarMode() const {
   return "disabled";
 }
 
+void ScrollView::SetScrollerInsets(const gfx::Insets& insets) {
+  auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
+  [scroll setScrollerInsets:NSEdgeInsetsMake(insets.top(), insets.left(),
+                                             insets.bottom(), insets.right())];
+}
+
 void ScrollView::SetScrollWheelSwapped(bool swap) {
   auto* scroll = static_cast<ElectronNativeScrollView*>(GetNSView());
   [scroll setScrollWheelSwapped:swap ? YES : NO];
