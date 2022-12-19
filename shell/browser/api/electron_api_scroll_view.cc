@@ -139,6 +139,7 @@ void ScrollView::BuildPrototype(v8::Isolate* isolate,
                  &ScrollView::SetVerticalScrollBarMode)
       .SetMethod("getVerticalScrollBarMode",
                  &ScrollView::GetVerticalScrollBarMode)
+      .SetMethod("setScrollerInsets", &ScrollView::SetScrollerInsets)
       .SetMethod("setScrollWheelSwapped", &ScrollView::SetScrollWheelSwapped)
       .SetMethod("isScrollWheelSwapped", &ScrollView::IsScrollWheelSwapped)
       .SetMethod("setScrollEventsEnabled", &ScrollView::SetScrollEventsEnabled)

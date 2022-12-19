@@ -196,6 +196,8 @@ std::string ScrollView::GetVerticalScrollBarMode() const {
     return "enabled";
 }
 
+void ScrollView::SetScrollerInsets(const gfx::Insets& insets) {}
+
 void ScrollView::SetScrollWheelSwapped(bool swap) {
   if (!GetView())
     return;
