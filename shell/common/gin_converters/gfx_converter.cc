@@ -7,6 +7,7 @@
 #include "shell/common/gin_helper/dictionary.h"
 #include "ui/display/display.h"
 #include "ui/display/screen.h"
+#include "ui/gfx/geometry/insets.h"
 #include "ui/gfx/geometry/point.h"
 #include "ui/gfx/geometry/point_f.h"
 #include "ui/gfx/geometry/rect.h"
@@ -14,6 +15,31 @@
 #include "ui/gfx/geometry/size.h"
 
 namespace gin {
+
+v8::Local<v8::Value> Converter<gfx::Insets>::ToV8(v8::Isolate* isolate,
+                                                  const gfx::Insets& val) {
+  gin_helper::Dictionary dict = gin::Dictionary::CreateEmpty(isolate);
+  dict.SetHidden("simple", true);
+  dict.Set("top", val.top());
+  dict.Set("left", val.left());
+  dict.Set("bottom", val.bottom());
+  dict.Set("right", val.right());
+  return dict.GetHandle();
+}
+
+bool Converter<gfx::Insets>::FromV8(v8::Isolate* isolate,
+                                    v8::Local<v8::Value> val,
+                                    gfx::Insets* out) {
+  gin::Dictionary dict(isolate);
+  if (!gin::ConvertFromV8(isolate, val, &dict))
+    return false;
+  int top, left, bottom, right;
+  if (!dict.Get("top", &top) || !dict.Get("left", &left) ||
+      !dict.Get("bottom", &bottom) || !dict.Get("right", &right))
+    return false;
+  *out = gfx::Insets::TLBR(top, left, bottom, right);
+  return true;
+}
 
 v8::Local<v8::Value> Converter<gfx::Point>::ToV8(v8::Isolate* isolate,
                                                  const gfx::Point& val) {
