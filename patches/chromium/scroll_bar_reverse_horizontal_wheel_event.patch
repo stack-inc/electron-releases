@@ -1,0 +1,20 @@
+diff --git a/ui/views/controls/scrollbar/scroll_bar.cc b/ui/views/controls/scrollbar/scroll_bar.cc
+index 733d7993ba7b0..3184704024d6c 100644
+--- a/ui/views/controls/scrollbar/scroll_bar.cc
++++ b/ui/views/controls/scrollbar/scroll_bar.cc
+@@ -113,7 +113,14 @@ bool ScrollBar::OnKeyPressed(const ui::KeyEvent& event) {
+ }
+ 
+ bool ScrollBar::OnMouseWheel(const ui::MouseWheelEvent& event) {
+-  OnScroll(event.x_offset(), event.y_offset());
++  int x_offset = event.x_offset();
++#if BUILDFLAG(IS_WIN)
++  if (event.native_event().message == WM_MOUSEHWHEEL) {
++    x_offset = -x_offset;
++  }
++#endif
++  OnScroll(x_offset, event.y_offset());
++  //! OnScroll(event.x_offset(), event.y_offset());
+   return true;
+ }
+ 
