@@ -21,6 +21,8 @@
 #include "shell/common/gin_helper/object_template_builder.h"
 #include "shell/common/node_includes.h"
 #include "shell/common/options_switches.h"
+#include "third_party/skia/include/core/SkRegion.h"
+#include "ui/base/hit_test.h"
 #include "ui/gfx/image/image.h"
 
 namespace electron::api {
@@ -32,7 +34,6 @@ WebBrowserView::WebBrowserView(gin::Arguments* args,
 
   web_contents_.Reset(args->isolate(), web_contents.ToV8());
   api_web_contents_ = web_contents.get();
-  api_web_contents_->AddObserver(this);
   Observe(api_web_contents_->web_contents());
 
 #if !BUILDFLAG(IS_MAC)
@@ -52,24 +53,23 @@ WebBrowserView::~WebBrowserView() {
     DetachFromHost();
   }
 #endif
-  if (web_contents()) {  // destroy() called without closing WebContents
-    web_contents()->RemoveObserver(this);
+  if (web_contents())  // destroy() called without closing WebContents
     web_contents()->Destroy();
-  }
+}
+
+int WebBrowserView::NonClientHitTest(const gfx::Point& point) {
+  gfx::Rect bounds = GetBounds();
+  gfx::Point local_point(point.x() - bounds.x(), point.y() - bounds.y());
+  SkRegion* region = api_web_contents_->draggable_region();
+  if (region && region->contains(local_point.x(), local_point.y()))
+    return HTCAPTION;
+  return HTNOWHERE;
 }
 
 void WebBrowserView::WebContentsDestroyed() {
   api_web_contents_ = nullptr;
   web_contents_.Reset();
   Unpin();
-}
-
-void WebBrowserView::OnDraggableRegionsUpdated(
-    const std::vector<mojom::DraggableRegionPtr>& regions) {
-  InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
-  if (!iwc_view)
-    return;
-  iwc_view->UpdateDraggableRegions(regions);
 }
 
 void WebBrowserView::SetBackgroundColorImpl(const SkColor& color) {
@@ -99,17 +99,13 @@ void WebBrowserView::SetWindow(BaseWindow* window) {
   if (web_contents())
     web_contents()->SetOwnerWindow(window ? window->window() : nullptr);
 
-  if (owner_window_.get() && owner_window_->window()) {
-    owner_window_->window()->remove_inspectable_view(
-        GetInspectableWebContentsView());
-  }
+  if (owner_window_.get() && owner_window_->window())
+    owner_window_->window()->RemoveDraggableRegionProvider(this);
 
   owner_window_ = window ? window->GetWeakPtr() : nullptr;
 
-  if (owner_window_.get() && owner_window_->window() &&
-      GetInspectableWebContentsView())
-    owner_window_->window()->add_inspectable_view(
-        GetInspectableWebContentsView());
+  if (owner_window_.get() && owner_window_->window())
+    owner_window_->window()->AddDraggableRegionProvider(this);
 }
 
 void WebBrowserView::Hide(bool freeze, gfx::Image thumbnail) {

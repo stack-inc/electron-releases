@@ -12,7 +12,7 @@
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_contents_observer.h"
 #include "shell/browser/api/electron_api_base_view.h"
-#include "shell/browser/extended_web_contents_observer.h"
+#include "shell/browser/draggable_region_provider.h"
 #include "shell/browser/native_window.h"
 #include "shell/common/api/api.mojom.h"
 #include "shell/common/gin_helper/pinnable.h"
@@ -46,8 +46,8 @@ class WebContents;
 
 class WebBrowserView : public BaseView,
                        public gin_helper::Pinnable<WebBrowserView>,
-                       public content::WebContentsObserver,
-                       public ExtendedWebContentsObserver {
+                       public DraggableRegionProvider,
+                       public content::WebContentsObserver {
  public:
   static gin_helper::WrappableBase* New(gin_helper::ErrorThrower thrower,
                                         gin::Arguments* args);
@@ -65,6 +65,9 @@ class WebBrowserView : public BaseView,
   WebBrowserView(gin::Arguments* args, gin::Handle<WebContents> web_contents);
   ~WebBrowserView() override;
 
+  // DraggableRegionProvider:
+  int NonClientHitTest(const gfx::Point& point) override;
+
   // content::WebContentsObserver:
   void WebContentsDestroyed() override;
 #if !BUILDFLAG(IS_MAC)
@@ -74,10 +77,6 @@ class WebBrowserView : public BaseView,
   void RenderFrameHostChanged(content::RenderFrameHost* old_host,
                               content::RenderFrameHost* new_host) override;
 #endif
-
-  // ExtendedWebContentsObserver:
-  void OnDraggableRegionsUpdated(
-      const std::vector<mojom::DraggableRegionPtr>& regions) override;
 
   // BaseView:
 #if BUILDFLAG(IS_MAC)
