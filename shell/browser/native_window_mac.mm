@@ -1230,7 +1230,6 @@ void NativeWindowMac::AddChildView(NativeView* view) {
     return;
   }
 
-  add_base_view(view);
   auto* native_view = view->GetNative();
   [[window_ contentView] addSubview:native_view
                          positioned:NSWindowAbove
@@ -1252,7 +1251,6 @@ bool NativeWindowMac::RemoveChildView(NativeView* view) {
 
   view->SetWindow(nullptr);
   [view->GetNative() removeFromSuperview];
-  remove_base_view(view);
 
   [CATransaction commit];
 
@@ -1268,8 +1266,6 @@ void NativeWindowMac::SetTopChildView(NativeView* view) {
     return;
   }
 
-  remove_base_view(view);
-  add_base_view(view);
   auto* native_view = view->GetNative();
   [[window_ contentView] addSubview:native_view
                          positioned:NSWindowAbove

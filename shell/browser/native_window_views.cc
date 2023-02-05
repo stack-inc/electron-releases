@@ -1310,7 +1310,6 @@ void NativeWindowViews::AddChildView(NativeView* view) {
   if (!view)
     return;
 
-  add_base_view(view);
   content_view()->AddChildView(view->GetNative());
   view->SetWindow(this);
 }
@@ -1324,7 +1323,6 @@ bool NativeWindowViews::RemoveChildView(NativeView* view) {
 
   view->SetWindow(nullptr);
   content_view()->RemoveChildView(view->GetNative());
-  remove_base_view(view);
   return true;
 }
 
@@ -1335,8 +1333,6 @@ void NativeWindowViews::SetTopChildView(NativeView* view) {
   if (!view)
     return;
 
-  remove_base_view(view);
-  add_base_view(view);
   content_view()->ReorderChildView(view->GetNative(), -1);
   view->SetWindow(this);
 }

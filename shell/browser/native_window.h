@@ -387,8 +387,6 @@ class NativeWindow : public base::SupportsUserData,
 
   std::list<NativeBrowserView*> browser_views() const { return browser_views_; }
 
-  std::list<NativeView*> base_views() const { return base_views_; }
-
   int32_t window_id() const { return next_id_; }
 
   int NonClientHitTest(const gfx::Point& point);
@@ -413,11 +411,6 @@ class NativeWindow : public base::SupportsUserData,
   void remove_browser_view(NativeBrowserView* browser_view) {
     browser_views_.remove_if(
         [&browser_view](NativeBrowserView* n) { return (n == browser_view); });
-  }
-
-  void add_base_view(NativeView* view) { base_views_.push_back(view); }
-  void remove_base_view(NativeView* view) {
-    base_views_.remove_if([&view](NativeView* n) { return (n == view); });
   }
 
   // The boolean parsing of the "titleBarOverlay" option
@@ -484,9 +477,6 @@ class NativeWindow : public base::SupportsUserData,
 
   // The browser view layer.
   std::list<NativeBrowserView*> browser_views_;
-
-  // The BaseView's layer.
-  std::list<NativeView*> base_views_;
 
   std::list<DraggableRegionProvider*> draggable_region_providers_;
 

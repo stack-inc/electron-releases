@@ -153,7 +153,7 @@ void InspectableWebContentsViewViews::SetCornerRadii(
     const gfx::RoundedCornersF& corner_radii) {
   if (!contents_web_view_ || !inspectable_web_contents_ ||
       (inspectable_web_contents_->IsGuest() ||
-          !inspectable_web_contents_->GetWebContents()->GetNativeView()))
+       !inspectable_web_contents_->GetWebContents()->GetNativeView()))
     return;
 
   if (devtools_web_view_ && devtools_web_view_->GetVisible())
@@ -169,7 +169,7 @@ void InspectableWebContentsViewViews::SetCornerRadii(
 void InspectableWebContentsViewViews::SetClickThrough(bool click_through) {
   if (!contents_web_view_ || !inspectable_web_contents_ ||
       (inspectable_web_contents_->IsGuest() ||
-          !inspectable_web_contents_->GetWebContents()->GetNativeView()))
+       !inspectable_web_contents_->GetWebContents()->GetNativeView()))
     return;
 
   if (devtools_web_view_ && devtools_web_view_->GetVisible())
@@ -183,9 +183,9 @@ void InspectableWebContentsViewViews::SetClickThrough(bool click_through) {
   if (!native_view_container)
     return;
 
-  native_view_container->SetEventTargetingPolicy(click_through ?
-      aura::EventTargetingPolicy::kNone :
-      aura::EventTargetingPolicy::kTargetAndDescendants);
+  native_view_container->SetEventTargetingPolicy(
+      click_through ? aura::EventTargetingPolicy::kNone
+                    : aura::EventTargetingPolicy::kTargetAndDescendants);
 }
 
 void InspectableWebContentsViewViews::ShowDevTools(bool activate) {
