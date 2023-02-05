@@ -78,8 +78,6 @@ bool NativeView::IsClickThrough() const {
 
 void NativeView::DetachChildView(NativeView* view) {}
 
-void NativeView::TriggerBeforeunloadEvents() {}
-
 void NativeView::AddObserver(Observer* observer) {
   CHECK(observer);
   observers_.AddObserver(observer);

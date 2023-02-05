@@ -214,12 +214,6 @@ void BrowserWindow::OnCloseButtonClicked(bool* prevent_default) {
     }
   }
 
-  if (window_->GetContentView())
-    window_->GetContentView()->TriggerBeforeunloadEvents();
-
-  for (NativeView* view : window_->base_views())
-    view->TriggerBeforeunloadEvents();
-
   if (web_contents()->NeedToFireBeforeUnloadOrUnloadEvents()) {
     web_contents()->DispatchBeforeUnload(false /* auto_cancel */);
   } else {

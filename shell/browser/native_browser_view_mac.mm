@@ -83,9 +83,6 @@ void NativeBrowserViewMac::SetBounds(const gfx::Rect& bounds,
     return;
   auto* view = iwc_view->GetNativeView().GetNativeNSView();
   SetBoundsForView(view, bounds, options);
-
-  // Ensure draggable regions are properly updated to reflect new bounds.
-  UpdateDraggableRegions(draggable_regions_);
 }
 
 gfx::Rect NativeBrowserViewMac::GetBounds() {

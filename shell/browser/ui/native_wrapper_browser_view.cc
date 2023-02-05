@@ -2,7 +2,6 @@
 
 #include "content/public/browser/web_contents.h"
 #include "shell/browser/api/electron_api_browser_view.h"
-#include "shell/browser/api/electron_api_web_contents.h"
 #include "shell/common/gin_helper/dictionary.h"
 
 namespace electron {
@@ -33,21 +32,6 @@ void NativeWrapperBrowserView::DetachBrowserView(NativeBrowserView* view) {
     return;
   DetachBrowserViewImpl();
   api_browser_view_ = nullptr;
-}
-
-void NativeWrapperBrowserView::TriggerBeforeunloadEvents() {
-  if (!api_browser_view_)
-    return;
-
-  auto* vwc = api_browser_view_->view()->web_contents();
-  auto* api_web_contents = api::WebContents::From(vwc);
-
-  // Required to make beforeunload handler work.
-  if (api_web_contents)
-    api_web_contents->NotifyUserActivation();
-
-  if (vwc && vwc->NeedToFireBeforeUnloadOrUnloadEvents())
-    vwc->DispatchBeforeUnload(false /* auto_cancel */);
 }
 
 void NativeWrapperBrowserView::SetWindowForChildren(NativeWindow* window) {
