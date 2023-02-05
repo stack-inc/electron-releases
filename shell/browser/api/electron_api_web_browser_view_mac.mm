@@ -24,9 +24,6 @@ void WebBrowserView::SetBounds(const gfx::Rect& bounds, gin::Arguments* args) {
 
   auto* view = iwc_view->GetNativeView().GetNativeNSView();
   view.frame = NSMakeRect(0, 0, bounds.width(), bounds.height());
-
-  // Ensure draggable regions are properly updated to reflect new bounds.
-  iwc_view->UpdateDraggableRegions(iwc_view->GetDraggableRegions());
 }
 
 void WebBrowserView::CreateWebBrowserView(
