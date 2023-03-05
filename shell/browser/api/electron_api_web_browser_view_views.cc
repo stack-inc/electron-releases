@@ -32,7 +32,7 @@ void WebBrowserView::RenderViewReady() {
 
 void WebBrowserView::RenderFrameCreated(content::RenderFrameHost* frame_host) {
   // Only handle the initial main frame, not speculative ones.
-  if (frame_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
+  if (!web_contents() || frame_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
     return;
   DCHECK(!host_);
 
@@ -41,7 +41,7 @@ void WebBrowserView::RenderFrameCreated(content::RenderFrameHost* frame_host) {
 
 void WebBrowserView::RenderFrameDeleted(content::RenderFrameHost* frame_host) {
   // Only handle the active main frame, not speculative ones.
-  if (frame_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
+  if (!web_contents() || frame_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
     return;
   DCHECK(host_);
   DCHECK_EQ(host_, frame_host->GetRenderWidgetHost());
@@ -54,7 +54,7 @@ void WebBrowserView::RenderFrameHostChanged(
     content::RenderFrameHost* new_host) {
   // Since we skipped speculative main frames in RenderFrameCreated, we must
   // watch for them being swapped in by watching for RenderFrameHostChanged().
-  if (new_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
+  if (!web_contents() || new_host != web_contents()->GetWebContents()->GetPrimaryMainFrame())
     return;
   // Don't watch for the initial main frame RenderFrameHost, which does not come
   // with a renderer frame. We'll hear about that from RenderFrameCreated.
@@ -137,6 +137,8 @@ void WebBrowserView::AttachToHost(content::RenderFrameHost* frame_host) {
 }
 
 void WebBrowserView::DetachFromHost() {
+  if (!host_)
+    return;
   host_->RemoveMouseEventCallback(mouse_event_callback_);
   host_ = nullptr;
 }
