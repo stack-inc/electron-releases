@@ -34,6 +34,7 @@ WebBrowserView::WebBrowserView(gin::Arguments* args,
 
   web_contents_.Reset(args->isolate(), web_contents.ToV8());
   api_web_contents_ = web_contents.get();
+  api_web_contents_->AddObserver(this);
   Observe(api_web_contents_->web_contents());
 
 #if !BUILDFLAG(IS_MAC)
@@ -53,8 +54,10 @@ WebBrowserView::~WebBrowserView() {
     DetachFromHost();
   }
 #endif
-  if (web_contents())  // destroy() called without closing WebContents
+  if (web_contents()) {  // destroy() called without closing WebContents
+    web_contents()->RemoveObserver(this);
     web_contents()->Destroy();
+  }
 }
 
 int WebBrowserView::NonClientHitTest(const gfx::Point& point) {
@@ -70,6 +73,16 @@ void WebBrowserView::WebContentsDestroyed() {
   api_web_contents_ = nullptr;
   web_contents_.Reset();
   Unpin();
+}
+
+void WebBrowserView::OnCloseContents() {
+  EnsureDetachFromParent();
+  ResetChildViews();
+#if !BUILDFLAG(IS_MAC)
+  DetachFromHost();
+#endif
+  web_contents()->RemoveObserver(this);
+  api_web_contents_ = nullptr;
 }
 
 void WebBrowserView::SetBackgroundColorImpl(const SkColor& color) {
