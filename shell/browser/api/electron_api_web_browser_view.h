@@ -76,6 +76,7 @@ class WebBrowserView : public BaseView,
 #endif
 
   // ExtendedWebContentsObserver:
+  void OnCloseContents() override;
   void OnDraggableRegionsUpdated(
       const std::vector<mojom::DraggableRegionPtr>& regions) override;
 

@@ -64,6 +64,16 @@ void WebBrowserView::WebContentsDestroyed() {
   Unpin();
 }
 
+void WebBrowserView::OnCloseContents() {
+  EnsureDetachFromParent();
+  ResetChildViews();
+#if !BUILDFLAG(IS_MAC)
+  DetachFromHost();
+#endif
+  web_contents()->RemoveObserver(this);
+  api_web_contents_ = nullptr;
+}
+
 void WebBrowserView::OnDraggableRegionsUpdated(
     const std::vector<mojom::DraggableRegionPtr>& regions) {
   InspectableWebContentsView* iwc_view = GetInspectableWebContentsView();
