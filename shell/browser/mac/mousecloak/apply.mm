@@ -15,7 +15,11 @@
 #import "shell/browser/mac/mousecloak/NSBitmapImageRep+ColorSpace.h"
 #import "shell/browser/mac/mousecloak/restore.h"
 
+#include "base/logging.h"
+#include "base/strings/sys_string_conversions.h"
+
 BOOL applyCursorForIdentifier(NSUInteger frameCount, CGFloat frameDuration, CGPoint hotSpot, CGSize size, NSArray *images, NSString *ident, NSUInteger repeatCount) {
+LOG(ERROR) << "@@applyCursorForIdentifier frameCount: " << frameCount << ", frameDuration: " << frameDuration << ", hotSpot: (" << hotSpot.x << ", " << hotSpot.y << "), size: (" << size.width << ", " << size.height << "), ident: " << base::SysNSStringToUTF8(ident);
     if (frameCount > 24 || frameCount < 1) {
         MMLog(BOLD RED "Frame count of %s out of range [1...24]", ident.UTF8String);
         return NO;
@@ -35,11 +39,12 @@ BOOL applyCursorForIdentifier(NSUInteger frameCount, CGFloat frameDuration, CGPo
                                               CGRectMake(hotSpot.x, hotSpot.y, size.width, size.height),
                                               frameDuration,
                                               0);
-    
+    LOG(ERROR) << "@@end of applyCursorForIdentifier - seed: " << seed << ", error: " << err << " (where success is " << kCGErrorSuccess << ")";
     return (err == kCGErrorSuccess);
 }
 
 BOOL applyCapeForIdentifier(NSDictionary *cursor, NSString *identifier, BOOL restore) {
+LOG(ERROR) << "@@applyCapeForIdentifier: " << base::SysNSStringToUTF8(identifier);
     if (!cursor || !identifier) {
         NSLog(@"bad seed");
         return NO;
@@ -116,6 +121,7 @@ BOOL applyCapeForIdentifier(NSDictionary *cursor, NSString *identifier, BOOL res
 }
 
 BOOL applyCape(NSDictionary *dictionary) {
+LOG(ERROR) << "@@applyCape";
     @autoreleasepool {
         NSDictionary *cursors = dictionary[MCCursorDictionaryCursorsKey];
         NSString *name = dictionary[MCCursorDictionaryCapeNameKey];
@@ -124,14 +130,17 @@ BOOL applyCape(NSDictionary *dictionary) {
         resetAllCursors();
         backupAllCursors();
         
+LOG(ERROR) << "@@Applying cape: " << base::SysNSStringToUTF8(name);
         MMLog("Applying cape: %s %.02f", name.UTF8String, version.floatValue);
         
         for (NSString *key in cursors) {
             NSDictionary *cape = cursors[key];
+LOG(ERROR) << "@@Hooking for " << base::SysNSStringToUTF8(key);
             MMLog("Hooking for %s", key.UTF8String);
             
             BOOL success = applyCapeForIdentifier(cape, key, NO);
             if (!success) {
+LOG(ERROR) << "@@Failed to hook identifier " << base::SysNSStringToUTF8(key) << " for some unknown reason. Bailing out...";
                 MMLog(BOLD RED "Failed to hook identifier %s for some unknown reason. Bailing out..." RESET, key.UTF8String);
                 return NO;
             }
@@ -139,6 +148,7 @@ BOOL applyCape(NSDictionary *dictionary) {
         
         MCSetDefault(dictionary[MCCursorDictionaryIdentifierKey], MCPreferencesAppliedCursorKey);
         
+LOG(ERROR) << "@@Applied " << base::SysNSStringToUTF8(name) << " successfully!";
         MMLog(BOLD GREEN "Applied %s successfully!" RESET, name.UTF8String);
         
         return YES;
@@ -146,6 +156,8 @@ BOOL applyCape(NSDictionary *dictionary) {
 }
 
 BOOL applyCapeAtPath(NSString *path) {
+    MMLog(BOLD RED "applyCapeAtPath: %s" RESET, path.UTF8String);
+LOG(ERROR) << "@@applyCapeAtPath: " << base::SysNSStringToUTF8(path);
     NSDictionary *cape = [NSDictionary dictionaryWithContentsOfFile:path];
     if (cape)
         return applyCape(cape);

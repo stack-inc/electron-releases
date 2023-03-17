@@ -14,6 +14,9 @@
 #import "shell/browser/mac/mousecloak/MCDefs.h"
 #import "shell/browser/mac/mousecloak/MCPrefs.h"
 
+#include "base/logging.h"
+#include "base/strings/sys_string_conversions.h"
+
 NSString *restoreStringForIdentifier(NSString *identifier) {
     return [identifier substringFromIndex:28];
 }
@@ -34,8 +37,9 @@ void restoreCursorForIdentifier(NSString *ident) {
 }
 
 void resetAllCursors() {
-    MMLog("Restoring cursors...");
-    
+    MMLog("%%resetAllCursors");
+    LOG(ERROR) << "@@resetAllCursors";
+
     // Backup main cursors first
     NSUInteger i = 0;
     NSString *key = nil;
